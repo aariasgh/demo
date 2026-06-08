@@ -1,10 +1,11 @@
-# Sprint Status Tracking
+# Sprint Status Tracking — Epics_and_User_Stories_Detailed.md
 # Generated: 2026-06-07
 # Last Updated: 2026-06-07
-# Project: Demo - Mini CRM
+# Project: Demo - Mini CRM de Seguimiento de Clientes
 # Project Key: NOKEY
 # Tracking System: file-system
 # Story Location: _bmad-output/implementation-artifacts
+# Source: _bmad-output/planning-artifacts/Epics_and_User_Stories_Detailed.md
 
 # STATUS DEFINITIONS:
 # ==================
@@ -13,122 +14,250 @@
 #   - in-progress: Epic actively being worked on
 #   - done: All stories in epic completed
 #
-# Epic Status Transitions:
-#   - backlog → in-progress: Automatically when first story is created (via create-story)
-#   - in-progress → done: Manually when all stories reach 'done' status
-#
 # Story Status:
 #   - backlog: Story only exists in epic file
 #   - ready-for-dev: Story file created in stories folder
 #   - in-progress: Developer actively working on implementation
-#   - review: Ready for code review (via Dev's code-review workflow)
+#   - review: Ready for code review
 #   - done: Story completed
 #
 # Retrospective Status:
 #   - optional: Can be completed but not required
 #   - done: Retrospective has been completed
-#
-# WORKFLOW NOTES:
-# ===============
-# - Epic transitions to 'in-progress' automatically when first story is created
-# - Stories can be worked in parallel if team capacity allows
-# - Developer typically creates next story after previous one is 'done' to incorporate learnings
-# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-07
-last_updated: 2026-06-07
-project: Demo - Mini CRM
+last_updated: 2026-06-08T01:15:00Z
+project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
+total_story_points: 144
 
 development_status:
   # ============================================================
-  # EPIC 1: Infraestructura y Setup
+  # EPIC 1: INFRAESTRUCTURA Y SETUP
+  # Status: in-progress | Goal: Setup stack técnico completo
+  # Duration: 8h | Points: 42
   # ============================================================
-  epic-1: backlog
+  epic-1: in-progress
   
-  1-1-setup-fastapi-backend-postgresql-docker: backlog
-  1-2-diseño-e-implementación-del-schema-postgresql: backlog
-  1-3-setup-react-frontend-typescript-zustand-tanstack-query: backlog
-  1-4-docker-compose-integración-y-ambiente-local: backlog
+  E1-S1:
+    title: "Setup FastAPI Backend + PostgreSQL + Docker"
+    status: done
+    points: 13
+    priority: P0
+  
+  E1-S2:
+    title: "Diseño e Implementación del Schema PostgreSQL"
+    status: done
+    points: 8
+    priority: P0
+  
+  E1-S3:
+    title: "Setup React Frontend + TypeScript + State Management"
+    status: done
+    points: 13
+    priority: P0
+    date_started: "2026-06-07T10:00:00Z"
+    date_completed: "2026-06-08T12:40:00Z"
+    code_review: completed
+    code_review_date: "2026-06-08T12:35:00Z"
+    code_review_findings: "3 decision_needed (all resolved), 20 patches (all applied), 3 defer, 2 dismiss"
+  
+  E1-S4:
+    title: "Docker Compose Integración y Ambiente Local"
+    status: backlog
+    points: 8
+    priority: P0
   
   epic-1-retrospective: optional
   
   # ============================================================
-  # EPIC 2: Gestión de Leads (CRUD)
+  # EPIC 2: GESTIÓN DE LEADS (CRUD)
+  # Status: backlog | Goal: CRUD completo con validaciones
+  # Duration: 20h | Points: 47
   # ============================================================
   epic-2: backlog
   
-  2-1-crear-lead-api-endpoint-validaciones-backend: backlog
-  2-2-editar-lead-api-endpoint-validaciones-backend: backlog
-  2-3-cambiar-estado-de-lead-backend-api: backlog
-  2-4-crear-lead-modal-y-formulario-frontend: backlog
+  E2-S1:
+    title: "Crear Lead - API Endpoint + Validaciones Backend"
+    status: backlog
+    points: 13
+    priority: P0
+  
+  E2-S2:
+    title: "Editar Lead - API Endpoint + Validaciones Backend"
+    status: backlog
+    points: 13
+    priority: P0
+  
+  E2-S3:
+    title: "Cambiar Estado de Lead - API PATCH Backend"
+    status: backlog
+    points: 8
+    priority: P0
+  
+  E2-S4:
+    title: "Crear Lead - Modal y Formulario Frontend"
+    status: backlog
+    points: 13
+    priority: P0
   
   epic-2-retrospective: optional
   
   # ============================================================
-  # EPIC 3: Visualización del Pipeline (Kanban)
+  # EPIC 3: VISUALIZACIÓN DEL PIPELINE (KANBAN)
+  # Status: backlog | Goal: Kanban interactivo
+  # Duration: 20h | Points: 34
   # ============================================================
   epic-3: backlog
   
-  3-1-listar-leads-api-get-leads-backend: backlog
-  3-2-dashboard-kanban-render-de-4-columnas-frontend: backlog
-  3-3-drag-drop-entre-columnas-frontend-backend-sync: backlog
+  E3-S1:
+    title: "Listar Leads - API GET /leads Backend"
+    status: backlog
+    points: 8
+    priority: P0
+  
+  E3-S2:
+    title: "Dashboard Kanban - Render de 4 Columnas Frontend"
+    status: backlog
+    points: 13
+    priority: P0
+  
+  E3-S3:
+    title: "Drag & Drop - Cambiar Estado de Lead en Kanban Frontend"
+    status: backlog
+    points: 13
+    priority: P0
   
   epic-3-retrospective: optional
   
   # ============================================================
-  # EPIC 4: Búsqueda, Filtrado y Alertas
+  # EPIC 4: BÚSQUEDA, FILTRADO Y ALERTAS
+  # Status: backlog | Goal: Búsqueda rápida + alertas
+  # Duration: 16h | Points: 21
   # ============================================================
   epic-4: backlog
   
-  4-1-búsqueda-de-leads-api-get-search-backend: backlog
-  4-2-widget-leads-en-riesgo-backend-calculation: backlog
-  4-3-búsqueda-ui-widget-leads-en-riesgo-frontend: backlog
+  E4-S1:
+    title: "Búsqueda y Filtro de Leads Frontend"
+    status: backlog
+    points: 8
+    priority: P1
+  
+  E4-S2:
+    title: "Widget 'Leads en Riesgo' + Alertas Backend"
+    status: backlog
+    points: 8
+    priority: P1
+  
+  E4-S3:
+    title: "Filtro por Status en Kanban Frontend"
+    status: backlog
+    points: 5
+    priority: P1
   
   epic-4-retrospective: optional
   
   # ============================================================
-  # EPIC 5: Timeline y Auditoría
+  # EPIC 5: TIMELINE Y AUDITORÍA
+  # Status: backlog | Goal: Historial de eventos completo
+  # Duration: 12h | Points: 13
   # ============================================================
   epic-5: backlog
   
-  5-1-timeline-de-actividad-api-get-backend: backlog
-  5-2-timeline-ui-agregar-notas-frontend: backlog
+  E5-S1:
+    title: "Timeline de Actividad por Lead - Backend + Frontend"
+    status: backlog
+    points: 8
+    priority: P2
+  
+  E5-S2:
+    title: "Auditoría Completa - Registro de Cambios Backend"
+    status: backlog
+    points: 5
+    priority: P2
   
   epic-5-retrospective: optional
   
   # ============================================================
-  # EPIC 6: UX/UI, Responsivo y Accesibilidad
+  # EPIC 6: UX/UI, RESPONSIVO Y ACCESIBILIDAD
+  # Status: backlog | Goal: UI pulida, responsive, accesible
+  # Duration: 16h | Points: 21
   # ============================================================
   epic-6: backlog
   
-  6-1-diseño-responsivo-mobile-tablet-desktop: backlog
-  6-2-estados-ui-loading-error-empty-state: backlog
-  6-3-accesibilidad-focus-management-aria-keyboard-navigation: backlog
+  E6-S1:
+    title: "Diseño Responsivo - Mobile, Tablet, Desktop"
+    status: backlog
+    points: 8
+    priority: P1
+  
+  E6-S2:
+    title: "Animaciones, Transiciones y Feedback Visual"
+    status: backlog
+    points: 8
+    priority: P2
+  
+  E6-S3:
+    title: "Accesibilidad (WCAG AA) e Internacionalización Base"
+    status: backlog
+    points: 5
+    priority: P2
   
   epic-6-retrospective: optional
   
   # ============================================================
-  # EPIC 7: Performance, Optimización y Confiabilidad
+  # EPIC 7: PERFORMANCE, OPTIMIZACIÓN Y CONFIABILIDAD
+  # Status: backlog | Goal: <2s load, API p95 <300ms
+  # Duration: 8h | Points: 15
   # ============================================================
   epic-7: backlog
   
-  7-1-database-query-optimization-indexing: backlog
-  7-2-optimistic-updates-retry-logic-frontend: backlog
-  7-3-api-response-logging-monitoring: backlog
+  E7-S1:
+    title: "Optimización de Performance - Frontend Bundle"
+    status: backlog
+    points: 5
+    priority: P1
+  
+  E7-S2:
+    title: "Optimización de Performance - Backend Query y Caching"
+    status: backlog
+    points: 5
+    priority: P1
+  
+  E7-S3:
+    title: "Confiabilidad - Error Handling y Retry Logic"
+    status: backlog
+    points: 5
+    priority: P1
   
   epic-7-retrospective: optional
   
   # ============================================================
-  # EPIC 8: Testing, Documentación y Preparación Demo
+  # EPIC 8: TESTING, DOCUMENTACIÓN Y PREPARACIÓN DEMO
+  # Status: backlog | Goal: >70% coverage, docs listos, demo runbook
+  # Duration: 8h | Points: -3 (task-based, no estimation)
   # ============================================================
   epic-8: backlog
   
-  8-1-backend-unit-tests-integration-tests: backlog
-  8-2-end-to-end-tests-playwright: backlog
-  8-3-documentación-y-runbook-para-demo: backlog
+  E8-S1:
+    title: "Automated Testing - Backend Tests (pytest)"
+    status: backlog
+    points: 8
+    priority: P1
+  
+  E8-S2:
+    title: "Automated Testing - Frontend Tests (Vitest) + E2E (Playwright)"
+    status: backlog
+    points: 8
+    priority: P1
+  
+  E8-S3:
+    title: "Documentación Completa + Demo Runbook"
+    status: backlog
+    points: -3
+    priority: P1
   
   epic-8-retrospective: optional
 
@@ -137,6 +266,7 @@ development_status:
 # ============================================================
 total_epics: 8
 total_stories: 26
+total_story_points_estimate: 144
 epics_backlog: 8
 epics_in_progress: 0
 epics_done: 0
@@ -145,3 +275,11 @@ stories_ready_for_dev: 0
 stories_in_progress: 0
 stories_in_review: 0
 stories_done: 0
+
+# ============================================================
+# TIMELINE ROADMAP (48h total)
+# ============================================================
+day_1_morning: "9:00-13:00 | E1 Setup: Docker, DB, Frontend (5.5h)"
+day_1_afternoon: "14:00-18:00 | E2 CRUD APIs + E3 Kanban Start (5h)"
+day_2_morning: "9:00-13:00 | E3 Kanban Complete + E2-S4 + E4 Search (5.5h)"
+day_2_afternoon: "14:00-18:00 | E5,E6,E7 Polish + E8 Testing/Docs (7h)"
