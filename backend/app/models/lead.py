@@ -1,9 +1,9 @@
 """Lead ORM Model for SQLAlchemy"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import String, Text, DateTime, func, Index, CheckConstraint
+from sqlalchemy import String, Text, DateTime, Index, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -24,10 +24,10 @@ class Lead(Base):
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
 
     __table_args__ = (
@@ -37,7 +37,7 @@ class Lead(Base):
         ),
         Index("idx_leads_email", "email"),
         Index("idx_leads_status", "status"),
-        Index("idx_leads_updated_at", "updated_at", postgresql_using="DESC"),
+        Index("idx_leads_updated_at", "updated_at"),
     )
 
     def __repr__(self) -> str:

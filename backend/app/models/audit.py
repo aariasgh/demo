@@ -1,9 +1,9 @@
 """LeadAuditLog ORM Model for SQLAlchemy"""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Any, Dict, TYPE_CHECKING
 
-from sqlalchemy import BigInteger, Integer, String, Text, DateTime, func, Index, ForeignKey, JSON
+from sqlalchemy import BigInteger, Integer, String, Text, DateTime, Index, ForeignKey, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from .base import Base
@@ -14,7 +14,7 @@ class LeadAuditLog(Base):
 
     __tablename__ = "lead_audit_log"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     lead_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("leads.id", ondelete="CASCADE"), nullable=False
     )
@@ -26,7 +26,7 @@ class LeadAuditLog(Base):
         Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
     meta: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
 
@@ -38,7 +38,7 @@ class LeadAuditLog(Base):
 
     __table_args__ = (
         Index("idx_audit_lead_id", "lead_id"),
-        Index("idx_audit_created_at", "created_at", postgresql_using="DESC"),
+        Index("idx_audit_created_at", "created_at"),
         Index("idx_audit_event_type", "event_type"),
     )
 

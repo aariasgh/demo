@@ -1,0 +1,65 @@
+"""Pydantic schemas for Lead API requests/responses"""
+
+import re
+from pydantic import BaseModel, Field, field_validator
+from datetime import datetime
+from typing import Optional
+
+
+class LeadBase(BaseModel):
+    """Base schema with common Lead fields - DO NOT USE DIRECTLY for requests/responses"""
+    name: str = Field(..., min_length=2, max_length=255, description="Lead name")
+    company: str = Field(..., min_length=2, max_length=255, description="Company name")
+    email: str = Field(..., description="Lead email (must be unique)")
+    phone: Optional[str] = Field(None, max_length=20, description="Optional phone number")
+    notes: Optional[str] = Field(None, max_length=1000, description="Optional notes")
+
+    @field_validator('name', 'company', mode='before')
+    @classmethod
+    def strip_whitespace(cls, v):
+        """Strip leading/trailing whitespace from name and company"""
+        if isinstance(v, str):
+            v = v.strip()
+        return v
+
+    @field_validator('name', 'company')
+    @classmethod
+    def not_empty_after_strip(cls, v):
+        """Validate field is not empty or only whitespace"""
+        if not v or not v.strip():
+            raise ValueError('Field cannot be empty or contain only whitespace')
+        return v
+
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v):
+        """Validate email format without external dependencies"""
+        # Basic email validation regex (RFC 5322 simplified)
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, v):
+            raise ValueError('Invalid email format')
+        return v
+
+    @field_validator('notes')
+    @classmethod
+    def validate_notes_length(cls, v):
+        """Validate notes don't exceed character limit"""
+        if v and len(v) > 1000:
+            raise ValueError(f'notes cannot exceed 1000 characters (you provided {len(v)})')
+        return v
+
+
+class LeadCreate(LeadBase):
+    """Schema for POST /api/leads request - inherits validation from LeadBase"""
+    pass
+
+
+class LeadResponse(LeadBase):
+    """Schema for API response - includes DB-generated fields and uses ORM conversion"""
+    id: int = Field(..., description="Lead unique identifier")
+    status: str = Field(default="Nuevo", description="Lead status")
+    created_at: datetime = Field(..., description="Lead creation timestamp")
+    updated_at: datetime = Field(..., description="Lead last update timestamp")
+
+    class Config:
+        from_attributes = True  # Allow ORM model to Pydantic conversion
