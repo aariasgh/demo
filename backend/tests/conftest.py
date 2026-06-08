@@ -112,12 +112,58 @@ async def client(test_db_session: AsyncSession):
     app.dependency_overrides[get_db] = override_get_db
     
     # Import here to avoid circular imports
-    from httpx import AsyncClient
-    
-    # Create and yield test client
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    from httpx import AsyncClient, ASGITransport
+
+    # Create and yield test client.
+    # httpx >= 0.28 removed the `app=` shortcut; drive the ASGI app via ASGITransport.
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
-    
-    # Clean up: remove the override after test
+
+    # Clean up: remove the override after the test so it does not leak
     if get_db in app.dependency_overrides:
         del app.dependency_overrides[get_db]
+
+
+@pytest_asyncio.fixture
+async def db_session(test_db_session: AsyncSession):
+    """Alias for test_db_session for direct database access in tests"""
+    return test_db_session
+
+
+@pytest_asyncio.fixture
+async def created_lead(client):
+    """Fixture: Creates a single lead for testing"""
+    payload = {
+        "name": "Juan García",
+        "company": "TechCorp SL",
+        "email": "juan@techcorp.com",
+        "phone": "+34917777777",
+        "notes": "Lead muy interesado"
+    }
+    response = await client.post("/api/leads", json=payload)
+    assert response.status_code == 201
+    return response.json()
+
+
+@pytest_asyncio.fixture
+async def two_created_leads(client):
+    """Fixture: Creates two leads for testing"""
+    lead1_payload = {
+        "name": "Lead 1",
+        "company": "Company A",
+        "email": "lead1@test.com",
+    }
+    lead2_payload = {
+        "name": "Lead 2",
+        "company": "Company B",
+        "email": "lead2@test.com",
+    }
+    
+    response1 = await client.post("/api/leads", json=lead1_payload)
+    response2 = await client.post("/api/leads", json=lead2_payload)
+    
+    assert response1.status_code == 201
+    assert response2.status_code == 201
+
+    return response1.json(), response2.json()

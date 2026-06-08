@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-08T22:05:00Z
+last_updated: 2026-06-08T23:45:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -101,9 +101,23 @@ development_status:
   
   E2-S2:
     title: "Editar Lead - API Endpoint + Validaciones Backend"
-    status: backlog
+    status: done
     points: 13
     priority: P0
+    date_created: "2026-06-08T22:30:00Z"
+    date_started: "2026-06-08T22:35:00Z"
+    date_completed: "2026-06-08T23:15:00Z"
+    story_file: "_bmad-output/implementation-artifacts/E2-S2.md"
+    code_review_status: "completed"
+    code_review_date: "2026-06-07"
+    code_review_findings: "3 decision_needed (all resolved), 7 patches (all applied), 7 defer, 8 dismiss"
+    testing_status: "17/17 tests passing"
+    implementation_details:
+      - "LeadUpdate schema with partial field support"
+      - "PUT /api/leads/{id} endpoint"
+      - "Email uniqueness check with lead ID exclusion"
+      - "Audit trail for field changes"
+      - "GET /api/leads/{id} helper endpoint"
   
   E2-S3:
     title: "Cambiar Estado de Lead - API PATCH Backend"
@@ -285,10 +299,10 @@ epics_backlog: 6
 epics_in_progress: 1
 epics_done: 1
 stories_backlog: 21
-stories_ready_for_dev: 1
+stories_ready_for_dev: 0
 stories_in_progress: 0
 stories_in_review: 0
-stories_done: 4
+stories_done: 5
 
 # EPIC 1 COMPLETION METRICS:
 epic_1_total_points: 42

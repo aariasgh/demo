@@ -63,3 +63,56 @@ class LeadResponse(LeadBase):
 
     class Config:
         from_attributes = True  # Allow ORM model to Pydantic conversion
+
+
+class LeadUpdate(BaseModel):
+    """Schema for PUT /api/leads/{id} - supports partial updates with all fields optional"""
+    name: Optional[str] = Field(None, min_length=2, max_length=255, description="Update lead name")
+    company: Optional[str] = Field(None, min_length=2, max_length=255, description="Update company name")
+    email: Optional[str] = Field(None, description="Update lead email (must remain unique)")
+    phone: Optional[str] = Field(None, max_length=20, description="Update optional phone")
+    notes: Optional[str] = Field(None, max_length=1000, description="Update optional notes")
+
+    @field_validator('name', 'company', mode='before')
+    @classmethod
+    def strip_whitespace(cls, v):
+        """Strip whitespace - skip if None (field not provided)"""
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.strip()
+        return v
+
+    @field_validator('name', 'company')
+    @classmethod
+    def not_empty_after_strip(cls, v):
+        """Validate not empty after stripping - skip if None"""
+        if v is None:
+            return None
+        if not v or not v.strip():
+            raise ValueError('Field cannot be empty or contain only whitespace')
+        return v
+
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v):
+        """Validate email format - skip if None (no change)"""
+        if v is None:
+            return None
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, v):
+            raise ValueError('Invalid email format')
+        return v
+
+    @field_validator('notes')
+    @classmethod
+    def validate_notes_length(cls, v):
+        """Validate notes length - skip if None"""
+        if v is None:
+            return None
+        if len(v) > 1000:
+            raise ValueError(f'notes cannot exceed 1000 characters (you provided {len(v)})')
+        return v
+
+    class Config:
+        from_attributes = True

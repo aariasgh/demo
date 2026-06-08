@@ -10,7 +10,7 @@ from sqlalchemy import select
 from app.database import get_db
 from app.models.lead import Lead
 from app.models.audit import LeadAuditLog
-from app.schemas.lead import LeadCreate, LeadResponse
+from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -167,4 +167,251 @@ async def create_lead(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al crear el lead",
+        )
+
+
+@router.put("/{lead_id}", response_model=LeadResponse, status_code=status.HTTP_200_OK)
+async def update_lead(
+    lead_id: int,
+    lead_data: LeadUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> LeadResponse:
+    """
+    Update an existing lead with partial field updates and complete audit trail.
+    
+    - Validates all input fields (only provided fields are validated/updated)
+    - Checks email uniqueness (excluding current lead)
+    - Updates only provided fields, leaves others unchanged
+    - Creates audit log entry with old_value → new_value for changed fields
+    - Returns 200 OK with updated lead
+    
+    **Raises:**
+        HTTPException 422: Validation error (handled by Pydantic)
+        HTTPException 404: Lead not found
+        HTTPException 409: Email already exists in another lead
+        HTTPException 500: Unexpected database error
+    
+    **Example request (partial update - only phone):**
+    ```json
+    { "phone": "+34917999999" }
+    ```
+    
+    **Example response (200 OK):**
+    ```json
+    {
+        "id": 1,
+        "name": "Juan García",
+        "company": "TechCorp SL",
+        "email": "juan@techcorp.com",
+        "phone": "+34917999999",
+        "status": "Nuevo",
+        "notes": "Updated",
+        "created_at": "2026-06-08T14:30:45.123000",
+        "updated_at": "2026-06-08T14:35:22.123000"
+    }
+    ```
+    """
+    
+    try:
+        # Step 1: Fetch existing lead
+        stmt = select(Lead).where(Lead.id == lead_id)
+        result = await db.execute(stmt)
+        existing_lead = result.scalars().first()
+        
+        if not existing_lead:
+            logger.warning(
+                f"Attempted update to non-existent lead",
+                extra={"lead_id": lead_id}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lead not found",
+                headers={"X-Error-Code": "LEAD_NOT_FOUND"},
+            )
+        
+        # Step 2: Email uniqueness check (if email is being changed)
+        if lead_data.email is not None and lead_data.email != existing_lead.email:
+            stmt = select(Lead).where(
+                (Lead.email == lead_data.email) & 
+                (Lead.id != lead_id)
+            )
+            result = await db.execute(stmt)
+            duplicate_lead = result.scalars().first()
+            
+            if duplicate_lead:
+                logger.warning(
+                    f"Attempted email change to duplicate",
+                    extra={
+                        "lead_id": lead_id,
+                        "email": lead_data.email,
+                        "existing_lead_id": duplicate_lead.id,
+                    }
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Email ya existe en el sistema",
+                    headers={"X-Error-Code": "EMAIL_DUPLICATE"},
+                )
+        
+        # Step 3: Capture old values for audit trail
+        old_value = {}
+        new_value = {}
+        
+        # Step 4: Update fields selectively (only if value actually changes)
+        if lead_data.name is not None and lead_data.name != existing_lead.name:
+            old_value["name"] = existing_lead.name
+            new_value["name"] = lead_data.name
+            existing_lead.name = lead_data.name
+        
+        if lead_data.company is not None and lead_data.company != existing_lead.company:
+            old_value["company"] = existing_lead.company
+            new_value["company"] = lead_data.company
+            existing_lead.company = lead_data.company
+        
+        if lead_data.email is not None and lead_data.email != existing_lead.email:
+            old_value["email"] = existing_lead.email
+            new_value["email"] = lead_data.email
+            existing_lead.email = lead_data.email
+        
+        if lead_data.phone is not None and lead_data.phone != existing_lead.phone:
+            old_value["phone"] = existing_lead.phone
+            new_value["phone"] = lead_data.phone
+            existing_lead.phone = lead_data.phone
+        
+        if lead_data.notes is not None and lead_data.notes != existing_lead.notes:
+            old_value["notes"] = existing_lead.notes
+            new_value["notes"] = lead_data.notes
+            existing_lead.notes = lead_data.notes
+        
+        # Step 5: Persist changes only if at least one field actually changed.
+        # A no-op update must NOT bump updated_at (keeps the endpoint idempotent
+        # per Decision #2) and must NOT create an audit event (Decision #4).
+        if old_value:
+            fields_changed = list(old_value.keys())
+            existing_lead.updated_at = datetime.now(timezone.utc)
+            db.add(existing_lead)
+            await db.flush()
+
+            # Step 6: Create audit log — one event with all changed fields, plus a
+            # human-readable old → new description for the timeline UI (per spec).
+            changes = [
+                f"{field} edited from '{old_value[field]}' to '{new_value[field]}'"
+                for field in fields_changed
+            ]
+            audit_log = LeadAuditLog(
+                lead_id=existing_lead.id,
+                event_type="FIELD_EDITED",
+                old_value=old_value,
+                new_value=new_value,
+                description="; ".join(changes),
+                created_by_id=None,  # Future: from authentication
+                meta={"fields_changed": fields_changed},
+            )
+            db.add(audit_log)
+
+            # Step 7: Commit transaction (atomic: lead + audit log)
+            await db.commit()
+            await db.refresh(existing_lead)
+        
+        logger.info(
+            f"Lead updated successfully",
+            extra={
+                "lead_id": existing_lead.id,
+                "fields_changed": list(old_value.keys()),
+                "email": existing_lead.email,
+            }
+        )
+        
+        return existing_lead
+        
+    except IntegrityError as e:
+        # The only unique constraint on leads is email; a violation here means a
+        # concurrent request claimed the email between our pre-check and commit.
+        # Decision #3: the UNIQUE constraint is the second line of defense → 409.
+        await db.rollback()
+        logger.error(
+            f"Database integrity error during lead update",
+            extra={"lead_id": lead_id, "error": str(e)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email ya existe en el sistema",
+            headers={"X-Error-Code": "EMAIL_DUPLICATE"},
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (email duplicate, lead not found, etc)
+        raise
+        
+    except Exception as e:
+        # Catch unexpected errors
+        await db.rollback()
+        logger.error(
+            f"Unexpected error updating lead",
+            extra={"lead_id": lead_id, "error": str(e)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al actualizar el lead",
+        )
+
+
+@router.get("/{lead_id}", response_model=LeadResponse, status_code=status.HTTP_200_OK)
+async def get_lead(
+    lead_id: int,
+    db: AsyncSession = Depends(get_db),
+) -> LeadResponse:
+    """
+    Retrieve a specific lead by ID.
+    
+    **Raises:**
+        HTTPException 404: Lead not found
+    
+    **Example response (200 OK):**
+    ```json
+    {
+        "id": 1,
+        "name": "Juan García",
+        "company": "TechCorp SL",
+        "email": "juan@techcorp.com",
+        "phone": "+34917777777",
+        "status": "Nuevo",
+        "notes": "Lead muy interesado",
+        "created_at": "2026-06-08T14:30:45.123000",
+        "updated_at": "2026-06-08T14:30:45.123000"
+    }
+    ```
+    """
+    try:
+        stmt = select(Lead).where(Lead.id == lead_id)
+        result = await db.execute(stmt)
+        lead = result.scalars().first()
+        
+        if not lead:
+            logger.warning(
+                f"Attempted retrieval of non-existent lead",
+                extra={"lead_id": lead_id}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lead not found",
+                headers={"X-Error-Code": "LEAD_NOT_FOUND"},
+            )
+        
+        return lead
+        
+    except HTTPException:
+        raise
+        
+    except Exception as e:
+        logger.error(
+            f"Unexpected error retrieving lead",
+            extra={"lead_id": lead_id, "error": str(e)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al recuperar el lead",
         )
