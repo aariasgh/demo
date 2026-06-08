@@ -25,7 +25,7 @@ export const useCreateLead = () => {
           ...newLead,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          status: 'active',
+          status: 'Nuevo',
         } as Lead,
       ]);
       

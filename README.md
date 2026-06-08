@@ -19,25 +19,57 @@ Mini CRM funcional para demostración de BMAD (metodología de consultoría). In
 - Docker Compose 2.0+
 - (Opcional) Make para comandos simplificados
 
-### Instalación y Ejecución
+### Instalación y Ejecución (Quick Start)
+
+**3 pasos para empezar:**
 
 ```bash
-# 1. Clonar repositorio
+# 1️⃣ Clonar y navegar
 git clone <repo-url>
 cd demo
 
-# 2. Crear archivo .env (copiar de ejemplo)
-cp backend/.env.example backend/.env
-
-# 3. Iniciar servicios
+# 2️⃣ Iniciar todos los servicios
 docker-compose up -d
 
-# 4. Esperar 15-20 segundos para que los servicios se initialicen
-
-# 5. Verificar que todo funciona
-curl http://localhost:8000/api/health
-# Output: {"status": "ok", "timestamp": "2026-06-07T...Z"}
+# 3️⃣ Esperar a que esté listo (~15-20 segundos)
+docker-compose ps
+# Verificar que todos tengan estado "healthy"
 ```
+
+**Verificación rápida:**
+
+```bash
+# Backend health (debe responder 200)
+curl http://localhost:8000/api/health
+
+# Frontend (debe servir HTML)
+curl http://localhost:3000 | head -5
+
+# Swagger docs
+open http://localhost:8000/docs
+```
+
+### Docker Compose Stack
+
+Todos los servicios se ejecutan en contenedores interconectados:
+
+```
+┌─────────────┐         ┌─────────────┐         ┌──────────────┐
+│   Frontend  │         │   Backend   │         │  PostgreSQL  │
+│  (Nginx)    │◄───────►│  (FastAPI)  │◄───────►│   (TCP 5432) │
+│ Port 3000   │         │ Port 8000   │         │              │
+└─────────────┘         └─────────────┘         └──────────────┘
+       ↓                        ↓                       ↓
+  React 18.3.1          Python 3.11+              Alpine 15
+  Vite + HMR            uvicorn                   Volume: postgres_data
+```
+
+**Health Checks:**
+- ✅ PostgreSQL: `pg_isready` every 10s (startup: 10s)
+- ✅ Backend: `GET /api/health` every 10s (startup: 30s)
+- ✅ Frontend: `GET /` every 30s (startup: 5s)
+
+All services are **healthy** typically within **20-30 seconds** of `docker-compose up -d`.
 
 ### Acceso a Servicios
 
@@ -166,6 +198,70 @@ docker-compose logs backend
 
 # Verificar que .env existe con valores correctos
 cat backend/.env
+
+# Rebuild si hay cambios en dependencias
+docker-compose up -d --build backend
+```
+
+### Problema: Frontend container unhealthy / nginx errors
+
+```bash
+# Ver logs de frontend
+docker-compose logs frontend
+
+# Common issues:
+# - Port 3000 already in use → cambiar puerto en docker-compose.yml
+# - Node version mismatch → rebuild con: docker-compose up -d --build frontend
+# - Memory issues → aumentar Docker memory limit
+
+# Rebuild frontend desde cero
+docker-compose down
+docker-compose up -d --build frontend
+```
+
+### Problema: PostgreSQL connection refused
+
+```bash
+# Verificar que PostgreSQL está healthy
+docker-compose ps
+# Status debe ser "Up ... (healthy)"
+
+# Ver logs de postgres
+docker-compose logs postgres
+
+# Resetear volumen (⚠️ BORRA TODOS LOS DATOS)
+docker-compose down -v
+docker-compose up -d
+```
+
+### Problema: CORS errors entre Frontend y Backend
+
+```bash
+# Verificar encabezados CORS
+curl -v -H "Origin: http://localhost:3000" http://localhost:8000/api/health
+
+# Backend debe responder con:
+# access-control-allow-origin: http://localhost:3000
+
+# Si falla: reiniciar backend
+docker-compose restart backend
+```
+
+### Limpieza y Reset
+
+```bash
+# Detener todos los servicios sin borrar datos
+docker-compose down
+
+# Detener y borrar volúmenes (⚠️ BORRA BASE DE DATOS)
+docker-compose down -v
+
+# Reconstruir todas las imágenes
+docker-compose up -d --build
+
+# Limpiar todo (imágenes, volúmenes, redes)
+docker system prune -a --volumes
+```
 
 # Reiniciar desde cero
 make reset

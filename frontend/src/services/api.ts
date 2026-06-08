@@ -1,4 +1,5 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 
 // Validate API URL at startup
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';

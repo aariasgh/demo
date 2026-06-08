@@ -6,7 +6,7 @@ import { useUIStore } from '../store/uiStore';
  * Prevents memory leaks from setTimeout not being cleared on unmount
  */
 export const useToastCleanup = () => {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     // Cleanup timeout on component unmount
