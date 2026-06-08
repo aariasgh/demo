@@ -1,4 +1,11 @@
-.PHONY: up down logs logs-backend logs-postgres logs-frontend reset shell-backend shell-postgres db-reset help
+.PHONY: up down logs logs-backend logs-postgres logs-frontend reset shell-backend shell-postgres db-reset health help
+
+.env:
+	@if [ ! -f .env ]; then \
+		echo "Creating .env from .env.example..."; \
+		cp .env.example .env; \
+		echo "✅ .env created. Review and update if needed."; \
+	fi
 
 help:
 	@echo "Mini CRM Docker Compose Helper"
@@ -16,7 +23,7 @@ help:
 	@echo "  make db-reset        Reset database to initial state"
 	@echo "  make health          Check health of all services"
 
-up:
+up: .env
 	docker-compose up -d
 	@echo "✅ Services starting... Wait 20 seconds for startup"
 

@@ -24,9 +24,10 @@ Mini CRM funcional para demostración de BMAD (metodología de consultoría). In
 **3 pasos para empezar:**
 
 ```bash
-# 1️⃣ Clonar y navegar
+# 1️⃣ Clonar, navegar, y configurar ambiente
 git clone <repo-url>
 cd demo
+cp .env.example .env    # Copiar configuración de ejemplo
 
 # 2️⃣ Iniciar todos los servicios
 docker-compose up -d

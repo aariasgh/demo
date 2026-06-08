@@ -45,7 +45,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 30s
+      start_period: 20s
     networks:
       - mini-crm-network
 
@@ -58,15 +58,17 @@ services:
     container_name: minicrm-frontend
     ports:
       - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ && curl -f http://localhost:3000/api/health || exit 1"]
       interval: 30s
-      timeout: 3s
+      timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     networks:
       - mini-crm-network
 
