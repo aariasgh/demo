@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-08T22:20:00Z
+last_updated: 2026-06-08T22:05:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -89,10 +89,15 @@ development_status:
   
   E2-S1:
     title: "Crear Lead - API Endpoint + Validaciones Backend"
-    status: ready-for-dev
+    status: done
     points: 13
     priority: P0
     date_created: "2026-06-08T22:15:00Z"
+    date_started: "2026-06-08T22:20:00Z"
+    date_completed: "2026-06-08T22:05:00Z"
+    code_review_status: "passed"
+    testing_status: "14/14 tests passing"
+    manual_testing: "completed"
   
   E2-S2:
     title: "Editar Lead - API Endpoint + Validaciones Backend"
