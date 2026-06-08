@@ -1,9 +1,10 @@
 """Pydantic schemas for Lead API requests/responses"""
 
 import re
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 from typing import Optional
+from app.models.lead import LeadStatus
 
 
 class LeadBase(BaseModel):
@@ -61,8 +62,7 @@ class LeadResponse(LeadBase):
     created_at: datetime = Field(..., description="Lead creation timestamp")
     updated_at: datetime = Field(..., description="Lead last update timestamp")
 
-    class Config:
-        from_attributes = True  # Allow ORM model to Pydantic conversion
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LeadUpdate(BaseModel):
@@ -116,3 +116,10 @@ class LeadUpdate(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class LeadStatusUpdate(BaseModel):
+    """Schema for PATCH /api/leads/{id}/status endpoint"""
+    new_status: LeadStatus = Field(..., description="New lead status")
+
+    model_config = ConfigDict(from_attributes=True)

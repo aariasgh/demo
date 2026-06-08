@@ -1,12 +1,21 @@
 """Lead ORM Model for SQLAlchemy"""
 
 from datetime import datetime, timezone
+from enum import Enum
 from typing import Optional
 
 from sqlalchemy import String, Text, DateTime, Index, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
+
+
+class LeadStatus(str, Enum):
+    """Valid lead status values"""
+    NUEVO = "Nuevo"
+    EN_CONTACTO = "En contacto"
+    PROPUESTA_ENVIADA = "Propuesta enviada"
+    CERRADO = "Cerrado"
 
 
 class Lead(Base):

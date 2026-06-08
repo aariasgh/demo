@@ -2,17 +2,20 @@
 
 import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 
 from app.database import get_db
-from app.models.lead import Lead
+from app.models.lead import Lead, LeadStatus
 from app.models.audit import LeadAuditLog
-from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate
+from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate, LeadStatusUpdate
 
 logger = logging.getLogger(__name__)
+
+# Idempotency cache for status changes
+IDEMPOTENCY_CACHE = {}
 
 router = APIRouter(prefix="/api/leads", tags=["leads"])
 
@@ -414,4 +417,148 @@ async def get_lead(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al recuperar el lead",
+        )
+
+
+@router.patch("/{lead_id}/status", response_model=LeadResponse, status_code=status.HTTP_200_OK)
+async def change_lead_status(
+    lead_id: int,
+    status_update: LeadStatusUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> LeadResponse:
+    """
+    Change lead status with complete audit trail and idempotency support.
+    
+    **Status Values:** Nuevo, En contacto, Propuesta enviada, Cerrado
+    
+    **Idempotency:** Include `Idempotency-Key` header to prevent duplicate processing.
+    Identical requests with same key return same result regardless of retry count.
+    
+    **Audit Trail:** Status changes are recorded in lead_audit_log with old/new values.
+    Only creates audit event if status actually changes (not for no-op requests).
+    
+    **Raises:**
+        HTTPException 400: Invalid status value
+        HTTPException 404: Lead not found
+        HTTPException 500: Unexpected database error
+    
+    **Example request:**
+    ```json
+    { "new_status": "En contacto" }
+    ```
+    
+    **Example response (200 OK):**
+    ```json
+    {
+        "id": 1,
+        "name": "Juan García",
+        "company": "TechCorp SL",
+        "email": "juan@techcorp.com",
+        "phone": "+34917777777",
+        "status": "En contacto",
+        "notes": "Lead muy interesado",
+        "created_at": "2026-06-08T14:30:45.123000",
+        "updated_at": "2026-06-08T14:35:22.123000"
+    }
+    ```
+    """
+    
+    try:
+        # Step 1: Check idempotency cache
+        # CRITICAL FIX EC-001: Cache key must include lead_id to prevent cross-lead collisions
+        idempotency_key = request.headers.get("Idempotency-Key")
+        cache_key = None
+        if idempotency_key:
+            cache_key = f"{lead_id}:{idempotency_key}"
+            if cache_key in IDEMPOTENCY_CACHE:
+                cached_status, cached_response = IDEMPOTENCY_CACHE[cache_key]
+                logger.info(
+                    f"Idempotency hit - returning cached response",
+                    extra={"lead_id": lead_id, "idempotency_key": idempotency_key}
+                )
+                return cached_response
+        
+        # Step 2: Fetch existing lead
+        stmt = select(Lead).where(Lead.id == lead_id)
+        result = await db.execute(stmt)
+        existing_lead = result.scalars().first()
+        
+        if not existing_lead:
+            logger.warning(
+                f"Attempted status change for non-existent lead",
+                extra={"lead_id": lead_id}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lead not found",
+                headers={"X-Error-Code": "LEAD_NOT_FOUND"},
+            )
+        
+        # Step 3: Capture old status and check for actual change
+        old_status = existing_lead.status
+        new_status = status_update.new_status
+        
+        # CRITICAL FIX BH-003: Move timestamp update AFTER change check
+        # Per E2-S2 Decision #2: no-op requests must NOT bump updated_at
+        # Step 4: Update status and timestamp ONLY if status actually changes
+        if old_status != new_status.value:
+            existing_lead.status = new_status.value
+            existing_lead.updated_at = datetime.now(timezone.utc)
+        
+        db.add(existing_lead)
+        await db.flush()
+        
+        # Step 5: Create audit log ONLY if status actually changed
+        if old_status != new_status.value:
+            audit_log = LeadAuditLog(
+                lead_id=existing_lead.id,
+                event_type="STATUS_CHANGED",
+                old_value={"status": old_status},
+                new_value={"status": new_status.value},
+                description=f"Status changed: {old_status} → {new_status.value}",
+                created_by_id=None,  # Future: from auth context
+                meta={"old_status": old_status, "new_status": new_status.value},
+            )
+            db.add(audit_log)
+        
+        # Step 6: Commit transaction
+        await db.commit()
+        
+        # Step 7: Refresh to ensure DB values are current
+        await db.refresh(existing_lead)
+        
+        # Step 8: Cache response for idempotency
+        response_data = LeadResponse.model_validate(existing_lead)
+        if cache_key:
+            IDEMPOTENCY_CACHE[cache_key] = (200, response_data)
+            logger.info(
+                f"Idempotency key cached",
+                extra={"lead_id": lead_id, "idempotency_key": idempotency_key}
+            )
+        
+        logger.info(
+            f"Lead status changed successfully",
+            extra={
+                "lead_id": existing_lead.id,
+                "old_status": old_status,
+                "new_status": new_status,
+            }
+        )
+        
+        return response_data
+        
+    except HTTPException:
+        raise
+        
+    except Exception as e:
+        await db.rollback()
+        logger.error(
+            f"Unexpected error changing lead status",
+            extra={"lead_id": lead_id, "error": str(e)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al cambiar estado del lead",
         )

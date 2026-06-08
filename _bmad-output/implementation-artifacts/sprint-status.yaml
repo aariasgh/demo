@@ -1,6 +1,6 @@
 # Sprint Status Tracking — Epics_and_User_Stories_Detailed.md
 # Generated: 2026-06-07
-# Last Updated: 2026-06-07
+# Last Updated: 2026-06-08
 # Project: Demo - Mini CRM de Seguimiento de Clientes
 # Project Key: NOKEY
 # Tracking System: file-system
@@ -121,9 +121,26 @@ development_status:
   
   E2-S3:
     title: "Cambiar Estado de Lead - API PATCH Backend"
-    status: backlog
+    status: done
     points: 8
     priority: P0
+    story_file: "_bmad-output/implementation-artifacts/E2-S3.md"
+    story_created_date: "2026-06-08"
+    story_context: "Comprehensive story file with 8 BDD scenarios, idempotency caching, audit trail patterns"
+    dev_started_date: "2026-06-08"
+    dev_completed_date: "2026-06-08"
+    code_review_date: "2026-06-08"
+    code_review_status: "completed"
+    code_review_findings: "3 critical fixes applied: (1) Cache key collision EC-001, (2) Request parameter BH-002, (3) No-op updated_at bump BH-003"
+    baseline_commit: "69c837e80fa74f06dceb9ad1b2e43ac4399f7a7a"
+    testing_status: "8/8 tests passing"
+    regression_status: "39/39 full suite passing (E2-S1: 14, E2-S2: 17, E2-S3: 8)"
+    implementation_details:
+      - "LeadStatus enum with 4 valid values"
+      - "PATCH /api/leads/{id}/status endpoint"
+      - "Idempotency caching with keyed by {lead_id}:{idempotency_key}"
+      - "Audit trail for status transitions (no-op safe)"
+      - "Transaction safety with flush/refresh pattern"
   
   E2-S4:
     title: "Crear Lead - Modal y Formulario Frontend"
