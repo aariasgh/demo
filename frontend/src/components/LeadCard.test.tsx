@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders, screen, fireEvent } from '../utils/test-utils';
 import LeadCard from './LeadCard';
 import type { Lead } from '../types';
 
@@ -20,19 +20,19 @@ describe('LeadCard', () => {
   };
 
   it('should render lead name', () => {
-    render(<LeadCard lead={mockLead} />);
+    renderWithProviders(<LeadCard lead={mockLead} />);
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
   it('should render lead company', () => {
-    render(<LeadCard lead={mockLead} />);
+    renderWithProviders(<LeadCard lead={mockLead} />);
 
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
   });
 
   it('should render lead email', () => {
-    render(<LeadCard lead={mockLead} />);
+    renderWithProviders(<LeadCard lead={mockLead} />);
 
     expect(screen.getByText('john@acme.com')).toBeInTheDocument();
   });
@@ -41,7 +41,7 @@ describe('LeadCard', () => {
     const onEdit = vi.fn();
     const onDelete = vi.fn();
 
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} onEdit={onEdit} onDelete={onDelete} />
     );
 
@@ -59,7 +59,7 @@ describe('LeadCard', () => {
     const onEdit = vi.fn();
     const onDelete = vi.fn();
 
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} onEdit={onEdit} onDelete={onDelete} />
     );
 
@@ -77,7 +77,7 @@ describe('LeadCard', () => {
   it('should call onEdit when Edit button clicked', () => {
     const onEdit = vi.fn();
 
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} onEdit={onEdit} />
     );
 
@@ -94,7 +94,7 @@ describe('LeadCard', () => {
   it('should call onDelete when Delete button clicked', () => {
     const onDelete = vi.fn();
 
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} onDelete={onDelete} />
     );
 
@@ -108,17 +108,20 @@ describe('LeadCard', () => {
     expect(onDelete).toHaveBeenCalledWith(mockLead.id);
   });
 
-  it('should have correct ARIA label', () => {
-    const { container } = render(
+  it('should have correct ARIA label with state and drag instructions', () => {
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} />
     );
 
     const card = container.querySelector('[role="article"]');
-    expect(card).toHaveAttribute('aria-label', 'Lead: John Doe de Acme Corp');
+    expect(card).toHaveAttribute(
+      'aria-label',
+      'Lead: John Doe de Acme Corp. Estado: Nuevo. Arrastra para cambiar estado.'
+    );
   });
 
   it('should change border color on hover', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} />
     );
 
@@ -136,7 +139,7 @@ describe('LeadCard', () => {
   });
 
   it('should be draggable=false', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} />
     );
 
@@ -152,7 +155,7 @@ describe('LeadCard', () => {
       email: 'this.is.a.very.long.email.address@example.com',
     };
 
-    render(<LeadCard lead={longLead} />);
+    renderWithProviders(<LeadCard lead={longLead} />);
 
     expect(screen.getByText(longLead.name)).toHaveClass('truncate');
     expect(screen.getByText(longLead.company)).toHaveClass('truncate');
@@ -160,7 +163,7 @@ describe('LeadCard', () => {
   });
 
   it('should have minimum height of 120px', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <LeadCard lead={mockLead} />
     );
 
@@ -176,7 +179,7 @@ describe('LeadCard', () => {
       phone: undefined,
     };
 
-    render(<LeadCard lead={leadWithoutPhone} />);
+    renderWithProviders(<LeadCard lead={leadWithoutPhone} />);
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     // Phone should not be rendered

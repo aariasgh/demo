@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { renderWithProviders, screen } from '../utils/test-utils';
 import KanbanColumn from './KanbanColumn';
 import { STATUS_COLORS } from '../utils/constants';
 import type { Lead } from '../types';
@@ -32,7 +32,7 @@ describe('KanbanColumn', () => {
   ];
 
   it('should render column with correct status title', () => {
-    render(
+    renderWithProviders(
       <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
@@ -40,7 +40,7 @@ describe('KanbanColumn', () => {
   });
 
   it('should display correct lead count', () => {
-    render(
+    renderWithProviders(
       <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
@@ -48,7 +48,7 @@ describe('KanbanColumn', () => {
   });
 
   it('should render correct status color', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
@@ -57,7 +57,7 @@ describe('KanbanColumn', () => {
   });
 
   it('should render all lead cards', () => {
-    render(
+    renderWithProviders(
       <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
@@ -66,7 +66,7 @@ describe('KanbanColumn', () => {
   });
 
   it('should show empty state when no leads', () => {
-    render(
+    renderWithProviders(
       <KanbanColumn status="Nuevo" leads={[]} />
     );
 
@@ -75,7 +75,7 @@ describe('KanbanColumn', () => {
   });
 
   it('should have correct ARIA label', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
@@ -87,7 +87,7 @@ describe('KanbanColumn', () => {
     const statuses = ['Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado'];
 
     statuses.forEach((status) => {
-      const { container } = render(
+      const { container } = renderWithProviders(
         <KanbanColumn status={status} leads={[]} />
       );
 
