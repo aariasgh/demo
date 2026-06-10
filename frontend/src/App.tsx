@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react';
 import React from 'react';
 import './styles/index.css';
 import CreateLeadModal from './components/CreateLeadModal';
+import KanbanBoard from './components/KanbanBoard';
 
 const ReactQueryDevtools =
   import.meta.env.DEV
@@ -84,8 +85,8 @@ function App() {
               </h1>
             </div>
           </header>
-          <main className="max-w-7xl mx-auto px-4 py-6">
-            <p className="text-gray-600">Welcome to the Mini CRM application</p>
+          <main>
+            <KanbanBoard />
           </main>
           {/* Create Lead Modal - appears when triggered */}
           <CreateLeadModal />

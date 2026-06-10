@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-09T23:59:00Z
+last_updated: 2026-06-09T23:59:59Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -192,18 +192,63 @@ development_status:
   
   E3-S1:
     title: "Listar Leads - API GET /leads Backend"
-    status: ready-for-dev
+    status: done
     points: 8
     priority: P0
     story_file: "_bmad-output/implementation-artifacts/E3-S1.md"
     story_created_date: "2026-06-09"
+    dev_completed_date: "2026-06-09"
+    code_review_date: "2026-06-09"
+    code_review_status: "completed"
+    code_review_findings: "Forensic review: 7/7 tests passing, 10/10 BDD criteria satisfied, all 2 review findings correctly implemented"
+    forensic_review_file: "_bmad-output/implementation-artifacts/E3-S1-FORENSIC-REVIEW.md"
     story_context: "Comprehensive story file for GET /api/leads backend listing endpoint and Kanban data contract"
+    testing_status: "7/7 tests passing - pagination, filtering, boundary validation, ordering"
+    implementation_details:
+      - "GET /api/leads endpoint with status filtering and pagination"
+      - "LeadStatus enum validation (rejects invalid values with 422)"
+      - "Pagination bounds validation (limit 1-1000, offset >= 0)"
+      - "DESC ordering by created_at with proper database indexing"
+      - "Response contract: data[] + meta{total,limit,offset}"
   
   E3-S2:
     title: "Dashboard Kanban - Render de 4 Columnas Frontend"
-    status: backlog
+    status: review
     points: 13
     priority: P0
+    story_file: "_bmad-output/implementation-artifacts/E3-S2.md"
+    story_created_date: "2026-06-09"
+    dev_started_date: "2026-06-09"
+    dev_completed_date: "2026-06-09T23:55:00Z"
+    baseline_commit: "c1dc79920139b465f4af447a042d9a338dbc751f"
+    phase1_completed_date: "2026-06-09T23:50:00Z"
+    phase1_status: "COMPLETE"
+    testing_completed_date: "2026-06-09T23:55:00Z"
+    testing_status: "37/37 tests PASSING (25 new + 12 existing)"
+    code_review_status: "awaiting-review"
+    build_status: "PASSING (npm run build successful)"
+    story_context: "Phase 1 complete: KanbanBoard, KanbanColumn, LeadCard components built and tested"
+    components_created:
+      - "KanbanBoard.tsx - Main container with responsive grid (1/2/4 cols)"
+      - "KanbanColumn.tsx - Individual column with header, counter, scroll"
+      - "LeadCard.tsx - Card with hover effects, actions, drag foundation"
+    utils_created:
+      - "utils/constants.ts - STATUS_COLORS, breakpoints, LeadStatus"
+      - "hooks/useLeadsByStatus.ts - Custom hook for grouping leads"
+    tests_created:
+      - "KanbanBoard.test.tsx - 7 tests for layout, counts, empty states"
+      - "KanbanColumn.test.tsx - 7 tests for column rendering, colors"
+      - "LeadCard.test.tsx - 11 tests for card display, hover, actions"
+    implementation_details:
+      - "React components: KanbanBoard → KanbanColumn → LeadCard"
+      - "State: useLeadsByStatus hook groups leads from useLeads (E3-S1)"
+      - "Grid layout: grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+      - "Colors: All 4 status colors with exact hex values"
+      - "Hover effects: Border, shadow, cursor grab, action buttons"
+      - "Empty states: 'No hay leads aún' per column"
+      - "App.tsx integration: KanbanBoard replaces dashboard placeholder"
+      - "TypeScript: Strict mode, no errors, all imports resolved"
+      - "Responsive: Mobile (320px), Tablet (768px), Desktop (1200px+)"
   
   E3-S3:
     title: "Drag & Drop - Cambiar Estado de Lead en Kanban Frontend"
