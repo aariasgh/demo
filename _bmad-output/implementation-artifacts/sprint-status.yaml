@@ -26,11 +26,27 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-10T00:25:00Z
+last_updated: 2026-06-10T21:30:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
+retro_status: Epic 3 retrospective completed 2026-06-10
+
+# ============================================================
+# ⚠️ ENVIRONMENT CONTEXT - CRITICAL FOR AGENTS
+# ============================================================
+environment:
+  os: "Windows"
+  shell: "PowerShell"
+  workspace_root: "C:\\SDD\\Demo"
+  note: |
+    All agents MUST use PowerShell commands, NOT Linux/Bash commands.
+    See /memories/repo/windows-powershell-environment.md for command equivalents.
+    Example: Use 'Get-Content file -Tail 20' instead of 'tail -20 file'
+  critical_commands:
+    - "Do NOT use: grep, sed, awk, tail, head (Linux only)"
+    - "DO use: Select-String, -replace, Get-Content (PowerShell equivalents)"
 total_story_points: 144
 stories_completed_points: 74
 stories_in_progress_points: 13
@@ -188,10 +204,10 @@ development_status:
   
   # ============================================================
   # EPIC 3: VISUALIZACIÓN DEL PIPELINE (KANBAN)
-  # Status: in-progress | Goal: Kanban interactivo
-  # Duration: 20h | Points: 34
+  # Status: done | Goal: Kanban interactivo ✅
+  # Duration: 20h | Points: 34 | Retrospective: COMPLETE
   # ============================================================
-  epic-3: in-progress
+  epic-3: done
   
   E3-S1:
     title: "Listar Leads - API GET /leads Backend"
@@ -397,7 +413,9 @@ development_status:
       - Blocks: Nothing (last story in Epic 3)
       - Unblocks: E4-S1, E5-S1 (search/timeline features)
   
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
+  epic-3-retrospective-date: "2026-06-10T21:30:00Z"
+  epic-3-retrospective-file: "_bmad-output/implementation-artifacts/epic-3-retro-2026-06-10.md"
   
   # ============================================================
   # EPIC 4: BÚSQUEDA, FILTRADO Y ALERTAS
@@ -588,7 +606,7 @@ velocity_metrics:
   epic_3_progress: "~12 hours so far (2/3 stories, ~1 story remaining)"
   estimated_project_completion: "2026-06-12 (~5 working days from start)"
 
-last_status_updated: 2026-06-10T00:25:00Z
+last_status_updated: 2026-06-10T20:30:00Z
 status_updated_by: "Code Review Automation System"
 stories_in_progress: 0
 stories_in_review: 0
