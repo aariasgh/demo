@@ -304,9 +304,34 @@ development_status:
   
   E3-S3:
     title: "Drag & Drop - Cambiar Estado de Lead en Kanban Frontend"
-    status: backlog
+    status: ready-for-dev
     points: 13
     priority: P0
+    story_file: "_bmad-output/implementation-artifacts/E3-S3.md"
+    story_created_date: "2026-06-10"
+    story_created_time: "2026-06-10T00:30:00Z"
+    dependencies: ["E1-S1", "E1-S3", "E1-S4", "E2-S3", "E3-S1", "E3-S2"]
+    story_context: "Comprehensive story file with drag-drop implementation, optimistic updates, error handling, retry logic, accessibility requirements"
+    acceptance_criteria_count: 12
+    estimated_duration_hours: 3.5
+    estimated_duration_range: "3.5-4.5 hours"
+    dev_guardrails: 10
+    dev_patterns_included: true
+    testing_patterns_included: true
+    architectural_context_included: true
+    notes: |
+      ✅ Story file created with ULTIMATE context depth
+      ✅ 12 Acceptance Criteria (Gherkin format) defined
+      ✅ E3-S2 learnings integrated into requirements
+      ✅ Backend contract from E2-S3 documented
+      ✅ React patterns from E2-S4 referenced
+      ✅ 10 critical guardrails listed (regression prevention)
+      ✅ Testing strategy with unit + integration tests
+      ✅ Component structure and TypeScript types defined
+      ✅ Execution roadmap provided (Phase 1-5)
+      - Ready for developer implementation
+      - Blocks: Nothing (last story in Epic 3)
+      - Unblocks: E4-S1, E5-S1 (search/timeline features)
   
   epic-3-retrospective: optional
   
