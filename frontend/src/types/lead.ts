@@ -3,13 +3,17 @@
  * Data Transfer Object (DTO) that mirrors backend Lead model
  */
 
+export type LeadStatus = "Nuevo" | "En contacto" | "Propuesta enviada" | "Cerrado";
+export type LeadPriority = "Baja" | "Media" | "Alta" | "Urgente";
+
 export interface Lead {
   id: string | number;
   name: string;
   company: string;
   email: string;
   phone?: string;
-  status: "Nuevo" | "En contacto" | "Propuesta enviada" | "Cerrado";
+  status: LeadStatus;
+  priority?: LeadPriority; // E4-S1: Priority filter support
   notes?: string;
   created_at: string;
   updated_at: string;

@@ -426,12 +426,14 @@ development_status:
   
   E4-S1:
     title: "Búsqueda y Filtro de Leads Frontend"
-    status: ready-for-dev
+    status: in-progress
     points: 8
     priority: P1
     story_file: "_bmad-output/implementation-artifacts/E4-S1.md"
     acceptance_criteria_count: 23
     planning_review_date: "2026-06-10T22:00:00Z"
+    date_started: "2026-06-10T23:00:00Z"
+    baseline_commit: "0edd4448960160d823226f58ab3febc8504b902c"
     planning_decisions:
       - "Q1: 'En Riesgo' = no avanza en 7 días (todos estados)"
       - "Q2: E4-S1 vs E4-S3 separados (search + priority vs status tabs)"

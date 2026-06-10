@@ -6,8 +6,8 @@
  * Uses react-redux v7 for compatibility with react-beautiful-dnd v13
  */
 
-import React, { ReactElement } from 'react';
-import { render, RenderOptions, screen, fireEvent } from '@testing-library/react';
+import React, { type ReactElement } from 'react';
+import { render, type RenderOptions, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
