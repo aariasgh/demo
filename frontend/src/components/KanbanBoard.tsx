@@ -14,17 +14,30 @@ export default function KanbanBoard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div 
+          className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"
+          role="status"
+          aria-label="Cargando leads"
+        ></div>
       </div>
     );
   }
 
   if (error) {
+    console.error('Error en KanbanBoard:', error);
+    const handleRetry = () => window.location.reload();
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-red-600 text-center">
           <p className="text-lg font-semibold">Error cargando pipeline</p>
           <p className="text-sm text-gray-500">Por favor, intenta recargar la página</p>
+          <button
+            onClick={handleRetry}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            aria-label="Reintentar cargar pipeline"
+          >
+            Reintentar
+          </button>
         </div>
       </div>
     );
@@ -49,13 +62,12 @@ export default function KanbanBoard() {
         - Tablet (md:): grid-cols-2 (2x2 grid)
         - Desktop (lg:): grid-cols-4 (1x4 grid)
       */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6">
         {LEAD_STATUSES.map((status) => (
           <KanbanColumn
             key={status}
             status={status}
-            leads={groupedLeads[status]}
-            count={groupedLeads[status].length}
+            leads={groupedLeads[status] ?? []}
           />
         ))}
       </div>

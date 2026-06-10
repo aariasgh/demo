@@ -158,4 +158,29 @@ describe('LeadCard', () => {
     expect(screen.getByText(longLead.company)).toHaveClass('truncate');
     expect(screen.getByText(longLead.email)).toHaveClass('truncate');
   });
+
+  it('should have minimum height of 120px', () => {
+    const { container } = render(
+      <LeadCard lead={mockLead} />
+    );
+
+    const card = container.querySelector('[role="article"]');
+    if (!card) throw new Error('Card not found');
+
+    expect(card).toHaveClass('min-h-[120px]');
+  });
+
+  it('should handle optional fields gracefully', () => {
+    const leadWithoutPhone: Lead = {
+      ...mockLead,
+      phone: undefined,
+    };
+
+    render(<LeadCard lead={leadWithoutPhone} />);
+
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    // Phone should not be rendered
+    const allText = screen.queryByText(/^\d{10,}$/);
+    expect(allText).not.toBeInTheDocument();
+  });
 });

@@ -33,7 +33,7 @@ describe('KanbanColumn', () => {
 
   it('should render column with correct status title', () => {
     render(
-      <KanbanColumn status="Nuevo" leads={mockLeads} count={2} />
+      <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
     expect(screen.getByText('Nuevo')).toBeInTheDocument();
@@ -41,7 +41,7 @@ describe('KanbanColumn', () => {
 
   it('should display correct lead count', () => {
     render(
-      <KanbanColumn status="Nuevo" leads={mockLeads} count={2} />
+      <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
     expect(screen.getByText('2')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('KanbanColumn', () => {
 
   it('should render correct status color', () => {
     const { container } = render(
-      <KanbanColumn status="Nuevo" leads={mockLeads} count={2} />
+      <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
     const colorDot = container.querySelector('.w-4.h-4.rounded-full');
@@ -58,7 +58,7 @@ describe('KanbanColumn', () => {
 
   it('should render all lead cards', () => {
     render(
-      <KanbanColumn status="Nuevo" leads={mockLeads} count={2} />
+      <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
     expect(screen.getByText('Lead 1')).toBeInTheDocument();
@@ -67,7 +67,7 @@ describe('KanbanColumn', () => {
 
   it('should show empty state when no leads', () => {
     render(
-      <KanbanColumn status="Nuevo" leads={[]} count={0} />
+      <KanbanColumn status="Nuevo" leads={[]} />
     );
 
     expect(screen.getByText('No hay leads aún')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('KanbanColumn', () => {
 
   it('should have correct ARIA label', () => {
     const { container } = render(
-      <KanbanColumn status="Nuevo" leads={mockLeads} count={2} />
+      <KanbanColumn status="Nuevo" leads={mockLeads} />
     );
 
     const region = container.querySelector('[role="region"]');
@@ -88,7 +88,7 @@ describe('KanbanColumn', () => {
 
     statuses.forEach((status) => {
       const { container } = render(
-        <KanbanColumn status={status} leads={[]} count={0} />
+        <KanbanColumn status={status} leads={[]} />
       );
 
       const colorDot = container.querySelector('.w-4.h-4.rounded-full');

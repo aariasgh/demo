@@ -10,11 +10,15 @@ import type { Lead } from '../types';
 interface KanbanColumnProps {
   status: string;
   leads: Lead[];
-  count: number;
 }
 
-export default function KanbanColumn({ status, leads, count }: KanbanColumnProps) {
-  const color = STATUS_COLORS[status] || '#6B7280';
+export default function KanbanColumn({ status, leads }: KanbanColumnProps) {
+  const count = leads.length;
+  const color = STATUS_COLORS[status];
+  if (!color) {
+    console.warn(`Invalid status color for: ${status}`);
+  }
+  const displayColor = color || '#EF4444';
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
@@ -24,7 +28,7 @@ export default function KanbanColumn({ status, leads, count }: KanbanColumnProps
           {/* Status Icon - Colored Circle */}
           <div
             className="w-4 h-4 rounded-full flex-shrink-0"
-            style={{ backgroundColor: color }}
+            style={{ backgroundColor: displayColor }}
             aria-hidden="true"
           />
           

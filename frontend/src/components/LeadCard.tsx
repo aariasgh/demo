@@ -5,7 +5,7 @@
  * Prepared for drag-and-drop in E3-S3
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Lead } from '../types';
 
 interface LeadCardProps {
@@ -16,38 +16,68 @@ interface LeadCardProps {
 
 export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
   const [isHovering, setIsHovering] = useState(false);
+  const [isTouchActive, setIsTouchActive] = useState(false);
+  const touchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      setIsHovering(false);
+      setIsTouchActive(false);
+      if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    };
+  }, []);
+
+  const handleTouchStart = () => {
+    touchTimerRef.current = setTimeout(() => {
+      setIsTouchActive(true);
+    }, 500);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimerRef.current) clearTimeout(touchTimerRef.current);
+    setIsTouchActive(false);
+  };
 
   return (
     <div
       className={`
-        p-3 rounded-lg border-2 transition-all duration-150 cursor-grab
-        ${isHovering
+        p-3 rounded-lg border-2 transition-all duration-150 cursor-grab min-h-[120px]
+        ${(isHovering || isTouchActive)
           ? 'border-blue-500 shadow-md bg-blue-50'
           : 'border-gray-200 shadow-sm bg-white'}
       `}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       role="article"
       aria-label={`Lead: ${lead.name} de ${lead.company}`}
       draggable={false}
     >
       {/* Lead Name - Bold */}
       <p className="font-semibold text-gray-900 text-sm truncate" title={lead.name}>
-        {lead.name}
+        {lead.name || 'Sin nombre'}
       </p>
 
       {/* Company - Medium Gray */}
       <p className="text-gray-600 text-xs mt-1 truncate" title={lead.company}>
-        {lead.company}
+        {lead.company || 'Sin empresa'}
       </p>
 
       {/* Email - Light Gray */}
       <p className="text-gray-400 text-xs mt-0.5 truncate" title={lead.email}>
-        {lead.email}
+        {lead.email || 'Sin email'}
       </p>
 
-      {/* Action Buttons - Visible on Hover */}
-      {isHovering && (
+      {/* Phone - If available */}
+      {lead.phone && (
+        <p className="text-gray-400 text-xs mt-0.5 truncate" title={lead.phone}>
+          {lead.phone}
+        </p>
+      )}
+
+      {/* Action Buttons - Visible on Hover or Touch Long-Press */}
+      {(isHovering || isTouchActive) && (
         <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
           {onEdit && (
             <button

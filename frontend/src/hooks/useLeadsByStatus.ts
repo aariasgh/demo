@@ -29,6 +29,8 @@ export const useLeadsByStatus = () => {
       const status = lead.status as keyof LeadsByStatus;
       if (status in grouped) {
         grouped[status].push(lead);
+      } else {
+        console.warn(`Invalid status value: "${lead.status}" for lead ID: ${lead.id}`);
       }
     });
 
