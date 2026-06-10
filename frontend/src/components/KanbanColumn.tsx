@@ -13,9 +13,10 @@ import type { Lead } from '../types';
 interface KanbanColumnProps {
   status: string;
   leads: Lead[];
+  isDisabled?: boolean;
 }
 
-export default function KanbanColumn({ status, leads }: KanbanColumnProps) {
+export default function KanbanColumn({ status, leads, isDisabled = false }: KanbanColumnProps) {
   const count = leads.length;
   const color = STATUS_COLORS[status];
   if (!color) {
@@ -41,17 +42,19 @@ export default function KanbanColumn({ status, leads }: KanbanColumnProps) {
           </h2>
         </div>
 
-        {/* Counter Badge */}
+        {/* Counter Badge - AC-12: Accessible counter with aria-live */}
         <span 
           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 flex-shrink-0 ml-2"
           aria-label={`${count} leads en ${status}`}
+          aria-live="polite"
+          aria-atomic="true"
         >
           {count}
         </span>
       </div>
 
       {/* Column Content - Droppable Container */}
-      <Droppable droppableId={status}>
+      <Droppable droppableId={status} isDropDisabled={isDisabled}>
         {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
           <div
             ref={provided.innerRef}
@@ -60,9 +63,11 @@ export default function KanbanColumn({ status, leads }: KanbanColumnProps) {
               snapshot.isDraggingOver 
                 ? 'bg-blue-50 ring-2 ring-blue-300 shadow-inner' 
                 : 'bg-white'
+            } ${
+              isDisabled ? 'opacity-50 pointer-events-none' : ''
             }`}
             role="region"
-            aria-label={`Columna ${status} con ${count} leads`}
+            aria-label={`Columna ${status} con ${count} leads${isDisabled ? ' - sincronizando' : ''}`}
             style={{
               maxHeight: 'calc(100vh - 250px)',
             }}

@@ -41,7 +41,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
   return (
     <div
       className={`
-        p-3 rounded-lg border-2 transition-all duration-150 cursor-grab min-h-[120px]
+        p-3 rounded-lg border-2 transition-all duration-150 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
         ${(isHovering || isTouchActive)
           ? 'border-blue-500 shadow-md bg-blue-50'
           : 'border-gray-200 shadow-sm bg-white'}
@@ -51,7 +51,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       role="article"
-      aria-label={`Lead: ${lead.name} de ${lead.company}`}
+      aria-label={`Lead: ${lead.name} de ${lead.company}. Estado: ${lead.status}. Arrastra para cambiar estado.`}
       draggable={false}
     >
       {/* Lead Name - Bold */}

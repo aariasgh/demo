@@ -13,7 +13,7 @@ import { LEAD_STATUSES } from '../utils/constants';
 
 export default function KanbanBoard() {
   const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
-  const { isDragging, handleDragEnd } = useKanbanDragDrop();
+  const { isDragging, handleDragEnd, isPending } = useKanbanDragDrop();
 
   if (isLoading) {
     return (
@@ -49,6 +49,17 @@ export default function KanbanBoard() {
 
   return (
     <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
+      {/* AC-12: Accessibility - Live region for status updates */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        id="kanban-status-announcer"
+      >
+        {isPending && 'Sincronizando cambio de estado...'}
+      </div>
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -83,6 +94,7 @@ export default function KanbanBoard() {
               key={status}
               status={status}
               leads={groupedLeads[status] ?? []}
+              isDisabled={isPending}
             />
           ))}
         </div>
