@@ -56,8 +56,10 @@ export default function KanbanColumn({ status, leads }: KanbanColumnProps) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 overflow-y-auto p-3 space-y-3 transition-colors duration-200 ${
-              snapshot.isDraggingOver ? 'bg-blue-50' : ''
+            className={`flex-1 overflow-y-auto p-3 space-y-3 transition-all duration-200 rounded-b-lg ${
+              snapshot.isDraggingOver 
+                ? 'bg-blue-50 ring-2 ring-blue-300 shadow-inner' 
+                : 'bg-white'
             }`}
             role="region"
             aria-label={`Columna ${status} con ${count} leads`}

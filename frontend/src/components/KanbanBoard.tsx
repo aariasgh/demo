@@ -67,11 +67,14 @@ export default function KanbanBoard() {
           - Tablet (md:): grid-cols-2 (2x2 grid)
           - Desktop (lg:): grid-cols-4 (1x4 grid)
         */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative transition-opacity duration-300">
           {/* Overlay during drag sync */}
           {isDragging && (
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-2">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                <p className="text-white text-sm font-medium">Sincronizando...</p>
+              </div>
             </div>
           )}
 
