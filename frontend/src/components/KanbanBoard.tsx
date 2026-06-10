@@ -2,14 +2,18 @@
  * KanbanBoard Component - Main Dashboard Container
  * Renders 4 columns for lead status tracking (Nuevo, En contacto, Propuesta, Cerrado)
  * Responsive: 1 col (mobile), 2 cols (tablet), 4 cols (desktop)
+ * Supports drag-drop to change lead status between columns
  */
 
+import { DragDropContext } from 'react-beautiful-dnd';
 import { useLeadsByStatus } from '../hooks/useLeadsByStatus';
+import { useKanbanDragDrop } from '../hooks/useKanbanDragDrop';
 import KanbanColumn from './KanbanColumn';
 import { LEAD_STATUSES } from '../utils/constants';
 
 export default function KanbanBoard() {
   const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
+  const { isDragging, handleDragEnd } = useKanbanDragDrop();
 
   if (isLoading) {
     return (
@@ -55,22 +59,31 @@ export default function KanbanBoard() {
         </p>
       </div>
 
-      {/* Kanban Grid */}
-      {/* 
-        Responsive breakpoints:
-        - Mobile (default): grid-cols-1 (stacked vertically)
-        - Tablet (md:): grid-cols-2 (2x2 grid)
-        - Desktop (lg:): grid-cols-4 (1x4 grid)
-      */}
-      <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6">
-        {LEAD_STATUSES.map((status) => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            leads={groupedLeads[status] ?? []}
-          />
-        ))}
-      </div>
+      {/* Kanban Grid with Drag-Drop Context */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        {/* 
+          Responsive breakpoints:
+          - Mobile (default): grid-cols-1 (stacked vertically)
+          - Tablet (md:): grid-cols-2 (2x2 grid)
+          - Desktop (lg:): grid-cols-4 (1x4 grid)
+        */}
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative">
+          {/* Overlay during drag sync */}
+          {isDragging && (
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          )}
+
+          {LEAD_STATUSES.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              leads={groupedLeads[status] ?? []}
+            />
+          ))}
+        </div>
+      </DragDropContext>
     </div>
   );
 }

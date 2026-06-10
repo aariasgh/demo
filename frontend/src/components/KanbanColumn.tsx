@@ -1,8 +1,11 @@
 /**
  * KanbanColumn Component - Individual Status Column
  * Displays leads grouped by status with column header and counter
+ * Supports drag-drop to reorder leads or change status
  */
 
+import { Droppable, Draggable } from 'react-beautiful-dnd';
+import type { DroppableProvided, DroppableStateSnapshot, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import LeadCard from './LeadCard';
 import { STATUS_COLORS } from '../utils/constants';
 import type { Lead } from '../types';
@@ -47,34 +50,59 @@ export default function KanbanColumn({ status, leads }: KanbanColumnProps) {
         </span>
       </div>
 
-      {/* Column Content - Scrollable Container */}
-      <div 
-        className="flex-1 overflow-y-auto p-3 space-y-3"
-        role="region"
-        aria-label={`Columna ${status} con ${count} leads`}
-        style={{
-          maxHeight: 'calc(100vh - 250px)',
-        }}
-      >
-        {leads.length > 0 ? (
-          leads.map((lead) => (
-            <LeadCard
-              key={lead.id}
-              lead={lead}
-            />
-          ))
-        ) : (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-gray-500 text-sm font-medium">
-              No hay leads aún
-            </p>
-            <p className="text-gray-400 text-xs mt-1">
-              Crea tu primer lead
-            </p>
+      {/* Column Content - Droppable Container */}
+      <Droppable droppableId={status}>
+        {(provided: DroppableProvided, snapshot: DroppableStateSnapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={`flex-1 overflow-y-auto p-3 space-y-3 transition-colors duration-200 ${
+              snapshot.isDraggingOver ? 'bg-blue-50' : ''
+            }`}
+            role="region"
+            aria-label={`Columna ${status} con ${count} leads`}
+            style={{
+              maxHeight: 'calc(100vh - 250px)',
+            }}
+          >
+            {leads.length > 0 ? (
+              leads.map((lead, index) => (
+                <Draggable 
+                  key={lead.id} 
+                  draggableId={`lead-${lead.id}`} 
+                  index={index}
+                >
+                  {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`transition-all duration-200 ${
+                        snapshot.isDragging 
+                          ? 'opacity-50 shadow-lg' 
+                          : 'opacity-100'
+                      }`}
+                    >
+                      <LeadCard lead={lead} />
+                    </div>
+                  )}
+                </Draggable>
+              ))
+            ) : (
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-gray-500 text-sm font-medium">
+                  No hay leads aún
+                </p>
+                <p className="text-gray-400 text-xs mt-1">
+                  Crea tu primer lead
+                </p>
+              </div>
+            )}
+            {provided.placeholder}
           </div>
         )}
-      </div>
+      </Droppable>
     </div>
   );
 }

@@ -304,12 +304,15 @@ development_status:
   
   E3-S3:
     title: "Drag & Drop - Cambiar Estado de Lead en Kanban Frontend"
-    status: ready-for-dev
+    status: in-progress
     points: 13
     priority: P0
     story_file: "_bmad-output/implementation-artifacts/E3-S3.md"
     story_created_date: "2026-06-10"
     story_created_time: "2026-06-10T00:30:00Z"
+    dev_started_date: "2026-06-10"
+    dev_started_time: "2026-06-10T00:45:00Z"
+    baseline_commit: "b933ca47299fa47df1fda97fe433fc741a23a020"
     dependencies: ["E1-S1", "E1-S3", "E1-S4", "E2-S3", "E3-S1", "E3-S2"]
     story_context: "Comprehensive story file with drag-drop implementation, optimistic updates, error handling, retry logic, accessibility requirements"
     acceptance_criteria_count: 12
