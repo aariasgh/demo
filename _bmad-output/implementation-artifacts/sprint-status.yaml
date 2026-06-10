@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-10T21:30:00Z
+last_updated: 2026-06-10T23:00:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -426,22 +426,41 @@ development_status:
   
   E4-S1:
     title: "Búsqueda y Filtro de Leads Frontend"
-    status: backlog
+    status: ready-for-dev
     points: 8
     priority: P1
+    story_file: "_bmad-output/implementation-artifacts/E4-S1.md"
+    acceptance_criteria_count: 23
+    planning_review_date: "2026-06-10T22:00:00Z"
+    planning_decisions:
+      - "Q1: 'En Riesgo' = no avanza en 7 días (todos estados)"
+      - "Q2: E4-S1 vs E4-S3 separados (search + priority vs status tabs)"
+      - "Q3: Debounce 300ms en búsqueda"
+      - "Q4: Backend search endpoint (Charlie)"
+      - "Q5: Search box en sticky header (Option A)"
   
   E4-S2:
     title: "Widget 'Leads en Riesgo' + Alertas Backend"
-    status: backlog
+    status: ready-for-dev
     points: 8
     priority: P1
+    story_file: "_bmad-output/implementation-artifacts/E4-S2.md"
+    acceptance_criteria_count: 16
+    planning_review_date: "2026-06-10T22:00:00Z"
+    backend_work_required: "Add last_status_change_at tracking + GET /api/leads/at-risk endpoint"
+    owner: "Charlie (Senior Dev) - backend + frontend coordination"
   
   E4-S3:
     title: "Filtro por Status en Kanban Frontend"
-    status: backlog
+    status: ready-for-dev
     points: 5
     priority: P1
+    story_file: "_bmad-output/implementation-artifacts/E4-S3.md"
+    acceptance_criteria_count: 14
+    planning_review_date: "2026-06-10T22:00:00Z"
   
+  epic-4-planning-review: done
+  epic-4-planning-review-date: "2026-06-10T22:00:00Z"
   epic-4-retrospective: optional
   
   # ============================================================
