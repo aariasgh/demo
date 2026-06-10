@@ -144,9 +144,41 @@ development_status:
   
   E2-S4:
     title: "Crear Lead - Modal y Formulario Frontend"
-    status: backlog
+    status: done
     points: 13
-    priority: P0
+    priority: P1
+    story_file: "_bmad-output/implementation-artifacts/E2-S4.md"
+    story_created_date: "2026-06-08"
+    dev_started_date: "2026-06-08"
+    dev_completed_date: "2026-06-08"
+    testing_status: "12/12 tests passing (all unit tests)"
+    code_review_status: "approved (all 12 PATCH findings applied and fixed)"
+    code_review_date: "2026-06-09T23:55:00Z"
+    story_context: "Comprehensive story file with 12 BDD scenarios, form validation patterns, TanStack Query integration, Tailwind CSS styling, accessibility requirements"
+    implementation_details:
+      - "React component: CreateLeadModal.tsx with react-hook-form"
+      - "Zod schema validation (client + type safety, no duplication)"
+      - "TanStack Query mutation for POST /api/leads with retry logic"
+      - "Email duplicate validation (async onBlur check, server fallback)"
+      - "Form field validations: inline, onBlur, character counter with maxLength"
+      - "Button state management: disabled until form valid + async email check"
+      - "Toast notifications: success/error handling with proper cleanup"
+      - "Accessibility: labels, ARIA, keyboard navigation, ESC/X close, focus trap, optimal TAB order"
+      - "Mobile responsive: max-w-md Tailwind"
+      - "Error handling: HTTP status codes, 409 email duplicate, 422 validation, 5xx server errors"
+      - "Optimistic updates: setQueryData with onMutate backup and onError rollback"
+      - "Advanced: shouldRetry predicate, query cancellation, focus trap implementation"
+    dependencies: ["E2-S1-backend"]
+    blocked_by: []
+    blocks: ["E3-S2-kanban"]
+    notes: |
+      - Email duplicate check requires GET /api/leads/validate-email endpoint ✅ (E2-S1)
+      - All 12 code review PATCH findings applied and tested
+      - AC-5 email server validation implemented with async onBlur handler
+      - Tests: 12/12 passing; Build: ✓ clean; Code Review: ✓ approved
+      - Ready for merge and production integration
+      - UX speed target: <30 seconds to create lead ✅
+      - Optimistic updates pattern ready for E3-S3 Kanban integration
   
   epic-2-retrospective: optional
   

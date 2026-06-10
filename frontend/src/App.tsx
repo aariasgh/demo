@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, lazy } from 'react';
+import React from 'react';
 import './styles/index.css';
+import CreateLeadModal from './components/CreateLeadModal';
 
 const ReactQueryDevtools =
   import.meta.env.DEV
@@ -70,8 +72,6 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-import React from 'react';
-
 function App() {
   return (
     <ErrorBoundary>
@@ -87,6 +87,8 @@ function App() {
           <main className="max-w-7xl mx-auto px-4 py-6">
             <p className="text-gray-600">Welcome to the Mini CRM application</p>
           </main>
+          {/* Create Lead Modal - appears when triggered */}
+          <CreateLeadModal />
         </div>
         <Suspense fallback={null}>
           <ReactQueryDevtools initialIsOpen={false} />
