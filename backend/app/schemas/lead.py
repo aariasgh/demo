@@ -65,6 +65,21 @@ class LeadResponse(LeadBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class LeadListMeta(BaseModel):
+    """Pagination metadata for lead list responses."""
+    total: int = Field(..., ge=0, description="Total number of matching leads")
+    limit: int = Field(..., ge=1, description="Page size")
+    offset: int = Field(..., ge=0, description="Offset applied")
+
+
+class LeadListResponse(BaseModel):
+    """Schema for GET /api/leads response payload."""
+    data: list[LeadResponse] = Field(default_factory=list, description="List of leads")
+    meta: LeadListMeta = Field(..., description="Pagination metadata")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class LeadUpdate(BaseModel):
     """Schema for PUT /api/leads/{id} - supports partial updates with all fields optional"""
     name: Optional[str] = Field(None, min_length=2, max_length=255, description="Update lead name")

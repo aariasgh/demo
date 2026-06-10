@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-09T23:55:00Z
+last_updated: 2026-06-09T23:59:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -185,16 +185,19 @@ development_status:
   
   # ============================================================
   # EPIC 3: VISUALIZACIÓN DEL PIPELINE (KANBAN)
-  # Status: backlog | Goal: Kanban interactivo
+  # Status: in-progress | Goal: Kanban interactivo
   # Duration: 20h | Points: 34
   # ============================================================
-  epic-3: backlog
+  epic-3: in-progress
   
   E3-S1:
     title: "Listar Leads - API GET /leads Backend"
-    status: backlog
+    status: ready-for-dev
     points: 8
     priority: P0
+    story_file: "_bmad-output/implementation-artifacts/E3-S1.md"
+    story_created_date: "2026-06-09"
+    story_context: "Comprehensive story file for GET /api/leads backend listing endpoint and Kanban data contract"
   
   E3-S2:
     title: "Dashboard Kanban - Render de 4 Columnas Frontend"
@@ -343,16 +346,16 @@ development_status:
 # SUMMARY METRICS
 # ============================================================
 total_epics: 8
-total_stories: 26
+total_stories: 25
 total_story_points_estimate: 144
-epics_backlog: 6
+epics_backlog: 5
 epics_in_progress: 1
-epics_done: 1
-stories_backlog: 21
-stories_ready_for_dev: 0
+epics_done: 2
+stories_backlog: 16
+stories_ready_for_dev: 1
 stories_in_progress: 0
 stories_in_review: 0
-stories_done: 5
+stories_done: 8
 
 # EPIC 1 COMPLETION METRICS:
 epic_1_total_points: 42

@@ -2,15 +2,22 @@
 
 import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, status, Depends, Request
+from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.database import get_db
 from app.models.lead import Lead, LeadStatus
 from app.models.audit import LeadAuditLog
-from app.schemas.lead import LeadCreate, LeadResponse, LeadUpdate, LeadStatusUpdate
+from app.schemas.lead import (
+    LeadCreate,
+    LeadListMeta,
+    LeadListResponse,
+    LeadResponse,
+    LeadUpdate,
+    LeadStatusUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +25,55 @@ logger = logging.getLogger(__name__)
 IDEMPOTENCY_CACHE = {}
 
 router = APIRouter(prefix="/api/leads", tags=["leads"])
+
+
+@router.get("", response_model=LeadListResponse, status_code=status.HTTP_200_OK)
+async def list_leads(
+    status: LeadStatus | None = Query(default=None, description="Filter by lead status"),
+    limit: int = Query(default=100, ge=1, le=1000, description="Number of leads to return"),
+    offset: int = Query(default=0, ge=0, description="Number of leads to skip"),
+    db: AsyncSession = Depends(get_db),
+) -> LeadListResponse:
+    """
+    List leads with optional status filtering, ordering and pagination.
+
+    The response keeps the existing lead fields and adds metadata so the
+    Kanban frontend can render the pipeline efficiently.
+    """
+    try:
+        base_stmt = select(Lead)
+        count_stmt = select(func.count()).select_from(Lead)
+
+        if status is not None:
+            status_value = status.value if isinstance(status, LeadStatus) else status
+            base_stmt = base_stmt.where(Lead.status == status_value)
+            count_stmt = count_stmt.where(Lead.status == status_value)
+
+        total_result = await db.execute(count_stmt)
+        total = total_result.scalar_one()
+
+        base_stmt = base_stmt.order_by(Lead.created_at.desc()).limit(limit).offset(offset)
+        result = await db.execute(base_stmt)
+        leads = result.scalars().all()
+
+        return LeadListResponse(
+            data=[LeadResponse.model_validate(lead) for lead in leads],
+            meta=LeadListMeta(total=total, limit=limit, offset=offset),
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception as exc:
+        logger.error(
+            "Unexpected error listing leads",
+            extra={"error": str(exc), "status_filter": status, "limit": limit, "offset": offset},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al listar los leads",
+        )
 
 
 @router.post("", response_model=LeadResponse, status_code=status.HTTP_201_CREATED)
