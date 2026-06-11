@@ -1,6 +1,6 @@
 # Sprint Status Tracking — Epics_and_User_Stories_Detailed.md
 # Generated: 2026-06-07
-# Last Updated: 2026-06-08
+# Last Updated: 2026-06-11T05:30:00Z
 # Project: Demo - Mini CRM de Seguimiento de Clientes
 # Project Key: NOKEY
 # Tracking System: file-system
@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-10T23:00:00Z
+last_updated: 2026-06-11T05:30:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -419,23 +419,24 @@ development_status:
   
   # ============================================================
   # EPIC 4: BÚSQUEDA, FILTRADO Y ALERTAS
-  # Status: backlog | Goal: Búsqueda rápida + alertas
-  # Duration: 16h | Points: 21
+  # Status: in-progress | Goal: Búsqueda rápida + alertas
+  # Duration: 16h | Points: 21 (8 completed, 13 remaining)
   # ============================================================
-  epic-4: backlog
+  epic-4: in-progress
   
   E4-S1:
     title: "Búsqueda y Filtro de Leads Frontend"
-    status: review
+    status: done
     points: 8
     priority: P1
     story_file: "_bmad-output/implementation-artifacts/E4-S1.md"
     acceptance_criteria_count: 23
+    acceptance_criteria_met: 23
     planning_review_date: "2026-06-10T22:00:00Z"
     date_started: "2026-06-10T23:00:00Z"
-    date_completed: "2026-06-11T00:15:00Z"
+    date_completed: "2026-06-11T05:30:00Z"
     baseline_commit: "0edd4448960160d823226f58ab3febc8504b902c"
-    final_commit: "df98e2f"
+    final_commit: "7574eb3"
     implementation_status: "COMPLETE ✅"
     components_created:
       - "SearchFilterHeader.tsx - Sticky header with search + priority filter"
@@ -446,17 +447,32 @@ development_status:
       - "PriorityFilter.test.tsx - 8 tests"
       - "KanbanBoard.filter.test.ts - 25+ filter logic tests"
       - "kanbanFilterStore.test.ts - 15+ store tests"
-    testing_status: "53+ unit tests passing"
-    code_review_status: "ready-for-review"
-    build_status: "PASSING"
+    testing_status: "58+ unit tests passing"
+    code_review_status: "approved"
+    code_review_date: "2026-06-11T05:15:00Z"
+    code_review_findings: "10 findings triaged (4 patches applied, 2 decisions accepted, 2 deferred, 1 dismissed)"
+    patches_applied:
+      - "PATCH #1: Type safety - lead: any → lead: Lead (HIGH severity)"
+      - "PATCH #2: Performance - searchLower moved outside loop (MEDIUM-HIGH)"
+      - "PATCH #3: Email field made optional (MEDIUM)"
+      - "PATCH #4: Whitespace trim + useEffect sync fix (MEDIUM)"
+    build_status: "PASSING ✅"
+    build_details: "268 modules | 447.57 KB gzipped | 10.14s build time"
     typescript_errors: 0
     ac_coverage: "23/23 acceptance criteria implemented and tested"
+    uat_ready: true
+    uat_checklist:
+      - "Mobile responsive testing (375px viewport)"
+      - "Backend search latency <500ms (E5-S1 requirement)"
+      - "Cross-browser testing (Chrome, Firefox, Safari)"
     planning_decisions:
       - "Q1: 'En Riesgo' = no avanza en 7 días (todos estados)"
       - "Q2: E4-S1 vs E4-S3 separados (search + priority vs status tabs)"
       - "Q3: Debounce 300ms en búsqueda"
-      - "Q4: Backend search endpoint (Charlie)"
-      - "Q5: Search box en sticky header (Option A)"
+      - "Q4: Backend search endpoint (Charlie) - not required for MVP"
+      - "Q5: Search box en sticky header (Option A) ✅ implemented"
+      - "DECISION #1: Priority filter behavior for unassigned leads (MVP: hidden when filter active)"
+      - "DECISION #2: useEffect sync pattern (unidirectional for simplicity)"
   
   E4-S2:
     title: "Widget 'Leads en Riesgo' + Alertas Backend"
