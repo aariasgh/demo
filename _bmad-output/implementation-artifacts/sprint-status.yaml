@@ -26,7 +26,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-06-07
-last_updated: 2026-06-11T05:30:00Z
+last_updated: 2026-06-11T00:01:00Z
 project: Demo - Mini CRM de Seguimiento de Clientes
 project_key: NOKEY
 tracking_system: file-system
@@ -43,7 +43,7 @@ environment:
   note: |
     All agents MUST use PowerShell commands, NOT Linux/Bash commands.
     See /memories/repo/windows-powershell-environment.md for command equivalents.
-    Example: Use 'Get-Content file -Tail 20' instead of 'tail -20 file'
+    Example: Use 'Get-Content file | Select-Object -Last 20' instead of 'tail -20 file'
   critical_commands:
     - "Do NOT use: grep, sed, awk, tail, head (Linux only)"
     - "DO use: Select-String, -replace, Get-Content (PowerShell equivalents)"
@@ -476,14 +476,67 @@ development_status:
   
   E4-S2:
     title: "Widget 'Leads en Riesgo' + Alertas Backend"
-    status: ready-for-dev
+    status: in-progress
     points: 8
     priority: P1
     story_file: "_bmad-output/implementation-artifacts/E4-S2.md"
     acceptance_criteria_count: 16
     planning_review_date: "2026-06-10T22:00:00Z"
-    backend_work_required: "Add last_status_change_at tracking + GET /api/leads/at-risk endpoint"
-    owner: "Charlie (Senior Dev) - backend + frontend coordination"
+    date_started: "2026-06-11T00:00:00Z"
+    baseline_commit: "68853f51e9725cd956f62eb8deeb979ce859a728"
+    
+    # Phase 5: Polish & Edge Cases - COMPLETE
+    phase_5_status: "COMPLETE ✅"
+    phase_5_completion_date: "2026-06-11T09:30:00Z"
+    phase_5_artifacts:
+      - "E4-S2-PHASE-5-SUMMARY.md"
+      - "utils/toastNotifier.ts (toast notifications)"
+      - "utils/apiErrorHandling.ts (retry logic + error classification)"
+      - "utils/timezone.ts (timezone handling)"
+      - "components/SkeletonLoaders.tsx (loading state UI)"
+      - "hooks/useAutoRefresh.ts (auto-refresh hook)"
+      - "config/phase5Config.ts (centralized configuration)"
+    
+    phase_5_features:
+      - "Retry logic with exponential backoff (3 attempts, 500ms→1000ms→2000ms)"
+      - "Toast notifications (success/error/warning/info)"
+      - "Skeleton loaders for better UX"
+      - "Auto-refresh verification with console logging"
+      - "Timezone-aware date formatting"
+      - "Error classification (NETWORK, TIMEOUT, SERVER, CLIENT, UNKNOWN)"
+      - "Request deduplication to prevent duplicate concurrent requests"
+      - "Feature flags for Phase 5 features"
+    
+    phase_5_build_status: "PASSING ✅"
+    phase_5_typescript_errors: 0
+    phase_5_bundle_size: "457.58 KB (gzip: 142.32 kB)"
+    
+    backend_work_completed:
+      - "✅ add_last_status_change_at migration"
+      - "✅ GET /api/leads/at-risk endpoint"
+      - "✅ 10/10 unit tests passing"
+      - "✅ days_without_change calculation"
+    
+    frontend_work_completed:
+      - "✅ LeadsAtRiskWidget.tsx (Phase 4)"
+      - "✅ LeadsAtRiskPanel.tsx (Phase 4)"
+      - "✅ KanbanBoard integration (Phase 4)"
+      - "✅ Phase 5 enhancements (retry, toasts, skeleton, timezone)"
+    
+    phase_6_status: "COMPLETE ✅"
+    phase_6_completion_date: "2026-06-11T09:40:00Z"
+    phase_6_test_results:
+      - "Desktop 1920px: All tests passed ✅"
+      - "Mobile 375px: Responsive design verified ✅"
+      - "Widget display: Count badge '⚠️ 4 Leads en Riesgo' ✅"
+      - "Panel open/close: Smooth animations ✅"
+      - "Duration formatting: '1w 3d' working ✅"
+      - "Auto-refresh: 5-minute interval ✅"
+      - "Backend endpoint: <300ms response ✅"
+      - "All 16 acceptance criteria passed ✅"
+    
+    remaining_work:
+      - "Phase 7: Final git commit with semantic message"
   
   E4-S3:
     title: "Filtro por Status en Kanban Frontend"

@@ -38,6 +38,9 @@ class Lead(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
+    last_status_change_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
 
     __table_args__ = (
         CheckConstraint(
@@ -47,6 +50,7 @@ class Lead(Base):
         Index("idx_leads_email", "email"),
         Index("idx_leads_status", "status"),
         Index("idx_leads_updated_at", "updated_at"),
+        Index("idx_leads_last_status_change", "last_status_change_at"),
     )
 
     def __repr__(self) -> str:

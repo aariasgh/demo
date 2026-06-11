@@ -7,13 +7,15 @@
  * E4-S1 Integration: Includes SearchFilterHeader for real-time lead filtering
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { useLeadsByStatus } from '../hooks/useLeadsByStatus';
 import { useKanbanDragDrop } from '../hooks/useKanbanDragDrop';
 import { useKanbanFilterStore } from '../store/kanbanFilterStore';
 import KanbanColumn from './KanbanColumn';
 import SearchFilterHeader from './SearchFilterHeader';
+import LeadsAtRiskWidget from './LeadsAtRiskWidget';
+import LeadsAtRiskPanel from './LeadsAtRiskPanel';
 import { LEAD_STATUSES } from '../utils/constants';
 import type { Lead } from '../types/lead';
 
@@ -21,6 +23,9 @@ export default function KanbanBoard() {
   const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
   const { isDragging, handleDragEnd, isPending } = useKanbanDragDrop();
   const { searchQuery, selectedPriorities } = useKanbanFilterStore();
+  
+  // E4-S2: At-risk leads widget state
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   // E4-S1: Filter leads based on search + priority filters (AC-4.1: AND logic)
   const filteredGroupedLeads = useMemo(() => {
@@ -105,6 +110,11 @@ export default function KanbanBoard() {
           {isPending && 'Sincronizando cambio de estado...'}
         </div>
 
+        {/* E4-S2: LeadsAtRiskWidget — AC-3.1: Widget appears at top */}
+        <div className="mb-6">
+          <LeadsAtRiskWidget onOpenPanel={() => setIsPanelOpen(true)} />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -165,6 +175,16 @@ export default function KanbanBoard() {
           </DragDropContext>
         )}
       </div>
+
+      {/* E4-S2: LeadsAtRiskPanel — AC-3.3: Panel overlay */}
+      <LeadsAtRiskPanel 
+        isOpen={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+        onSelectLead={() => {
+          // TODO: Scroll to lead or open edit modal
+          setIsPanelOpen(false);
+        }}
+      />
     </div>
   );
 }

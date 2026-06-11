@@ -61,6 +61,7 @@ class LeadResponse(LeadBase):
     status: str = Field(default="Nuevo", description="Lead status")
     created_at: datetime = Field(..., description="Lead creation timestamp")
     updated_at: datetime = Field(..., description="Lead last update timestamp")
+    last_status_change_at: Optional[datetime] = Field(None, description="Timestamp of last status change")
 
     model_config = ConfigDict(from_attributes=True)
 

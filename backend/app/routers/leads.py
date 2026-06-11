@@ -1,7 +1,7 @@
 """Lead CRUD endpoints for the Mini CRM API"""
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, HTTPException, status, Depends, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -153,6 +153,7 @@ async def create_lead(
             notes=lead_data.notes,
             created_at=now,
             updated_at=now,
+            last_status_change_at=now,  # ← NEW: Initialize status change timestamp
         )
         
         db.add(new_lead)
@@ -417,6 +418,106 @@ async def update_lead(
         )
 
 
+@router.get("/at-risk", response_model=dict, status_code=status.HTTP_200_OK)
+async def get_leads_at_risk(
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Get all leads that haven't changed status in 7+ days.
+    
+    Returns leads ordered by days_without_change DESC (oldest first).
+    Excludes leads with status="Cerrado" (completed leads).
+    
+    **Response Schema:**
+    ```json
+    {
+        "data": [
+            {
+                "id": 1,
+                "name": "Juan García",
+                "company": "TechCorp",
+                "email": "juan@techcorp.com",
+                "status": "Nuevo",
+                "priority": "Media",
+                "days_without_change": 9,
+                "created_at": "2026-06-01T10:00:00",
+                "last_status_change_at": "2026-06-01T10:00:00"
+            }
+        ],
+        "count": 1
+    }
+    ```
+    
+    **Acceptance Criteria:**
+    - AC-2.1: Endpoint exists at GET /api/leads/at-risk
+    - AC-2.2: Response includes id, name, company, status, priority, days_without_change
+    - AC-2.3: days_without_change = FLOOR((NOW() - last_status_change_at) / 86400 seconds)
+    - AC-2.4: Leads ordered DESC by days_without_change (oldest first)
+    - AC-6.1: Excludes status="Cerrado"
+    """
+    
+    try:
+        # Define "at risk" threshold: 7 days = 604800 seconds
+        RISK_THRESHOLD_DAYS = 7
+        risk_threshold_ts = datetime.now(timezone.utc) - timedelta(days=RISK_THRESHOLD_DAYS)
+        
+        # Query: leads where last_status_change_at <= 7 days ago, excluding "Cerrado"
+        # Order by last_status_change_at ASC (oldest first = most days without change)
+        stmt = (
+            select(Lead)
+            .where(
+                (Lead.last_status_change_at <= risk_threshold_ts) &
+                (Lead.status != LeadStatus.CERRADO.value)
+            )
+            .order_by(Lead.last_status_change_at.asc())  # Oldest first
+        )
+        
+        result = await db.execute(stmt)
+        at_risk_leads = result.scalars().all()
+        
+        # Build response with calculated days_without_change for each lead
+        now = datetime.now(timezone.utc)
+        response_leads = []
+        
+        for lead in at_risk_leads:
+            # Calculate days without status change: FLOOR((NOW - last_status_change_at) / 86400)
+            time_diff = now - lead.last_status_change_at
+            days_without_change = time_diff.days  # Python timedelta.days already floors
+            
+            response_leads.append({
+                "id": lead.id,
+                "name": lead.name,
+                "company": lead.company,
+                "email": lead.email,
+                "status": lead.status,
+                "priority": getattr(lead, "priority", None),  # If priority field exists
+                "days_without_change": days_without_change,
+                "created_at": lead.created_at,
+                "last_status_change_at": lead.last_status_change_at,
+            })
+        
+        logger.info(
+            f"Get leads at risk",
+            extra={"count": len(response_leads), "threshold_days": RISK_THRESHOLD_DAYS}
+        )
+        
+        return {
+            "data": response_leads,
+            "count": len(response_leads)
+        }
+        
+    except Exception as e:
+        logger.error(
+            f"Unexpected error getting leads at risk",
+            extra={"error": str(e)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al obtener leads en riesgo",
+        )
+
+
 @router.get("/{lead_id}", response_model=LeadResponse, status_code=status.HTTP_200_OK)
 async def get_lead(
     lead_id: int,
@@ -561,6 +662,7 @@ async def change_lead_status(
         if old_status != new_status.value:
             existing_lead.status = new_status.value
             existing_lead.updated_at = datetime.now(timezone.utc)
+            existing_lead.last_status_change_at = datetime.now(timezone.utc)  # ← NEW: Update on status change
         
         db.add(existing_lead)
         await db.flush()
@@ -618,3 +720,6 @@ async def change_lead_status(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al cambiar estado del lead",
         )
+
+
+
