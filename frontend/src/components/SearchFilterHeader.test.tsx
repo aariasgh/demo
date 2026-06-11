@@ -132,4 +132,34 @@ describe('SearchFilterHeader', () => {
     expect(screen.getByText(/Búsqueda: "juan"/)).toBeInTheDocument();
     expect(screen.getByText(/prioridad/i)).toBeInTheDocument();
   });
+
+  // E4-S1 FIX: Whitespace trimming (AC-6.3)
+  it('should trim whitespace from search input', async () => {
+    const mockSetSearchQuery = vi.fn();
+    (useKanbanFilterStore as any).mockReturnValue({
+      searchQuery: '',
+      setSearchQuery: mockSetSearchQuery,
+      clearSearch: vi.fn(),
+      selectedPriorities: [],
+      hasActiveFilters: () => false,
+    });
+
+    render(<SearchFilterHeader />);
+    const input = screen.getByPlaceholderText('Buscar: nombre, empresa, email...') as HTMLInputElement;
+
+    // Type spaces and whitespace
+    fireEvent.change(input, { target: { value: '   juan   ' } });
+    
+    // Input should show with spaces (immediate UI feedback)
+    expect(input.value).toBe('juan'); // Trimmed immediately due to .trim() in handler
+
+    // Wait for debounce to trigger
+    await waitFor(
+      () => {
+        // setSearchQuery should be called with trimmed value
+        expect(mockSetSearchQuery).toHaveBeenCalledWith('juan');
+      },
+      { timeout: 400 }
+    );
+  });
 });

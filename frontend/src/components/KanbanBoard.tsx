@@ -15,6 +15,7 @@ import { useKanbanFilterStore } from '../store/kanbanFilterStore';
 import KanbanColumn from './KanbanColumn';
 import SearchFilterHeader from './SearchFilterHeader';
 import { LEAD_STATUSES } from '../utils/constants';
+import type { Lead } from '../types/lead';
 
 export default function KanbanBoard() {
   const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
@@ -24,22 +25,23 @@ export default function KanbanBoard() {
   // E4-S1: Filter leads based on search + priority filters (AC-4.1: AND logic)
   const filteredGroupedLeads = useMemo(() => {
     const filtered: Record<string, typeof groupedLeads[keyof typeof groupedLeads]> = {};
+    const searchLower = searchQuery.toLowerCase(); // PATCH #2: Move outside loop for performance
 
     Object.entries(groupedLeads).forEach(([status, leads]) => {
-      filtered[status] = leads.filter((lead: any) => {
+      filtered[status] = leads.filter((lead: Lead) => {  // PATCH #1: Type safety - change lead: any to lead: Lead
         // AC-1.3: Search in 3 fields (name, company, email)
         // AC-1.4: Case-insensitive search
-        const searchLower = searchQuery.toLowerCase();
+        // Defensive null/undefined checks to prevent crashes
         const matchesSearch =
           searchQuery === '' ||
-          lead.name.toLowerCase().includes(searchLower) ||
-          lead.company.toLowerCase().includes(searchLower) ||
-          (lead.email && lead.email.toLowerCase().includes(searchLower));
+          (lead.name?.toLowerCase?.().includes(searchLower) ?? false) ||
+          (lead.company?.toLowerCase?.().includes(searchLower) ?? false) ||
+          (lead.email?.toLowerCase?.().includes(searchLower) ?? false);
 
         // AC-3.1 to AC-3.5: Priority filter (multi-select)
         const matchesPriority =
           selectedPriorities.length === 0 ||
-          (lead.priority && selectedPriorities.includes(lead.priority as any));
+          (lead.priority && selectedPriorities.includes(lead.priority));
 
         // AC-4.1: AND logic (both search AND filter must match)
         return matchesSearch && matchesPriority;

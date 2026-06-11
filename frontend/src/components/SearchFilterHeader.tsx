@@ -31,7 +31,7 @@ export default function SearchFilterHeader() {
   // Local input state for immediate UI feedback
   const [inputValue, setInputValue] = useState(searchQuery);
 
-  // Debounce timer
+  // Debounce timer: local input → store (unidirectional)
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(inputValue);
@@ -39,14 +39,12 @@ export default function SearchFilterHeader() {
 
     return () => clearTimeout(timer);
   }, [inputValue, setSearchQuery]);
-
-  // Sync store changes to input
-  useEffect(() => {
-    setInputValue(searchQuery);
-  }, [searchQuery]);
+  // DECISION #2: Removed second useEffect for state sync simplification (unidirectional pattern)
+  // Store now only updates from this component's input, avoiding feedback loops
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.currentTarget.value);
+    // E4-S1 FIX: Trim whitespace to avoid silent filtering when user types spaces
+    setInputValue(e.currentTarget.value.trim());
   };
 
   const handleClearSearch = () => {

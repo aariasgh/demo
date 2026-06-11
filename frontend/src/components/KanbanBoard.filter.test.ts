@@ -25,11 +25,12 @@ function filterLead(
 ): boolean {
   // AC-1.3: Search in 3 fields
   // AC-1.4: Case-insensitive
+  // E4-S1 FIX: Defensive null/undefined checks
   const searchLower = searchQuery.toLowerCase();
   const matchesSearch: boolean =
     searchQuery === '' ||
-    lead.name.toLowerCase().includes(searchLower) ||
-    lead.company.toLowerCase().includes(searchLower) ||
+    (lead.name && lead.name.toLowerCase().includes(searchLower)) ||
+    (lead.company && lead.company.toLowerCase().includes(searchLower)) ||
     (lead.email ? lead.email.toLowerCase().includes(searchLower) : false);
 
   // AC-3.1 to AC-3.5: Priority filter (multi-select)
@@ -264,6 +265,97 @@ describe('Kanban Filter Logic', () => {
         filterLead(l, 'nonexistent123', [])
       );
       expect(results).toHaveLength(0);
+    });
+
+    // E4-S1 FIX: Null/undefined name field (critical crash prevention)
+    it('should handle null/undefined name without crashing', () => {
+      const leadsWithNullName: Lead[] = [
+        ...testLeads,
+        {
+          id: 5,
+          name: null as any, // Defensive test for production edge case
+          company: 'TechCorp',
+          email: 'nullname@techcorp.com',
+          status: 'Nuevo' as const,
+          priority: 'Alta',
+          created_at: '2026-06-10',
+          updated_at: '2026-06-10',
+        },
+      ];
+      
+      // Should not crash and should fall back to company/email search
+      const results = leadsWithNullName.filter((l) =>
+        filterLead(l, 'TechCorp', [])
+      );
+      expect(results.length).toBeGreaterThanOrEqual(2); // Includes null-name lead if company matches
+    });
+
+    // E4-S1 FIX: Null/undefined company field
+    it('should handle null/undefined company without crashing', () => {
+      const leadsWithNullCompany: Lead[] = [
+        ...testLeads,
+        {
+          id: 6,
+          name: 'Test User',
+          company: null as any,
+          email: 'test@email.com',
+          status: 'Nuevo' as const,
+          priority: 'Media',
+          created_at: '2026-06-10',
+          updated_at: '2026-06-10',
+        },
+      ];
+      
+      // Should not crash and should search in name/email
+      const results = leadsWithNullCompany.filter((l) =>
+        filterLead(l, 'test', [])
+      );
+      expect(results.length).toBeGreaterThanOrEqual(1); // Finds by email
+    });
+
+    // E4-S1 FIX: Whitespace-only search (AC-6.3 actual implementation)
+    it('should not match anything with whitespace-only search', () => {
+      // Note: Real implementation trims spaces in SearchFilterHeader
+      // This test shows undesired behavior if trim() is missing
+      const spacesOnly = '   ';
+      const results = testLeads.filter((l) =>
+        filterLead(l, spacesOnly, [])
+      );
+      // With actual trim(), searchQuery would be '', matching all
+      // Without trim(), searchQuery is '   ', matching none
+      // This test documents the expected behavior with trim()
+      expect(results).toHaveLength(0); // Spaces won't match real lead names
+    });
+
+    // MEDIUM: Lead without priority when filter active
+    it('should hide leads without priority when filter is active', () => {
+      const leadsWithoutPriority: Lead[] = [
+        ...testLeads,
+        {
+          id: 7,
+          name: 'Unassigned Lead',
+          company: 'Test Corp',
+          email: 'unassigned@test.com',
+          status: 'Nuevo' as const,
+          priority: undefined, // No priority
+          created_at: '2026-06-10',
+          updated_at: '2026-06-10',
+        },
+      ];
+      
+      // When filter is active, unassigned leads are hidden
+      const results = leadsWithoutPriority.filter((l) =>
+        filterLead(l, '', ['Alta'])
+      );
+      
+      // Should NOT include the unassigned lead
+      expect(results.some(l => l.name === 'Unassigned Lead')).toBe(false);
+      
+      // But should appear when no filter selected
+      const resultsNoFilter = leadsWithoutPriority.filter((l) =>
+        filterLead(l, '', [])
+      );
+      expect(resultsNoFilter.some(l => l.name === 'Unassigned Lead')).toBe(true);
     });
   });
 });

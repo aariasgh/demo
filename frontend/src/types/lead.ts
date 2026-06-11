@@ -10,7 +10,7 @@ export interface Lead {
   id: string | number;
   name: string;
   company: string;
-  email: string;
+  email?: string;  // PATCH #3: Make email optional to match runtime behavior and prevent crashes
   phone?: string;
   status: LeadStatus;
   priority?: LeadPriority; // E4-S1: Priority filter support
