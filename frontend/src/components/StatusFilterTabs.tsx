@@ -14,11 +14,11 @@
 import { useKanbanFilterStore, type LeadStatus } from '../store/kanbanFilterStore';
 
 const TABS = [
-  { value: 'all' as const, label: 'Todos' },
-  { value: 'Nuevo' as const, label: 'Nuevo' },
-  { value: 'En contacto' as const, label: 'En contacto' },
-  { value: 'Propuesta' as const, label: 'Propuesta' },
-  { value: 'Cerrado' as const, label: 'Cerrado' },
+  { value: 'all' as const, label: 'Todos', index: 0 },
+  { value: 'Nuevo' as const, label: 'Nuevo', index: 1 },
+  { value: 'En contacto' as const, label: 'En contacto', index: 2 },
+  { value: 'Propuesta enviada' as const, label: 'Propuesta', index: 3 },  // CRÍTICO-2: Fixed backend mismatch ('Propuesta enviada')
+  { value: 'Cerrado' as const, label: 'Cerrado', index: 4 },
 ];
 
 export default function StatusFilterTabs() {
@@ -29,10 +29,28 @@ export default function StatusFilterTabs() {
     setSelectedStatus(status);
   };
 
-  // AC-5.2: Keyboard navigation - select on Enter key
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLButtonElement>, status: LeadStatus | 'all') => {
-    if (e.key === 'Enter') {
-      setSelectedStatus(status);
+  // AC-5.1: Keyboard navigation - Enter, Space, Arrow keys support
+  // CRÍTICO-1: Implement Arrow key navigation (LEFT/RIGHT with wrapping)
+  // ALTO-1: Replace onKeyPress (deprecated) with onKeyDown
+  // ALTO-6: Add Space key support for standard button behavior
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, tab: { value: LeadStatus | 'all', index: number }) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedStatus(tab.value);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextIndex = (tab.index + 1) % TABS.length;
+      setSelectedStatus(TABS[nextIndex].value);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevIndex = (tab.index - 1 + TABS.length) % TABS.length;
+      setSelectedStatus(TABS[prevIndex].value);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setSelectedStatus(TABS[0].value);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setSelectedStatus(TABS[TABS.length - 1].value);
     }
   };
 
@@ -50,7 +68,7 @@ export default function StatusFilterTabs() {
           <button
             key={tab.value}
             onClick={() => handleTabClick(tab.value)}
-            onKeyPress={(e) => handleKeyPress(e, tab.value)}
+            onKeyDown={(e) => handleKeyDown(e, tab)}
             role="tab"
             aria-pressed={isActive}
             aria-label={`Filtrar por ${tab.label}`}

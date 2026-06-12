@@ -13,9 +13,7 @@
  */
 
 import { create } from 'zustand';
-
-export type LeadPriority = 'Baja' | 'Media' | 'Alta' | 'Urgente';
-export type LeadStatus = 'Nuevo' | 'En contacto' | 'Propuesta' | 'Cerrado';
+import type { LeadStatus, LeadPriority } from '../types/lead';
 
 interface KanbanFilterState {
   // Search state
@@ -42,7 +40,7 @@ interface KanbanFilterState {
   hasActiveFilters: () => boolean;
 }
 
-const ALL_STATUSES: LeadStatus[] = ['Nuevo', 'En contacto', 'Propuesta', 'Cerrado'];
+const ALL_STATUSES: LeadStatus[] = ['Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado'];
 
 export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
   // Initial state
@@ -80,6 +78,11 @@ export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
 
   getVisibleColumns: () => {
     const state = get();
+    // CRÍTICO-3: Add validation to prevent silent failures from corrupted state
+    if (state.selectedStatus !== 'all' && !ALL_STATUSES.includes(state.selectedStatus)) {
+      console.error(`[KanbanFilterStore] Invalid selectedStatus: "${state.selectedStatus}". Falling back to "all".`);
+      return ALL_STATUSES;
+    }
     if (state.selectedStatus === 'all') {
       return ALL_STATUSES;
     }
@@ -107,3 +110,6 @@ export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
     );
   },
 }));
+
+// Re-export types for convenience
+export type { LeadPriority, LeadStatus };

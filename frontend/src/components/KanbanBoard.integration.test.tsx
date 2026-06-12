@@ -18,8 +18,8 @@ function FilteringTestComponent() {
   const mockLeads = [
     { id: 1, name: 'juan', status: 'Nuevo' as const, priority: 'Alta' as const },
     { id: 2, name: 'maria', status: 'En contacto' as const, priority: 'Media' as const },
-    { id: 3, name: 'juan', status: 'Propuesta' as const, priority: 'Alta' as const },
-    { id: 4, name: 'carlos', status: 'Propuesta' as const, priority: 'Urgente' as const },
+    { id: 3, name: 'juan', status: 'Propuesta enviada' as const, priority: 'Alta' as const },
+    { id: 4, name: 'carlos', status: 'Propuesta enviada' as const, priority: 'Urgente' as const },
     { id: 5, name: 'juan', status: 'Cerrado' as const, priority: 'Baja' as const },
   ];
 
@@ -42,11 +42,12 @@ function FilteringTestComponent() {
     <div>
       {/* Status Filter Tabs */}
       <div role="tablist" aria-label="Filter by status">
-        {(['all', 'Nuevo', 'En contacto', 'Propuesta', 'Cerrado'] as const).map((status) => {
+        {(['all', 'Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado'] as const).map((status) => {
           const isActive = selectedStatus === status;
           
-          const handleKeyPress = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-            if (e.key === 'Enter') {
+          const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
               setSelectedStatus(status);
             }
           };
@@ -57,7 +58,7 @@ function FilteringTestComponent() {
               role="tab"
               aria-pressed={isActive}
               onClick={() => setSelectedStatus(status)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               data-testid={`status-tab-${status}`}
               tabIndex={isActive ? 0 : -1}
             >
@@ -125,17 +126,17 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       const visibleColumns = screen.getByTestId('visible-columns');
       expect(visibleColumns).toHaveTextContent('Nuevo');
       expect(visibleColumns.textContent).not.toContain('En contacto');
-      expect(visibleColumns.textContent).not.toContain('Propuesta');
+      expect(visibleColumns.textContent).not.toContain('Propuesta enviada');
       expect(visibleColumns.textContent).not.toContain('Cerrado');
     });
 
-    it('should show only Propuesta column when Propuesta tab is selected', () => {
+    it('should show only Propuesta enviada column when Propuesta enviada tab is selected', () => {
       render(<FilteringTestComponent />);
       
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       
       const visibleColumns = screen.getByTestId('visible-columns');
-      expect(visibleColumns).toHaveTextContent('Propuesta');
+      expect(visibleColumns).toHaveTextContent('Propuesta enviada');
     });
   });
 
@@ -161,18 +162,18 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
     it('should combine status filter with search (AND logic)', () => {
       render(<FilteringTestComponent />);
       
-      // Filter by status "Propuesta"
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      // Filter by status "Propuesta enviada"
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       
       // Search for "juan"
       fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'juan' } });
       
-      // Should show only juan's leads that are in Propuesta status (1 result: Lead 3)
+      // Should show only juan's leads that are in Propuesta enviada status (1 result: Lead 3)
       const resultCount = screen.getByTestId('result-count');
       expect(resultCount).toHaveTextContent('1');
       
-      // Verify lead is juan in Propuesta
-      expect(screen.getByTestId('lead-3')).toHaveTextContent('juan - Propuesta');
+      // Verify lead is juan in Propuesta enviada
+      expect(screen.getByTestId('lead-3')).toHaveTextContent('juan - Propuesta enviada - Alta');
       expect(screen.queryByTestId('lead-1')).not.toBeInTheDocument(); // juan in Nuevo not shown
       expect(screen.queryByTestId('lead-5')).not.toBeInTheDocument(); // juan in Cerrado not shown
     });
@@ -182,19 +183,19 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
     it('should combine status filter with priority filter (AND logic)', () => {
       render(<FilteringTestComponent />);
       
-      // Filter by status "Propuesta"
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      // Filter by status "Propuesta enviada"
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       
       // Filter by priority "Alta"
       fireEvent.click(screen.getByTestId('priority-Alta'));
       
-      // Should show only leads in Propuesta with Alta priority (1 result: Lead 3)
+      // Should show only leads in Propuesta enviada with Alta priority (1 result: Lead 3)
       const resultCount = screen.getByTestId('result-count');
       expect(resultCount).toHaveTextContent('1');
       
-      // Verify lead is in Propuesta with Alta priority
-      expect(screen.getByTestId('lead-3')).toHaveTextContent('juan - Propuesta - Alta');
-      expect(screen.queryByTestId('lead-4')).not.toBeInTheDocument(); // Propuesta but Urgente, not Alta
+      // Verify lead is in Propuesta enviada with Alta priority
+      expect(screen.getByTestId('lead-3')).toHaveTextContent('juan - Propuesta enviada - Alta');
+      expect(screen.queryByTestId('lead-4')).not.toBeInTheDocument(); // Propuesta enviada but Urgente, not Alta
     });
   });
 
@@ -202,8 +203,8 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
     it('should combine all three filters (AND logic)', () => {
       render(<FilteringTestComponent />);
       
-      // Filter by status "Propuesta"
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      // Filter by status "Propuesta enviada"
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       
       // Search for "juan"
       fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'juan' } });
@@ -211,11 +212,11 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       // Filter by priority "Alta"
       fireEvent.click(screen.getByTestId('priority-Alta'));
       
-      // Should show only juan's leads in Propuesta with Alta priority (1 result: Lead 3)
+      // Should show only juan's leads in Propuesta enviada with Alta priority (1 result: Lead 3)
       const resultCount = screen.getByTestId('result-count');
       expect(resultCount).toHaveTextContent('1');
       
-      expect(screen.getByTestId('lead-3')).toHaveTextContent('juan - Propuesta - Alta');
+      expect(screen.getByTestId('lead-3')).toHaveTextContent('juan - Propuesta enviada - Alta');
     });
 
     it('should return 0 results when filters have no intersection', () => {
@@ -240,22 +241,22 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
     it('should persist status filter when search changes', () => {
       render(<FilteringTestComponent />);
       
-      // Select "Propuesta" status
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      // Select "Propuesta enviada" status
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       
       // Change search
       fireEvent.change(screen.getByTestId('search-input'), { target: { value: 'test' } });
       
-      // Status should still be "Propuesta"
+      // Status should still be "Propuesta enviada"
       const { selectedStatus } = useKanbanFilterStore.getState();
-      expect(selectedStatus).toBe('Propuesta');
+      expect(selectedStatus).toBe('Propuesta enviada');
       
       // Clear search
       fireEvent.change(screen.getByTestId('search-input'), { target: { value: '' } });
       
-      // Status should still be "Propuesta"
+      // Status should still be "Propuesta enviada"
       const updatedState = useKanbanFilterStore.getState();
-      expect(updatedState.selectedStatus).toBe('Propuesta');
+      expect(updatedState.selectedStatus).toBe('Propuesta enviada');
     });
   });
 
@@ -295,54 +296,60 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
     it('should render tabs without horizontal overflow at 375px viewport', () => {
       // Mock viewport size
       const originalInnerWidth = window.innerWidth;
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 375,
-      });
+      // ALTO-3: Add try/finally to prevent test state pollution if test fails
+      try {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        });
 
-      const { container } = render(<FilteringTestComponent />);
-      
-      const tabList = container.querySelector('[role="tablist"]') as HTMLElement;
-      expect(tabList).toBeInTheDocument();
-      
-      // Verify all 5 tabs are still clickable
-      expect(screen.getByTestId('status-tab-all')).toBeInTheDocument();
-      expect(screen.getByTestId('status-tab-Nuevo')).toBeInTheDocument();
-      expect(screen.getByTestId('status-tab-En contacto')).toBeInTheDocument();
-      expect(screen.getByTestId('status-tab-Propuesta')).toBeInTheDocument();
-      expect(screen.getByTestId('status-tab-Cerrado')).toBeInTheDocument();
-
-      // Restore viewport
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: originalInnerWidth,
-      });
+        const { container } = render(<FilteringTestComponent />);
+        
+        const tabList = container.querySelector('[role="tablist"]') as HTMLElement;
+        expect(tabList).toBeInTheDocument();
+        
+        // Verify all 5 tabs are still clickable
+        expect(screen.getByTestId('status-tab-all')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-Nuevo')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-En contacto')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-Propuesta enviada')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-Cerrado')).toBeInTheDocument();
+      } finally {
+        // Restore viewport
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: originalInnerWidth,
+        });
+      }
     });
 
     it('should maintain tab functionality at mobile viewport', () => {
       const originalInnerWidth = window.innerWidth;
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: 375,
-      });
+      // ALTO-3: Add try/finally to prevent test state pollution if test fails
+      try {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        });
 
-      render(<FilteringTestComponent />);
-      
-      // Click tab at mobile viewport
-      fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
-      
-      // Verify filter was applied
-      const { selectedStatus } = useKanbanFilterStore.getState();
-      expect(selectedStatus).toBe('Nuevo');
-
-      Object.defineProperty(window, 'innerWidth', {
-        writable: true,
-        configurable: true,
-        value: originalInnerWidth,
-      });
+        render(<FilteringTestComponent />);
+        
+        // Click tab at mobile viewport
+        fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
+        
+        // Verify filter was applied
+        const { selectedStatus } = useKanbanFilterStore.getState();
+        expect(selectedStatus).toBe('Nuevo');
+      } finally {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: originalInnerWidth,
+        });
+      }
     });
   });
 
@@ -354,7 +361,8 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       nuevoTab.focus();
       
       // Fire keyboard event and click to simulate real user interaction
-      fireEvent.keyPress(nuevoTab, { key: 'Enter', code: 'Enter', charCode: 13 });
+      // ALTO-4: Replace fireEvent.keyPress (deprecated) with fireEvent.keyDown
+      fireEvent.keyDown(nuevoTab, { key: 'Enter', code: 'Enter' });
       
       const { selectedStatus } = useKanbanFilterStore.getState();
       expect(selectedStatus).toBe('Nuevo');
@@ -380,7 +388,7 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
         screen.getByTestId('status-tab-all'),
         screen.getByTestId('status-tab-Nuevo'),
         screen.getByTestId('status-tab-En contacto'),
-        screen.getByTestId('status-tab-Propuesta'),
+        screen.getByTestId('status-tab-Propuesta enviada'),
         screen.getByTestId('status-tab-Cerrado'),
       ];
 
@@ -395,10 +403,10 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
     it('should have proper aria-pressed state for keyboard users', () => {
       render(<FilteringTestComponent />);
       
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       
       // Active tab should have aria-pressed="true"
-      expect(screen.getByTestId('status-tab-Propuesta')).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.getByTestId('status-tab-Propuesta enviada')).toHaveAttribute('aria-pressed', 'true');
       
       // Inactive tabs should have aria-pressed="false"
       expect(screen.getByTestId('status-tab-Nuevo')).toHaveAttribute('aria-pressed', 'false');
@@ -412,7 +420,7 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       
       // Simulate rapid clicks
       fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
       fireEvent.click(screen.getByTestId('status-tab-Cerrado'));
       fireEvent.click(screen.getByTestId('status-tab-all'));
       
@@ -441,8 +449,8 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
       expect(useKanbanFilterStore.getState().selectedStatus).toBe('Nuevo');
       
-      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
-      expect(useKanbanFilterStore.getState().selectedStatus).toBe('Propuesta');
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
+      expect(useKanbanFilterStore.getState().selectedStatus).toBe('Propuesta enviada');
       
       fireEvent.click(screen.getByTestId('status-tab-all'));
       expect(useKanbanFilterStore.getState().selectedStatus).toBe('all');

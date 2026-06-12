@@ -18,7 +18,7 @@ import SearchFilterHeader from './SearchFilterHeader';
 import StatusFilterTabs from './StatusFilterTabs';
 import LeadsAtRiskWidget from './LeadsAtRiskWidget';
 import LeadsAtRiskPanel from './LeadsAtRiskPanel';
-import type { Lead } from '../types/lead';
+import type { Lead, LeadStatus } from '../types/lead';
 
 export default function KanbanBoard() {
   const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
@@ -41,7 +41,8 @@ export default function KanbanBoard() {
 
     Object.entries(groupedLeads).forEach(([status, leads]) => {
       // Only process if this status is in visible columns (E4-S3: AC-2.1)
-      if (!visibleColumns.includes(status as any)) {
+      // ALTO-2: Replace `as any` with specific LeadStatus type
+      if (!visibleColumns.includes(status as LeadStatus)) {
         return;
       }
 
@@ -65,7 +66,9 @@ export default function KanbanBoard() {
     });
 
     return filtered;
-  }, [groupedLeads, searchQuery, selectedPriorities, selectedStatus, getVisibleColumns]);
+  // ALTO-5: Remove getVisibleColumns from dependencies (it's a function that recreates on every render)
+  // Only depend on its inputs (selectedStatus) and other filter states
+  }, [groupedLeads, searchQuery, selectedPriorities, selectedStatus]);
 
   // AC-4.3: Calculate filtered totals
   const filteredTotalLeads = useMemo(() => {

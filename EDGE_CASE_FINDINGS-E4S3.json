@@ -1,0 +1,321 @@
+{
+  "analysis_metadata": {
+    "date": "2026-06-12",
+    "story": "E4-S3 - Status Filter en Kanban",
+    "stack": "React 18 + TypeScript + Zustand",
+    "tests_passing": 56,
+    "methodology": "Systematic path analysis + boundary condition testing + type safety audit",
+    "total_edge_cases_found": 14,
+    "critical_count": 2,
+    "medium_count": 8,
+    "low_count": 5
+  },
+  "critical_issues": [
+    {
+      "id": 1,
+      "severity": "🔴 CRITICAL",
+      "component": "kanbanFilterStore.ts + types/lead.ts + useLeadsByStatus.ts",
+      "category": "Type Safety / Silent Failure",
+      "scenario": "LeadStatus type mismatch - store uses 'Propuesta' but backend uses 'Propuesta enviada'",
+      "current_behavior": "User clicks 'Propuesta' tab → store sets selectedStatus='Propuesta' → filtering checks lead.status='Propuesta enviada' → no match → column appears empty",
+      "expected_behavior": "All LeadStatus type definitions must align, filtering must accurately show all leads in selected status",
+      "impact": "Users see incorrect/empty 'Propuesta' column. Silent failure with no error thrown. Blocks Status Filter feature completely.",
+      "test_needed": "Test that lead with status='Propuesta enviada' appears when 'Propuesta' tab is selected",
+      "fix": "Align store type definition with backend: Change kanbanFilterStore.ts LeadStatus union from ['Nuevo', 'En contacto', 'Propuesta', 'Cerrado'] to ['Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado']. Update TABS array label from 'Propuesta' to use correct backend value.",
+      "effort_minutes": 15,
+      "blocking": true
+    },
+    {
+      "id": 2,
+      "severity": "🔴 CRITICAL",
+      "component": "kanbanFilterStore.ts - getVisibleColumns()",
+      "category": "State Corruption / Type Safety",
+      "scenario": "getVisibleColumns() accepts invalid selectedStatus values without validation (e.g., corrupted localStorage, typos, external manipulation)",
+      "current_behavior": "If selectedStatus is corrupted (e.g., 'INVALID_STATUS' or 'Nuevoo'), function returns [invalidValue] which never matches any lead.status, causing 0 results to display silently",
+      "expected_behavior": "Validate selectedStatus before returning. Return ALL_STATUSES or log warning if invalid. Graceful fallback with user feedback.",
+      "impact": "Silent rendering of empty board (0 leads shown). Corrupted state persists across session reloads. No console error, user confusion.",
+      "test_needed": "Test that setSelectedStatus('INVALID' as any) either returns ALL_STATUSES or shows error, not [INVALID]",
+      "fix": "Add runtime validation: Check if selectedStatus is in valid list before returning. If invalid, log warning and return ALL_STATUSES. Alternative: Use Zod/io-ts schema validation.",
+      "effort_minutes": 10,
+      "blocking": true
+    }
+  ],
+  "medium_issues": [
+    {
+      "id": 3,
+      "severity": "🟡 MEDIUM",
+      "component": "KanbanBoard.tsx + StatusFilterTabs.tsx",
+      "category": "Race Condition / Concurrency",
+      "scenario": "User rapid-clicks tabs (Nuevo → Propuesta → Cerrado → Nuevo) while KanbanBoard is computing filtered results",
+      "current_behavior": "If filteredGroupedLeads useMemo is slow, old and new filters mix. User briefly sees results from combined filter states.",
+      "expected_behavior": "Each tab click immediately shows results for selected status. No flicker between states. Consistent UI.",
+      "impact": "Visual flicker during rapid tab switching. Temporary incorrect data display. Especially noticeable on slow devices/networks.",
+      "test_needed": "Render FilteringTestComponent, fire 4 rapid clicks, verify final selectedStatus is 'Nuevo' and no mixed results shown",
+      "fix": "Option A: Debounce tab clicks (50ms). Option B: Add loading state during filter transitions. Option C: Memoize visibleColumns separately.",
+      "effort_minutes": 20,
+      "blocking": false
+    },
+    {
+      "id": 4,
+      "severity": "🟡 MEDIUM",
+      "component": "StatusFilterTabs.tsx",
+      "category": "Accessibility / Keyboard Navigation",
+      "scenario": "User tries to navigate tabs with arrow keys (standard WAI-ARIA tabs pattern) but only Enter key is supported",
+      "current_behavior": "Arrow keys (ArrowRight, ArrowLeft, Home, End) do nothing. Only Enter key selects tabs. Keyboard-only users must Tab through all 5 buttons.",
+      "expected_behavior": "WAI-ARIA tabs pattern: ArrowRight=next tab, ArrowLeft=previous tab, Home=first, End=last, Enter/Space=activate",
+      "impact": "Accessibility violation (WCAG 2.1 Level AA). Poor keyboard UX. Screen reader users confused by tab order.",
+      "test_needed": "Test ArrowRight/Left navigate through tabs and wrap around at edges. Test Home/End jump to first/last.",
+      "fix": "Implement full WAI-ARIA tabs pattern: Add keyDown handler for arrow keys, Home, End. Update focus and selectedStatus accordingly.",
+      "effort_minutes": 30,
+      "blocking": false,
+      "wcag_violation": true
+    },
+    {
+      "id": 5,
+      "severity": "🟡 MEDIUM",
+      "component": "KanbanBoard.tsx + StatusFilterTabs.tsx",
+      "category": "Error Handling / Robustness",
+      "scenario": "Zustand store fails to initialize due to corrupted session, module load order issue, or browser extension interference",
+      "current_behavior": "App crashes with: 'Cannot read property selectedStatus of undefined'. Entire Kanban becomes unusable. No recovery.",
+      "expected_behavior": "Show error message to user with recovery option (reload page). Log error for debugging.",
+      "impact": "Complete feature breakdown if store fails. Poor UX during initialization issues. Difficult to troubleshoot in production.",
+      "test_needed": "Mock useKanbanFilterStore to return undefined, verify component doesn't crash",
+      "fix": "Add error boundary/wrapper component that checks store exists before rendering. Show fallback UI with 'Error loading filters - Refresh page' message.",
+      "effort_minutes": 15,
+      "blocking": false
+    },
+    {
+      "id": 6,
+      "severity": "🟡 MEDIUM",
+      "component": "KanbanBoard.tsx - filteredGroupedLeads render",
+      "category": "State Validation / Edge Case",
+      "scenario": "getVisibleColumns() returns empty array (due to bug or store corruption)",
+      "current_behavior": "visibleColumns.map() renders 0 columns. Board appears blank with no error or explanation.",
+      "expected_behavior": "Show meaningful message or fallback to ALL_STATUSES",
+      "impact": "Silent rendering of empty board. User confusion. No indication of problem.",
+      "test_needed": "Mock getVisibleColumns to return [], verify error message or fallback displayed",
+      "fix": "Add validation: if (visibleColumns.length === 0) log warning and fallback to ALL_STATUSES, or show error UI",
+      "effort_minutes": 10,
+      "blocking": false
+    },
+    {
+      "id": 7,
+      "severity": "🟡 MEDIUM",
+      "component": "kanbanFilterStore.ts",
+      "category": "State Consistency / Documentation",
+      "scenario": "Developer wants to reset only status filter while keeping search/priority filters",
+      "current_behavior": "resetStatusFilter() exists but not obviously discoverable. Developers might use setSelectedStatus('all') instead",
+      "expected_behavior": "Clear API: resetStatusFilter() intent is obvious. Method is exported and documented.",
+      "impact": "Low functional impact, but API clarity issue. Developers might use wrong method.",
+      "test_needed": "Verify resetStatusFilter() works and clears status while preserving search/priority",
+      "fix": "Improve documentation: Add JSDoc comment explaining when to use resetStatusFilter() vs setSelectedStatus(). Ensure method is prominently exported.",
+      "effort_minutes": 5,
+      "blocking": false
+    },
+    {
+      "id": 8,
+      "severity": "🟡 MEDIUM",
+      "component": "KanbanBoard.tsx - filteredGroupedLeads",
+      "category": "Logic Clarity / Documentation",
+      "scenario": "Triple filter evaluation order (status AND search AND priority) not clearly documented",
+      "current_behavior": "Filters applied in order: (1) Status, (2) Search, (3) Priority. Correct AND logic but not documented.",
+      "expected_behavior": "Document filter precedence and AND logic clearly",
+      "impact": "Potential developer confusion. Currently working correctly but could be misunderstood.",
+      "test_needed": "Add comment/test explaining filter order: Status → Search → Priority (all must match)",
+      "fix": "Add comment above useMemo explaining filter pipeline: '1. Status filters by column, 2. Search filters within columns, 3. Priority further filters. Result: AND logic'",
+      "effort_minutes": 5,
+      "blocking": false
+    },
+    {
+      "id": 9,
+      "severity": "🟡 MEDIUM",
+      "component": "StatusFilterTabs.tsx",
+      "category": "Mobile UX / Responsive Design",
+      "scenario": "At 375px viewport (mobile), 5 tabs with full labels cause horizontal overflow. All tabs need ~360px+ width.",
+      "current_behavior": "overflow-x-auto allows scroll. All tabs accessible but require horizontal scrolling. Some tabs hidden initially.",
+      "expected_behavior": "All tabs visible without scroll, or responsive labels on mobile",
+      "impact": "Mobile UX degradation. Users must scroll to see all tabs. Minor but noticeable.",
+      "test_needed": "Test at 375px viewport that scrollWidth <= clientWidth or tabs are responsive",
+      "fix": "Option A: Responsive tab labels (short labels on mobile: T, N, EC, P, C). Option B: Reduce padding on mobile (px-2 md:px-4). Option C: Scrolling indicator.",
+      "effort_minutes": 20,
+      "blocking": false
+    }
+  ],
+  "low_issues": [
+    {
+      "id": 10,
+      "severity": "🟢 LOW",
+      "component": "StatusFilterTabs.tsx - handleKeyPress",
+      "category": "Keyboard Accessibility / Minor",
+      "scenario": "User presses Space key on tab (standard HTML button behavior) but nothing happens",
+      "current_behavior": "Only Enter key works. Space key doesn't select tab.",
+      "expected_behavior": "Both Enter and Space activate tab (standard button behavior)",
+      "impact": "Minor a11y issue. Users expect Space to work on buttons.",
+      "test_needed": "Test that Space key selects tab same as Enter key",
+      "fix": "Update handleKeyPress: if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedStatus(status); }",
+      "effort_minutes": 5,
+      "blocking": false
+    },
+    {
+      "id": 11,
+      "severity": "🟢 LOW",
+      "component": "KanbanBoard.tsx",
+      "category": "UX Polish / User Feedback",
+      "scenario": "When user clicks tab, filtering computes synchronously with no visual feedback on slow devices",
+      "current_behavior": "Filter computes immediately. No loading state or transition shown.",
+      "expected_behavior": "Show brief loading state or fade transition to indicate filtering happening",
+      "impact": "UX polish. On slow devices, might appear frozen. Users get no feedback.",
+      "test_needed": "Test that loading state is shown during filter change",
+      "fix": "Add opacity transition or skeleton loader during filter change. Use local state to track if transitioning.",
+      "effort_minutes": 15,
+      "blocking": false
+    },
+    {
+      "id": 12,
+      "severity": "🟢 LOW",
+      "component": "StatusFilterTabs.tsx + kanbanFilterStore.ts",
+      "category": "UX Feature / Polish",
+      "scenario": "If user accidentally clicks wrong tab, no undo option available",
+      "current_behavior": "Must manually click correct tab again. No Ctrl+Z or back button.",
+      "expected_behavior": "Optional undo/redo for filter changes (nice-to-have)",
+      "impact": "Minor UX convenience. Not expected for Kanban (direct selection is normal).",
+      "test_needed": "Future enhancement test",
+      "fix": "Add history/undo state management in store. Implement Ctrl+Z handler.",
+      "effort_minutes": 30,
+      "blocking": false,
+      "priority": "post_v1"
+    },
+    {
+      "id": 13,
+      "severity": "🟢 LOW",
+      "component": "StatusFilterTabs.tsx",
+      "category": "Accessibility / a11y Polish",
+      "scenario": "Tab buttons have aria-label but no aria-description for additional context",
+      "current_behavior": "aria-label exists and tabs are announced. No description of what tab does.",
+      "expected_behavior": "Could add aria-description for extra context (nice-to-have)",
+      "impact": "Minor a11y enhancement. Current WCAG AA compliance OK.",
+      "test_needed": "Verify aria-description is present (optional enhancement)",
+      "fix": "Add aria-description={`Mostrar solo leads en estado ${tab.label}`} to each tab",
+      "effort_minutes": 5,
+      "blocking": false
+    },
+    {
+      "id": 14,
+      "severity": "🟢 LOW",
+      "component": "StatusFilterTabs.tsx + SearchFilterHeader.tsx",
+      "category": "Analytics / Future Enhancement",
+      "scenario": "No telemetry collected for which filters are used (tab clicks not tracked)",
+      "current_behavior": "No event tracking/logging on tab clicks",
+      "expected_behavior": "Optional: Track which tabs clicked, frequency, user behavior",
+      "impact": "Can't measure filter usage. No analytics data. Not required for MVP.",
+      "test_needed": "Future: Add analytics event tracking test",
+      "fix": "Add event tracking: analytics.event('filter_status_changed', { status, timestamp })",
+      "effort_minutes": 10,
+      "blocking": false,
+      "priority": "post_v1"
+    }
+  ],
+  "test_coverage_gaps": {
+    "missing_tests": [
+      "Type consistency between store and backend LeadStatus",
+      "Invalid selectedStatus handling (validation)",
+      "Rapid tab click race condition",
+      "Arrow key navigation (ArrowRight, ArrowLeft, Home, End)",
+      "Store initialization failure recovery",
+      "Empty visibleColumns fallback",
+      "Mobile viewport 375px tab overflow",
+      "Space key support on tabs"
+    ],
+    "existing_test_count": 56,
+    "estimated_new_tests_needed": 8,
+    "total_recommended_tests": 64
+  },
+  "priority_matrix": {
+    "before_merge": [
+      {
+        "id": 1,
+        "title": "Fix LeadStatus type mismatch",
+        "effort_minutes": 15,
+        "blocking": true
+      },
+      {
+        "id": 2,
+        "title": "Add validation to getVisibleColumns()",
+        "effort_minutes": 10,
+        "blocking": true
+      }
+    ],
+    "before_v1": [
+      {
+        "id": 3,
+        "title": "Handle rapid tab click race condition",
+        "effort_minutes": 20
+      },
+      {
+        "id": 4,
+        "title": "Implement arrow key navigation",
+        "effort_minutes": 30
+      },
+      {
+        "id": 5,
+        "title": "Add error boundary for store",
+        "effort_minutes": 15
+      },
+      {
+        "id": 6,
+        "title": "Add empty visibleColumns fallback",
+        "effort_minutes": 10
+      },
+      {
+        "id": 7,
+        "title": "Document status filter reset API",
+        "effort_minutes": 5
+      },
+      {
+        "id": 8,
+        "title": "Document triple filter order",
+        "effort_minutes": 5
+      },
+      {
+        "id": 9,
+        "title": "Optimize mobile tab layout",
+        "effort_minutes": 20
+      }
+    ],
+    "post_v1": [
+      {
+        "id": 10,
+        "title": "Add Space key support",
+        "effort_minutes": 5
+      },
+      {
+        "id": 11,
+        "title": "Add loading state on filter change",
+        "effort_minutes": 15
+      },
+      {
+        "id": 12,
+        "title": "Implement undo/redo",
+        "effort_minutes": 30
+      },
+      {
+        "id": 13,
+        "title": "Add aria-description",
+        "effort_minutes": 5
+      },
+      {
+        "id": 14,
+        "title": "Add analytics tracking",
+        "effort_minutes": 10
+      }
+    ]
+  },
+  "summary": {
+    "feature_status": "Feature-complete and tested but has 2 CRITICAL silent-failure issues",
+    "production_ready": "With reservations - fix Issues #1-2 before merge",
+    "total_estimated_effort_before_merge": 25,
+    "total_estimated_effort_before_v1": 125,
+    "total_estimated_effort_nice_to_have": 65,
+    "recommendation": "FIX Issues #1-2 before merge (25 min). Schedule Issues #3-9 for v1 sprint (120 min). Issues #10-14 are post-v1 enhancements (65 min)."
+  }
+}

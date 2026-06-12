@@ -68,7 +68,8 @@ describe('StatusFilterTabs Component', () => {
       
       expect(propuestaTab).toHaveAttribute('aria-pressed', 'true');
       const { selectedStatus } = useKanbanFilterStore.getState();
-      expect(selectedStatus).toBe('Propuesta');
+      // CRÍTICO-2: Fixed type mismatch - backend uses 'Propuesta enviada' not 'Propuesta'
+      expect(selectedStatus).toBe('Propuesta enviada');
     });
 
     it('should update visual active state when tab is selected', () => {
@@ -118,7 +119,8 @@ describe('StatusFilterTabs Component', () => {
       render(<StatusFilterTabs />);
       
       const nuevoTab = screen.getByRole('tab', { name: /Filtrar por Nuevo/i });
-      fireEvent.keyPress(nuevoTab, { key: 'Enter', code: 'Enter', charCode: 13 });
+      // ALTO-4: Replace fireEvent.keyPress (deprecated) with fireEvent.keyDown
+      fireEvent.keyDown(nuevoTab, { key: 'Enter', code: 'Enter' });
       
       const { selectedStatus } = useKanbanFilterStore.getState();
       expect(selectedStatus).toBe('Nuevo');
@@ -128,10 +130,92 @@ describe('StatusFilterTabs Component', () => {
       render(<StatusFilterTabs />);
       
       const nuevoTab = screen.getByRole('tab', { name: /Filtrar por Nuevo/i });
-      fireEvent.keyPress(nuevoTab, { key: 'a', code: 'KeyA', charCode: 97 });
+      fireEvent.keyDown(nuevoTab, { key: 'a', code: 'KeyA' });
       
       const { selectedStatus } = useKanbanFilterStore.getState();
       expect(selectedStatus).toBe('all');
+    });
+
+    // CRÍTICO-1 + MEDIO-1: Arrow key navigation tests
+    it('should navigate to next tab with ArrowRight key', () => {
+      render(<StatusFilterTabs />);
+      
+      // Start at Todos (index 0)
+      const todosTab = screen.getByRole('tab', { name: /Filtrar por Todos/i });
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+    });
+
+    it('should navigate to previous tab with ArrowLeft key', () => {
+      render(<StatusFilterTabs />);
+      
+      // First, move to Nuevo
+      const todosTab = screen.getByRole('tab', { name: /Filtrar por Todos/i });
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' });
+      
+      // Now go back with ArrowLeft
+      const nuevoTab = screen.getByRole('tab', { name: /Filtrar por Nuevo/i });
+      fireEvent.keyDown(nuevoTab, { key: 'ArrowLeft' });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('all');
+    });
+
+    it('should cycle from last tab to first with ArrowLeft', () => {
+      render(<StatusFilterTabs />);
+      
+      // Go to Cerrado (last tab)
+      const todosTab = screen.getByRole('tab', { name: /Filtrar por Todos/i });
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // Nuevo
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // En contacto
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // Propuesta
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // Cerrado
+      
+      // Now go back one more (should wrap to Todos)
+      const cerradoTab = screen.getByRole('tab', { name: /Filtrar por Cerrado/i });
+      fireEvent.keyDown(cerradoTab, { key: 'ArrowLeft' });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Propuesta enviada');
+    });
+
+    it('should select Space key to activate tab', () => {
+      render(<StatusFilterTabs />);
+      
+      const nuevoTab = screen.getByRole('tab', { name: /Filtrar por Nuevo/i });
+      fireEvent.keyDown(nuevoTab, { key: ' ' });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+    });
+
+    it('should jump to first tab with Home key', () => {
+      render(<StatusFilterTabs />);
+      
+      // First, move to Propuesta
+      const todosTab = screen.getByRole('tab', { name: /Filtrar por Todos/i });
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // Nuevo
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // En contacto
+      fireEvent.keyDown(todosTab, { key: 'ArrowRight' }); // Propuesta
+      
+      // Press Home to jump to first
+      const propuestaTab = screen.getByRole('tab', { name: /Filtrar por Propuesta/i });
+      fireEvent.keyDown(propuestaTab, { key: 'Home' });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('all');
+    });
+
+    it('should jump to last tab with End key', () => {
+      render(<StatusFilterTabs />);
+      
+      const todosTab = screen.getByRole('tab', { name: /Filtrar por Todos/i });
+      fireEvent.keyDown(todosTab, { key: 'End' });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Cerrado');
     });
   });
 
