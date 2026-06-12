@@ -28,6 +28,37 @@ export default function KanbanBoard() {
   // E4-S2: At-risk leads widget state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+  /**
+   * MEDIUM-8: Triple Filter Pipeline with AND Logic
+   * 
+   * Filter Precedence (ALL must match for a lead to appear):
+   * 1. STATUS FILTER (E4-S3):
+   *    - User selects tab: "Todos" | "Nuevo" | "En contacto" | "Propuesta enviada" | "Cerrado"
+   *    - Gets visibleColumns from store
+   *    - Only leads matching selectedStatus are shown
+   *    - AND logic: Only proceeds to step 2 if status matches
+   *
+   * 2. SEARCH FILTER (E4-S1):
+   *    - User types search query
+   *    - Searches across 3 fields (name, company, email)
+   *    - Case-insensitive matching
+   *    - AND logic: Lead must match search AND status from step 1
+   *
+   * 3. PRIORITY FILTER (E4-S1):
+   *    - User selects priorities: "Baja" | "Media" | "Alta" | "Urgente"
+   *    - Multi-select allows filtering by multiple priorities
+   *    - If no priority selected, all priorities shown (no filtering)
+   *    - AND logic: Lead must match status AND search AND priority
+   *
+   * Result: Lead appears in Kanban ONLY if:
+   *   - Its status is in visibleColumns AND
+   *   - Its name/company/email contains searchQuery AND
+   *   - Its priority is in selectedPriorities (if any selected)
+   *
+   * Example:
+   *   Status="Nuevo", Search="juan", Priority=["Alta"]
+   *   → Shows only leads with status="Nuevo" AND (name|company|email contains "juan") AND priority="Alta"
+   */
   // E4-S1 + E4-S3: Filter leads based on search + priority + status filters (AND logic)
   const filteredGroupedLeads = useMemo(() => {
     const visibleColumns = getVisibleColumns();

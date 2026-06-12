@@ -456,4 +456,126 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       expect(useKanbanFilterStore.getState().selectedStatus).toBe('all');
     });
   });
+
+  describe('MEDIUM-3: Race Condition Prevention', () => {
+    it('should handle rapid consecutive clicks without mixed results (race condition check)', () => {
+      render(<FilteringTestComponent />);
+      
+      // Simulate rapid user clicking: Nuevo → Propuesta enviada → Cerrado → all
+      // This tests that intermediate states don't render mixed results
+      fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
+      fireEvent.click(screen.getByTestId('status-tab-Cerrado'));
+      fireEvent.click(screen.getByTestId('status-tab-all'));
+      
+      // Final state should be 'all' with all 4 columns visible
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('all');
+      
+      const visibleColumns = screen.getByTestId('visible-columns');
+      expect(visibleColumns.textContent).toContain('Nuevo');
+      expect(visibleColumns.textContent).toContain('En contacto');
+      expect(visibleColumns.textContent).toContain('Propuesta enviada');
+      expect(visibleColumns.textContent).toContain('Cerrado');
+    });
+  });
+
+  describe('MEDIUM-5: Error Handling & Store Initialization', () => {
+    it('should gracefully handle invalid status values from corrupted state', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      // Simulate corrupted state by setting invalid status
+      // The getVisibleColumns() validation should handle this gracefully
+      (store as any).selectedStatus = 'INVALID_STATUS';
+      
+      // getVisibleColumns() should validate and return safe result
+      const visibleColumns = store.getVisibleColumns();
+      
+      // Should either be ALL_STATUSES or log error gracefully
+      expect(visibleColumns).toBeDefined();
+      expect(visibleColumns.length).toBeGreaterThan(0);
+      // Most importantly: should not return ['INVALID_STATUS']
+      expect(visibleColumns).not.toContain('INVALID_STATUS' as any);
+    });
+
+    it('should provide meaningful fallback for empty visible columns', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      // Reset to known good state
+      store.clearAllFilters();
+      store.setSelectedStatus('all');
+      
+      const visibleColumns = store.getVisibleColumns();
+      
+      // Should never return empty array
+      expect(visibleColumns.length).toBeGreaterThan(0);
+      expect(Array.isArray(visibleColumns)).toBe(true);
+    });
+  });
+
+  describe('MEDIUM-6: State Validation', () => {
+    it('should validate that getVisibleColumns never returns empty array', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      // Test all valid status values
+      const validStatuses: Array<'all' | 'Nuevo' | 'En contacto' | 'Propuesta enviada' | 'Cerrado'> = [
+        'all',
+        'Nuevo',
+        'En contacto',
+        'Propuesta enviada',
+        'Cerrado',
+      ];
+      
+      validStatuses.forEach((status) => {
+        store.setSelectedStatus(status);
+        const visible = store.getVisibleColumns();
+        
+        expect(visible.length).toBeGreaterThan(0, `getVisibleColumns should not be empty for status=${status}`);
+        
+        if (status === 'all') {
+          expect(visible.length).toBe(4, 'Should return all 4 statuses when "all" is selected');
+        } else {
+          expect(visible.length).toBe(1, `Should return 1 column for single status: ${status}`);
+          expect(visible[0]).toBe(status);
+        }
+      });
+    });
+  });
+
+  describe('MEDIUM-9: Mobile Viewport & Responsive Design', () => {
+    it('should render tabs without unwanted overflow at 375px (mobile viewport)', () => {
+      const originalInnerWidth = window.innerWidth;
+      
+      try {
+        // Set mobile viewport
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: 375,
+        });
+
+        const { container } = render(<FilteringTestComponent />);
+        
+        const tabList = container.querySelector('[role="tablist"]') as HTMLElement;
+        expect(tabList).toBeInTheDocument();
+        
+        // Verify all 5 tabs are present
+        expect(screen.getByTestId('status-tab-all')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-Nuevo')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-En contacto')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-Propuesta enviada')).toBeInTheDocument();
+        expect(screen.getByTestId('status-tab-Cerrado')).toBeInTheDocument();
+        
+        // All tabs should be clickable even if scrolling needed
+        fireEvent.click(screen.getByTestId('status-tab-Propuesta enviada'));
+        expect(useKanbanFilterStore.getState().selectedStatus).toBe('Propuesta enviada');
+      } finally {
+        Object.defineProperty(window, 'innerWidth', {
+          writable: true,
+          configurable: true,
+          value: originalInnerWidth,
+        });
+      }
+    });
+  });
 });

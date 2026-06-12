@@ -89,6 +89,19 @@ export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
     return [state.selectedStatus];
   },
 
+  /**
+   * MEDIUM-7: Reset status filter only (clears status tab selection)
+   * 
+   * Use case: User clicks "Clear Status Filter" button while keeping search/priority active
+   * Difference from clearAllFilters():
+   *   - resetStatusFilter() → Only sets selectedStatus='all', preserves search & priority
+   *   - clearAllFilters() → Clears ALL filters (search, priority, status)
+   * 
+   * @example
+   * // User has: search="juan" + priority=["Alta"] + status="Nuevo"
+   * store.resetStatusFilter();
+   * // Result: search="juan" + priority=["Alta"] + status="all"
+   */
   resetStatusFilter: () =>
     set({ selectedStatus: 'all' }),
 
