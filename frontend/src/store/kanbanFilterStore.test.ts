@@ -156,3 +156,134 @@ describe('kanbanFilterStore', () => {
     });
   });
 });
+
+// ============================================================
+// E4-S3: Status Filter State Tests
+// ============================================================
+
+describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
+  beforeEach(() => {
+    // Reset store before each test
+    const store = useKanbanFilterStore.getState();
+    store.clearAllFilters();
+    store.resetStatusFilter?.(); // Reset status if method exists
+  });
+
+  describe('Setting selected status', () => {
+    it('should set selectedStatus to a valid status (Nuevo)', () => {
+      const store = useKanbanFilterStore.getState();
+      store.setSelectedStatus('Nuevo');
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+    });
+
+    it('should set selectedStatus to "all"', () => {
+      const store = useKanbanFilterStore.getState();
+      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('all');
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('all');
+    });
+
+    it('should handle multiple status changes', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      store.setSelectedStatus('Nuevo');
+      let { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+      
+      store.setSelectedStatus('En contacto');
+      ({ selectedStatus } = useKanbanFilterStore.getState());
+      expect(selectedStatus).toBe('En contacto');
+      
+      store.setSelectedStatus('Propuesta');
+      ({ selectedStatus } = useKanbanFilterStore.getState());
+      expect(selectedStatus).toBe('Propuesta');
+    });
+  });
+
+  describe('Computing visible columns', () => {
+    it('should return all 4 statuses when selectedStatus is "all"', () => {
+      const store = useKanbanFilterStore.getState();
+      store.setSelectedStatus('all');
+      
+      const { getVisibleColumns } = useKanbanFilterStore.getState();
+      const visible = getVisibleColumns();
+      expect(visible).toEqual(['Nuevo', 'En contacto', 'Propuesta', 'Cerrado']);
+      expect(visible.length).toBe(4);
+    });
+
+    it('should return only "Nuevo" when selectedStatus is "Nuevo"', () => {
+      const store = useKanbanFilterStore.getState();
+      store.setSelectedStatus('Nuevo');
+      
+      const { getVisibleColumns } = useKanbanFilterStore.getState();
+      const visible = getVisibleColumns();
+      expect(visible).toEqual(['Nuevo']);
+      expect(visible.length).toBe(1);
+    });
+
+    it('should return only "Propuesta" when selectedStatus is "Propuesta"', () => {
+      const store = useKanbanFilterStore.getState();
+      store.setSelectedStatus('Propuesta');
+      
+      const { getVisibleColumns } = useKanbanFilterStore.getState();
+      const visible = getVisibleColumns();
+      expect(visible).toEqual(['Propuesta']);
+      expect(visible.length).toBe(1);
+    });
+  });
+
+  describe('Status filter persistence', () => {
+    it('should persist selectedStatus across search changes (AC-2.4)', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      store.setSelectedStatus('Propuesta');
+      store.setSearchQuery('juan');
+      store.setSearchQuery('maria');
+      store.clearSearch();
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Propuesta');
+    });
+
+    it('should not affect search query when status changes', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      store.setSearchQuery('juan');
+      store.setSelectedStatus('Propuesta');
+      
+      const { searchQuery, selectedStatus } = useKanbanFilterStore.getState();
+      expect(searchQuery).toBe('juan');
+      expect(selectedStatus).toBe('Propuesta');
+    });
+
+    it('should not affect priority filters when status changes', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      store.setPriorities(['Alta']);
+      store.setSelectedStatus('Propuesta');
+      
+      const { selectedPriorities, selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedPriorities).toEqual(['Alta']);
+      expect(selectedStatus).toBe('Propuesta');
+    });
+  });
+
+  describe('Triple filter combination', () => {
+    it('should work with search + priority + status filters (AC-3.2)', () => {
+      const store = useKanbanFilterStore.getState();
+      
+      store.setSearchQuery('juan');
+      store.setPriorities(['Alta']);
+      store.setSelectedStatus('Propuesta');
+      
+      const { searchQuery, selectedPriorities, selectedStatus } = useKanbanFilterStore.getState();
+      expect(searchQuery).toBe('juan');
+      expect(selectedPriorities).toEqual(['Alta']);
+      expect(selectedStatus).toBe('Propuesta');
+    });
+  });
+});

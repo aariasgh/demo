@@ -5,6 +5,7 @@
  * Supports drag-drop to change lead status between columns
  * 
  * E4-S1 Integration: Includes SearchFilterHeader for real-time lead filtering
+ * E4-S3 Integration: Includes StatusFilterTabs for status filtering
  */
 
 import { useMemo, useState } from 'react';
@@ -14,6 +15,7 @@ import { useKanbanDragDrop } from '../hooks/useKanbanDragDrop';
 import { useKanbanFilterStore } from '../store/kanbanFilterStore';
 import KanbanColumn from './KanbanColumn';
 import SearchFilterHeader from './SearchFilterHeader';
+import StatusFilterTabs from './StatusFilterTabs';
 import LeadsAtRiskWidget from './LeadsAtRiskWidget';
 import LeadsAtRiskPanel from './LeadsAtRiskPanel';
 import { LEAD_STATUSES } from '../utils/constants';
@@ -22,21 +24,31 @@ import type { Lead } from '../types/lead';
 export default function KanbanBoard() {
   const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
   const { isDragging, handleDragEnd, isPending } = useKanbanDragDrop();
-  const { searchQuery, selectedPriorities } = useKanbanFilterStore();
+  const { searchQuery, selectedPriorities, selectedStatus, getVisibleColumns } = useKanbanFilterStore();
   
   // E4-S2: At-risk leads widget state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
-  // E4-S1: Filter leads based on search + priority filters (AC-4.1: AND logic)
+  // E4-S1 + E4-S3: Filter leads based on search + priority + status filters (AND logic)
   const filteredGroupedLeads = useMemo(() => {
+    const visibleColumns = getVisibleColumns();
     const filtered: Record<string, typeof groupedLeads[keyof typeof groupedLeads]> = {};
-    const searchLower = searchQuery.toLowerCase(); // PATCH #2: Move outside loop for performance
+    const searchLower = searchQuery.toLowerCase();
+
+    // Initialize filtered object with visible columns only (E4-S3: AC-2.1)
+    visibleColumns.forEach((status) => {
+      filtered[status] = [];
+    });
 
     Object.entries(groupedLeads).forEach(([status, leads]) => {
-      filtered[status] = leads.filter((lead: Lead) => {  // PATCH #1: Type safety - change lead: any to lead: Lead
+      // Only process if this status is in visible columns (E4-S3: AC-2.1)
+      if (!visibleColumns.includes(status as any)) {
+        return;
+      }
+
+      filtered[status] = leads.filter((lead: Lead) => {
         // AC-1.3: Search in 3 fields (name, company, email)
         // AC-1.4: Case-insensitive search
-        // Defensive null/undefined checks to prevent crashes
         const matchesSearch =
           searchQuery === '' ||
           (lead.name?.toLowerCase?.().includes(searchLower) ?? false) ||
@@ -48,18 +60,23 @@ export default function KanbanBoard() {
           selectedPriorities.length === 0 ||
           (lead.priority && selectedPriorities.includes(lead.priority));
 
-        // AC-4.1: AND logic (both search AND filter must match)
+        // AC-4.1: AND logic (search AND priority AND status must all match)
         return matchesSearch && matchesPriority;
       });
     });
 
     return filtered;
-  }, [groupedLeads, searchQuery, selectedPriorities]);
+  }, [groupedLeads, searchQuery, selectedPriorities, selectedStatus, getVisibleColumns]);
 
   // AC-4.3: Calculate filtered totals
   const filteredTotalLeads = useMemo(() => {
     return Object.values(filteredGroupedLeads).reduce((sum, leads) => sum + leads.length, 0);
   }, [filteredGroupedLeads]);
+
+  // E4-S3: Get visible columns for rendering
+  const visibleColumns = useMemo(() => {
+    return getVisibleColumns();
+  }, [getVisibleColumns]);
 
   if (isLoading) {
     return (
@@ -97,6 +114,11 @@ export default function KanbanBoard() {
     <div className="min-h-screen bg-gray-50">
       {/* E4-S1: SearchFilterHeader — AC-1.1: Sticky header above Kanban */}
       <SearchFilterHeader />
+
+      {/* E4-S3: StatusFilterTabs — AC-1.1: Sticky tabs below search header */}
+      <div className="px-4 md:px-6">
+        <StatusFilterTabs />
+      </div>
 
       <div className="p-4 md:p-6">
         {/* AC-12: Accessibility - Live region for status updates */}
@@ -151,6 +173,8 @@ export default function KanbanBoard() {
               - Mobile (default): grid-cols-1 (stacked vertically)
               - Tablet (md:): grid-cols-2 (2x2 grid)
               - Desktop (lg:): grid-cols-4 (1x4 grid)
+              
+              E4-S3: Only render visible columns based on selectedStatus filter
             */}
             <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative transition-opacity duration-300">
               {/* Overlay during drag sync */}
@@ -163,7 +187,8 @@ export default function KanbanBoard() {
                 </div>
               )}
 
-              {LEAD_STATUSES.map((status) => (
+              {/* E4-S3: Render only visible columns (AC-2.1: Show 1 or 4 columns) */}
+              {visibleColumns.map((status) => (
                 <KanbanColumn
                   key={status}
                   status={status}
