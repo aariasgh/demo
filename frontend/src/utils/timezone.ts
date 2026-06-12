@@ -63,11 +63,11 @@ export function calculateDaysDifference(
   const date = new Date(dateString);
   const ref = referenceDate || new Date();
 
-  // Reset times to midnight to get full day difference
-  date.setHours(0, 0, 0, 0);
-  ref.setHours(0, 0, 0, 0);
+  // Calculate days in UTC to avoid timezone-based off-by-one errors
+  const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const refUTC = Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(), ref.getUTCDate());
 
-  const diffMs = ref.getTime() - date.getTime();
+  const diffMs = refUTC - dateUTC;
   return Math.floor(diffMs / (1000 * 60 * 60 * 24));
 }
 
@@ -90,6 +90,10 @@ export function getCurrentTimeISO(): string {
  * Useful for showing how long a lead hasn't changed status
  */
 export function formatDuration(days: number): string {
+  // Guard against negative/invalid values
+  if (days < 0) {
+    return 'Fecha inválida';
+  }
   if (days === 0) {
     return 'Hoy';
   }
@@ -102,7 +106,7 @@ export function formatDuration(days: number): string {
   const weeks = Math.floor(days / 7);
   const remainingDays = days % 7;
   if (remainingDays === 0) {
-    return `${weeks} semana${weeks === 1 ? '' : 's'}`;
+    return `${weeks}w`;
   }
   return `${weeks}w ${remainingDays}d`;
 }

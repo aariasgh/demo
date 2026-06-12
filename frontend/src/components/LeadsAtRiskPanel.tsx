@@ -36,15 +36,22 @@ export default function LeadsAtRiskPanel({
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const isMountedRef = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchAtRiskLeads = useCallback(async () => {
     if (!isMountedRef.current) return;
 
     try {
+      // Cancel previous fetch if component unmounts during fetch
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+      
       setIsLoading(true);
       setError(null);
       
-      const response = await fetchWithRetry('/api/leads/at-risk', {}, {
+      const response = await fetchWithRetry('/api/leads/at-risk', { signal: abortControllerRef.current.signal }, {
         maxAttempts: 3,
         baseDelayMs: 500,
         backoffMultiplier: 2,
@@ -95,6 +102,10 @@ export default function LeadsAtRiskPanel({
 
     return () => {
       isMountedRef.current = false;
+      // Clean up abort controller on unmount
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
     };
   }, [isOpen, fetchAtRiskLeads]);
 
@@ -168,6 +179,27 @@ export default function LeadsAtRiskPanel({
                   className="p-4 hover:bg-red-50 cursor-pointer transition-colors border-l-4 border-red-600"
                 >
                   {/* Lead name - prominent */}
+                  <p className="font-bold text-gray-900">{lead.name}</p>
+                  
+                  {/* Company */}
+                  <p className="text-sm text-gray-600">{lead.company || 'Sin empresa'}</p>
+                  
+                  {/* Days without change - RED & BOLD */}
+                  <p className="text-sm font-bold text-red-600 mt-2">
+                    Sin cambios: {formatDuration(lead.days_without_change || 0)}
+                  </p>
+                  
+                  {/* Status badge */}
+                  <span className="inline-block mt-2 px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded">
+                    {lead.status || 'Sin estado'}
+                  </span>
+                  
+                  {/* Email - SAFE NULL CHECK */}
+                  {lead.email && (
+                    <p className="text-xs text-gray-500 mt-2">{lead.email}</p>
+                  )}
+                </div>
+              ))}
                   <p className="font-semibold text-gray-900 mb-1">{lead.name}</p>
                   
                   {/* Company */}

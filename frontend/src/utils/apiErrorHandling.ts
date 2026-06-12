@@ -117,10 +117,14 @@ export async function fetchWithRetry(
 
   for (let attempt = 0; attempt < config.maxAttempts; attempt++) {
     try {
+      // Create AbortController with timeout (polyfill: manual timeout for older browsers)
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 30000);
+      
       const response = await fetch(url, {
         ...options,
-        signal: AbortSignal.timeout(30000), // 30 second timeout
-      });
+        signal: abortController.signal,
+      }).finally(() => clearTimeout(timeoutId));
 
       if (response.ok) {
         return response;
@@ -131,7 +135,7 @@ export async function fetchWithRetry(
 
       // Don't retry on client errors (4xx)
       if (!error.isRetryable) {
-        throw response;
+        throw error;
       }
 
       // Last attempt, don't sleep

@@ -461,15 +461,15 @@ async def get_leads_at_risk(
         RISK_THRESHOLD_DAYS = 7
         risk_threshold_ts = datetime.now(timezone.utc) - timedelta(days=RISK_THRESHOLD_DAYS)
         
-        # Query: leads where last_status_change_at <= 7 days ago, excluding "Cerrado"
-        # Order by last_status_change_at ASC (oldest first = most days without change)
+        # Query: leads where last_status_change_at <= 7 days ago, excluding "Cerrado" (case-insensitive)
+        # Order by last_status_change_at ASC (oldest first = leads with most days without status change)
         stmt = (
             select(Lead)
             .where(
                 (Lead.last_status_change_at <= risk_threshold_ts) &
-                (Lead.status != LeadStatus.CERRADO.value)
+                (func.lower(Lead.status) != 'cerrado')  # Case-insensitive match
             )
-            .order_by(Lead.last_status_change_at.asc())  # Oldest first
+            .order_by(Lead.last_status_change_at.asc())  # Oldest first = most days
         )
         
         result = await db.execute(stmt)
@@ -484,14 +484,15 @@ async def get_leads_at_risk(
             time_diff = now - lead.last_status_change_at
             days_without_change = time_diff.days  # Python timedelta.days already floors
             
+            # Defensive field access to ensure all fields exist
             response_leads.append({
                 "id": lead.id,
-                "name": lead.name,
-                "company": lead.company,
-                "email": lead.email,
-                "status": lead.status,
-                "priority": getattr(lead, "priority", None),  # If priority field exists
-                "days_without_change": days_without_change,
+                "name": lead.name or "Sin nombre",
+                "company": lead.company or "Sin empresa",
+                "email": lead.email,  # Can be NULL, frontend handles safely
+                "status": lead.status or "Sin estado",
+                "priority": getattr(lead, "priority", None),  # Optional field
+                "days_without_change": max(0, days_without_change),  # Guard against negatives
                 "created_at": lead.created_at,
                 "last_status_change_at": lead.last_status_change_at,
             })

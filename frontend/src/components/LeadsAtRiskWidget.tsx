@@ -32,6 +32,7 @@ export default function LeadsAtRiskWidget({ onOpenPanel }: LeadsAtRiskWidgetProp
   const [retryCount, setRetryCount] = useState(0);
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMountedRef = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Fetch at-risk leads from backend with retry logic
   const fetchAtRiskLeads = useCallback(async () => {
@@ -95,6 +96,7 @@ export default function LeadsAtRiskWidget({ onOpenPanel }: LeadsAtRiskWidgetProp
 
   // AC-6.3: Auto-refresh every 5 minutes (300000 ms)
   // Phase 5: Enhanced auto-refresh with verification
+  // Note: Do NOT include fetchAtRiskLeads in dependencies to prevent interval recreation
   useEffect(() => {
     isMountedRef.current = true;
 
@@ -116,7 +118,7 @@ export default function LeadsAtRiskWidget({ onOpenPanel }: LeadsAtRiskWidgetProp
         clearInterval(refreshIntervalRef.current);
       }
     };
-  }, [fetchAtRiskLeads]);
+  }, []);
 
   const count = atRiskLeads.length;
 
