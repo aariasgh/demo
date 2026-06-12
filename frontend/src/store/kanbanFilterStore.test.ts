@@ -180,7 +180,7 @@ describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
 
     it('should set selectedStatus to "all"', () => {
       const store = useKanbanFilterStore.getState();
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       store.setSelectedStatus('all');
       
       const { selectedStatus } = useKanbanFilterStore.getState();
@@ -198,9 +198,9 @@ describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
       ({ selectedStatus } = useKanbanFilterStore.getState());
       expect(selectedStatus).toBe('En contacto');
       
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       ({ selectedStatus } = useKanbanFilterStore.getState());
-      expect(selectedStatus).toBe('Propuesta');
+      expect(selectedStatus).toBe('Propuesta enviada');
     });
   });
 
@@ -211,7 +211,7 @@ describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
       
       const { getVisibleColumns } = useKanbanFilterStore.getState();
       const visible = getVisibleColumns();
-      expect(visible).toEqual(['Nuevo', 'En contacto', 'Propuesta', 'Cerrado']);
+      expect(visible).toEqual(['Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado']);
       expect(visible.length).toBe(4);
     });
 
@@ -225,13 +225,13 @@ describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
       expect(visible.length).toBe(1);
     });
 
-    it('should return only "Propuesta" when selectedStatus is "Propuesta"', () => {
+    it('should return only "Propuesta enviada" when selectedStatus is "Propuesta enviada"', () => {
       const store = useKanbanFilterStore.getState();
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       
       const { getVisibleColumns } = useKanbanFilterStore.getState();
       const visible = getVisibleColumns();
-      expect(visible).toEqual(['Propuesta']);
+      expect(visible).toEqual(['Propuesta enviada']);
       expect(visible.length).toBe(1);
     });
   });
@@ -240,35 +240,35 @@ describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
     it('should persist selectedStatus across search changes (AC-2.4)', () => {
       const store = useKanbanFilterStore.getState();
       
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       store.setSearchQuery('juan');
       store.setSearchQuery('maria');
       store.clearSearch();
       
       const { selectedStatus } = useKanbanFilterStore.getState();
-      expect(selectedStatus).toBe('Propuesta');
+      expect(selectedStatus).toBe('Propuesta enviada');
     });
 
     it('should not affect search query when status changes', () => {
       const store = useKanbanFilterStore.getState();
       
       store.setSearchQuery('juan');
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       
       const { searchQuery, selectedStatus } = useKanbanFilterStore.getState();
       expect(searchQuery).toBe('juan');
-      expect(selectedStatus).toBe('Propuesta');
+      expect(selectedStatus).toBe('Propuesta enviada');
     });
 
     it('should not affect priority filters when status changes', () => {
       const store = useKanbanFilterStore.getState();
       
       store.setPriorities(['Alta']);
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       
       const { selectedPriorities, selectedStatus } = useKanbanFilterStore.getState();
       expect(selectedPriorities).toEqual(['Alta']);
-      expect(selectedStatus).toBe('Propuesta');
+      expect(selectedStatus).toBe('Propuesta enviada');
     });
   });
 
@@ -278,12 +278,12 @@ describe('kanbanFilterStore - Status Filter (E4-S3)', () => {
       
       store.setSearchQuery('juan');
       store.setPriorities(['Alta']);
-      store.setSelectedStatus('Propuesta');
+      store.setSelectedStatus('Propuesta enviada');
       
       const { searchQuery, selectedPriorities, selectedStatus } = useKanbanFilterStore.getState();
       expect(searchQuery).toBe('juan');
       expect(selectedPriorities).toEqual(['Alta']);
-      expect(selectedStatus).toBe('Propuesta');
+      expect(selectedStatus).toBe('Propuesta enviada');
     });
   });
 });
