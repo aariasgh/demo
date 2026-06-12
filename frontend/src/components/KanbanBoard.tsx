@@ -8,7 +8,7 @@
  * E4-S3 Integration: Includes StatusFilterTabs for status filtering
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { useLeadsByStatus } from '../hooks/useLeadsByStatus';
 import { useKanbanDragDrop } from '../hooks/useKanbanDragDrop';
@@ -27,6 +27,38 @@ export default function KanbanBoard() {
   
   // E4-S2: At-risk leads widget state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  /**
+   * BAJO-11: Loading/Transition State During Filter Changes
+   * 
+   * When user rapidly changes filters, briefly fade the grid to provide visual feedback
+   * that filtering is happening. This is especially noticeable on slow devices.
+   * 
+   * Implementation: Track filter changes with refs and apply CSS transition for smooth effect
+   */
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const prevStatusRef = useRef(selectedStatus);
+  const prevSearchRef = useRef(searchQuery);
+  const prevPrioritiesRef = useRef(selectedPriorities);
+
+  useEffect(() => {
+    // Detect any filter change (status, search, or priority)
+    const statusChanged = selectedStatus !== prevStatusRef.current;
+    const searchChanged = searchQuery !== prevSearchRef.current;
+    const prioritiesChanged = JSON.stringify(selectedPriorities) !== JSON.stringify(prevPrioritiesRef.current);
+
+    if (statusChanged || searchChanged || prioritiesChanged) {
+      // Briefly show transition effect
+      setIsTransitioning(true);
+      const timer = setTimeout(() => {
+        prevStatusRef.current = selectedStatus;
+        prevSearchRef.current = searchQuery;
+        prevPrioritiesRef.current = selectedPriorities;
+        setIsTransitioning(false);
+      }, 150); // 150ms fade effect
+      return () => clearTimeout(timer);
+    }
+  }, [selectedStatus, searchQuery, selectedPriorities]);
 
   /**
    * MEDIUM-8: Triple Filter Pipeline with AND Logic
@@ -208,8 +240,12 @@ export default function KanbanBoard() {
               - Desktop (lg:): grid-cols-4 (1x4 grid)
               
               E4-S3: Only render visible columns based on selectedStatus filter
+              
+              BAJO-11: Apply fade transition when filters change for visual feedback
             */}
-            <div className="grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative transition-opacity duration-300">
+            <div className={`grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative transition-opacity duration-300 ${
+              isTransitioning ? 'opacity-60' : 'opacity-100'
+            }`}>
               {/* Overlay during drag sync */}
               {isDragging && (
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none backdrop-blur-sm">

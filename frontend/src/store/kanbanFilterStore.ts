@@ -38,6 +38,11 @@ interface KanbanFilterState {
 
   // Computed: Check if any filter is active
   hasActiveFilters: () => boolean;
+
+  // BAJO-12: Undo/Redo for filter changes
+  previousStatus: LeadStatus | 'all' | null;
+  undoStatusFilter: () => void;
+  canUndo: () => boolean;
 }
 
 const ALL_STATUSES: LeadStatus[] = ['Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado'];
@@ -47,6 +52,7 @@ export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
   searchQuery: '',
   selectedPriorities: [],
   selectedStatus: 'all',  // E4-S3: Start with "all" (show all columns)
+  previousStatus: null,   // BAJO-12: Track previous status for undo
 
   // Search actions
   setSearchQuery: (query: string) =>
@@ -73,8 +79,12 @@ export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
     set({ selectedPriorities: [] }),
 
   // Status filter actions (E4-S3)
+  // BAJO-12: Track previous status when changing status
   setSelectedStatus: (status: LeadStatus | 'all') =>
-    set({ selectedStatus: status }),
+    set((state) => ({
+      previousStatus: state.selectedStatus,
+      selectedStatus: status,
+    })),
 
   getVisibleColumns: () => {
     const state = get();
@@ -105,12 +115,45 @@ export const useKanbanFilterStore = create<KanbanFilterState>((set, get) => ({
   resetStatusFilter: () =>
     set({ selectedStatus: 'all' }),
 
+  /**
+   * BAJO-12: Undo last status filter change
+   * 
+   * Reverts to the previous status selection (only tracks last change)
+   * Does not track search or priority filter undo
+   * 
+   * @example
+   * store.setSelectedStatus('Nuevo');
+   * store.setSelectedStatus('Cerrado');
+   * store.undoStatusFilter(); // Back to 'Nuevo'
+   */
+  undoStatusFilter: () =>
+    set((state) => {
+      if (state.previousStatus !== null) {
+        return {
+          previousStatus: state.selectedStatus,
+          selectedStatus: state.previousStatus,
+        };
+      }
+      return state;
+    }),
+
+  /**
+   * BAJO-12: Check if undo is available
+   * 
+   * Returns true if there is a previous status to revert to
+   */
+  canUndo: () => {
+    const state = get();
+    return state.previousStatus !== null;
+  },
+
   // Combined reset
   clearAllFilters: () =>
     set({ 
       searchQuery: '', 
       selectedPriorities: [],
-      selectedStatus: 'all'  // E4-S3: Reset status filter too
+      selectedStatus: 'all',  // E4-S3: Reset status filter too
+      previousStatus: null,   // BAJO-12: Clear undo history
     }),
 
   // Computed helpers

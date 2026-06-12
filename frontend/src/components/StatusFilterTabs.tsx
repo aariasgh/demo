@@ -9,31 +9,35 @@
  * - AC-1.4: Active tab has visual indicator (underline + color)
  * - AC-2.1-2.4: Click filtering + idempotency
  * - AC-4.2: Touch support via React onClick
+ * - BAJO-13: Tab descriptions for screen readers
  */
 
 import { useKanbanFilterStore, type LeadStatus } from '../store/kanbanFilterStore';
 
 const TABS = [
-  { value: 'all' as const, label: 'Todos', index: 0 },
-  { value: 'Nuevo' as const, label: 'Nuevo', index: 1 },
-  { value: 'En contacto' as const, label: 'En contacto', index: 2 },
-  { value: 'Propuesta enviada' as const, label: 'Propuesta', index: 3 },  // CRÍTICO-2: Fixed backend mismatch ('Propuesta enviada')
-  { value: 'Cerrado' as const, label: 'Cerrado', index: 4 },
+  { value: 'all' as const, label: 'Todos', index: 0, description: 'Mostrar todos los leads sin filtrar' },
+  { value: 'Nuevo' as const, label: 'Nuevo', index: 1, description: 'Mostrar solo leads en estado Nuevo' },
+  { value: 'En contacto' as const, label: 'En contacto', index: 2, description: 'Mostrar solo leads en estado En contacto' },
+  { value: 'Propuesta enviada' as const, label: 'Propuesta', index: 3, description: 'Mostrar solo leads en estado Propuesta enviada' },  // CRÍTICO-2: Fixed backend mismatch ('Propuesta enviada')
+  { value: 'Cerrado' as const, label: 'Cerrado', index: 4, description: 'Mostrar solo leads en estado Cerrado' },
 ];
 
 export default function StatusFilterTabs() {
   const { selectedStatus, setSelectedStatus } = useKanbanFilterStore();
 
   // AC-2.1: Handle tab click (idempotent - clicking active tab does nothing)
+  // BAJO-14: Track filter usage analytics
   const handleTabClick = (status: LeadStatus | 'all') => {
     setSelectedStatus(status);
+    // Optional: Track analytics event (future implementation)
+    // analytics?.event('filter_status_changed', { status, timestamp: new Date().toISOString() });
   };
 
   // AC-5.1: Keyboard navigation - Enter, Space, Arrow keys support
   // CRÍTICO-1: Implement Arrow key navigation (LEFT/RIGHT with wrapping)
   // ALTO-1: Replace onKeyPress (deprecated) with onKeyDown
   // ALTO-6: Add Space key support for standard button behavior
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, tab: { value: LeadStatus | 'all', index: number }) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, tab: typeof TABS[0]) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setSelectedStatus(tab.value);
@@ -72,6 +76,7 @@ export default function StatusFilterTabs() {
             role="tab"
             aria-pressed={isActive}
             aria-label={`Filtrar por ${tab.label}`}
+            aria-description={tab.description}
             className={`
               px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
               transition-colors duration-200 flex-shrink-0
