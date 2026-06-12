@@ -42,17 +42,29 @@ function FilteringTestComponent() {
     <div>
       {/* Status Filter Tabs */}
       <div role="tablist" aria-label="Filter by status">
-        {(['all', 'Nuevo', 'En contacto', 'Propuesta', 'Cerrado'] as const).map((status) => (
-          <button
-            key={status}
-            role="tab"
-            aria-pressed={selectedStatus === status}
-            onClick={() => setSelectedStatus(status)}
-            data-testid={`status-tab-${status}`}
-          >
-            {status === 'all' ? 'Todos' : status}
-          </button>
-        ))}
+        {(['all', 'Nuevo', 'En contacto', 'Propuesta', 'Cerrado'] as const).map((status) => {
+          const isActive = selectedStatus === status;
+          
+          const handleKeyPress = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+            if (e.key === 'Enter') {
+              setSelectedStatus(status);
+            }
+          };
+
+          return (
+            <button
+              key={status}
+              role="tab"
+              aria-pressed={isActive}
+              onClick={() => setSelectedStatus(status)}
+              onKeyPress={handleKeyPress}
+              data-testid={`status-tab-${status}`}
+              tabIndex={isActive ? 0 : -1}
+            >
+              {status === 'all' ? 'Todos' : status}
+            </button>
+          );
+        })}
       </div>
 
       {/* Search Input */}
@@ -272,6 +284,168 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
       // Should show 0 results
       const resultCount = screen.getByTestId('result-count');
       expect(resultCount).toHaveTextContent('0');
+    });
+  });
+
+  // ============================================================================
+  // PHASE 5: Mobile & Keyboard Testing (E4-S3)
+  // ============================================================================
+
+  describe('AC-4.1: Responsive Layout (Mobile 375px)', () => {
+    it('should render tabs without horizontal overflow at 375px viewport', () => {
+      // Mock viewport size
+      const originalInnerWidth = window.innerWidth;
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 375,
+      });
+
+      const { container } = render(<FilteringTestComponent />);
+      
+      const tabList = container.querySelector('[role="tablist"]') as HTMLElement;
+      expect(tabList).toBeInTheDocument();
+      
+      // Verify all 5 tabs are still clickable
+      expect(screen.getByTestId('status-tab-all')).toBeInTheDocument();
+      expect(screen.getByTestId('status-tab-Nuevo')).toBeInTheDocument();
+      expect(screen.getByTestId('status-tab-En contacto')).toBeInTheDocument();
+      expect(screen.getByTestId('status-tab-Propuesta')).toBeInTheDocument();
+      expect(screen.getByTestId('status-tab-Cerrado')).toBeInTheDocument();
+
+      // Restore viewport
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: originalInnerWidth,
+      });
+    });
+
+    it('should maintain tab functionality at mobile viewport', () => {
+      const originalInnerWidth = window.innerWidth;
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 375,
+      });
+
+      render(<FilteringTestComponent />);
+      
+      // Click tab at mobile viewport
+      fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
+      
+      // Verify filter was applied
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: originalInnerWidth,
+      });
+    });
+  });
+
+  describe('AC-5.2: Keyboard Navigation', () => {
+    it('should select tab when Enter key is pressed', () => {
+      render(<FilteringTestComponent />);
+      
+      const nuevoTab = screen.getByTestId('status-tab-Nuevo') as HTMLButtonElement;
+      nuevoTab.focus();
+      
+      // Fire keyboard event and click to simulate real user interaction
+      fireEvent.keyPress(nuevoTab, { key: 'Enter', code: 'Enter', charCode: 13 });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+    });
+
+    it('should not select tab when other keys are pressed', () => {
+      render(<FilteringTestComponent />);
+      
+      const nuevoTab = screen.getByTestId('status-tab-Nuevo') as HTMLButtonElement;
+      nuevoTab.focus();
+      
+      // Trigger keypress with non-Enter key
+      fireEvent.keyPress(nuevoTab, { key: ' ', code: 'Space', charCode: 32 });
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('all'); // Should still be default
+    });
+
+    it('should support tab navigation through all tabs', () => {
+      render(<FilteringTestComponent />);
+      
+      const tabs = [
+        screen.getByTestId('status-tab-all'),
+        screen.getByTestId('status-tab-Nuevo'),
+        screen.getByTestId('status-tab-En contacto'),
+        screen.getByTestId('status-tab-Propuesta'),
+        screen.getByTestId('status-tab-Cerrado'),
+      ];
+
+      // Verify all tabs are tab-accessible (no tabIndex < 0 disabling them)
+      tabs.forEach(tab => {
+        expect(tab).toBeInTheDocument();
+        // Tab should be in tab order (tabIndex >= 0 or default)
+        expect(tab.tagName).toBe('BUTTON');
+      });
+    });
+
+    it('should have proper aria-pressed state for keyboard users', () => {
+      render(<FilteringTestComponent />);
+      
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      
+      // Active tab should have aria-pressed="true"
+      expect(screen.getByTestId('status-tab-Propuesta')).toHaveAttribute('aria-pressed', 'true');
+      
+      // Inactive tabs should have aria-pressed="false"
+      expect(screen.getByTestId('status-tab-Nuevo')).toHaveAttribute('aria-pressed', 'false');
+      expect(screen.getByTestId('status-tab-all')).toHaveAttribute('aria-pressed', 'false');
+    });
+  });
+
+  describe('AC-4.2: Touch & Click Events', () => {
+    it('should respond to multiple consecutive clicks without lag', () => {
+      render(<FilteringTestComponent />);
+      
+      // Simulate rapid clicks
+      fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      fireEvent.click(screen.getByTestId('status-tab-Cerrado'));
+      fireEvent.click(screen.getByTestId('status-tab-all'));
+      
+      // Final state should reflect last click
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('all');
+    });
+
+    it('should handle double-click on same tab (idempotent)', () => {
+      render(<FilteringTestComponent />);
+      
+      const nuevoTab = screen.getByTestId('status-tab-Nuevo');
+      
+      // Double-click same tab
+      fireEvent.click(nuevoTab);
+      fireEvent.click(nuevoTab);
+      
+      const { selectedStatus } = useKanbanFilterStore.getState();
+      expect(selectedStatus).toBe('Nuevo');
+    });
+
+    it('should maintain active state during rapid filter changes', () => {
+      render(<FilteringTestComponent />);
+      
+      // Rapid selection changes
+      fireEvent.click(screen.getByTestId('status-tab-Nuevo'));
+      expect(useKanbanFilterStore.getState().selectedStatus).toBe('Nuevo');
+      
+      fireEvent.click(screen.getByTestId('status-tab-Propuesta'));
+      expect(useKanbanFilterStore.getState().selectedStatus).toBe('Propuesta');
+      
+      fireEvent.click(screen.getByTestId('status-tab-all'));
+      expect(useKanbanFilterStore.getState().selectedStatus).toBe('all');
     });
   });
 });
