@@ -39,7 +39,7 @@ async def startup():
     """Initialize application on startup with error handling"""
     try:
         logger.info("🚀 Backend starting...")
-        # Additional startup logic (DB init, etc) can go here
+        # Migrations are run via Docker CMD before Uvicorn starts
         logger.info("✅ Backend started successfully")
     except Exception as e:
         logger.error(f"❌ Startup failed: {e}")

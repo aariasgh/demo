@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/leads", tags=["leads"])
 
 @router.get("", response_model=LeadListResponse, status_code=status.HTTP_200_OK)
 async def list_leads(
-    status: LeadStatus | None = Query(default=None, description="Filter by lead status"),
+    status_filter: LeadStatus | None = Query(default=None, description="Filter by lead status"),
     limit: int = Query(default=100, ge=1, le=1000, description="Number of leads to return"),
     offset: int = Query(default=0, ge=0, description="Number of leads to skip"),
     db: AsyncSession = Depends(get_db),
@@ -44,8 +44,8 @@ async def list_leads(
         base_stmt = select(Lead)
         count_stmt = select(func.count()).select_from(Lead)
 
-        if status is not None:
-            status_value = status.value if isinstance(status, LeadStatus) else status
+        if status_filter is not None:
+            status_value = status_filter.value if isinstance(status_filter, LeadStatus) else status_filter
             base_stmt = base_stmt.where(Lead.status == status_value)
             count_stmt = count_stmt.where(Lead.status == status_value)
 
@@ -67,7 +67,7 @@ async def list_leads(
     except Exception as exc:
         logger.error(
             "Unexpected error listing leads",
-            extra={"error": str(exc), "status_filter": status, "limit": limit, "offset": offset},
+            extra={"error": str(exc), "status_filter": status_filter, "limit": limit, "offset": offset},
             exc_info=True,
         )
         raise HTTPException(

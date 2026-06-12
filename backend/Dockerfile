@@ -42,5 +42,5 @@ ENV PYTHONUNBUFFERED=1 \
 HEALTHCHECK --interval=10s --timeout=5s --retries=3 --start-period=30s \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# Run Uvicorn with conditional auto-reload based on ENVIRONMENT variable
-CMD ["sh", "-c", "if [ \"$ENVIRONMENT\" = \"development\" ]; then uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload; else uvicorn app.main:app --host 0.0.0.0 --port 8000; fi"]
+# Run migrations and then start Uvicorn with conditional auto-reload based on ENVIRONMENT variable
+CMD ["sh", "-c", "alembic upgrade head && if [ \"$ENVIRONMENT\" = \"development\" ]; then uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload; else uvicorn app.main:app --host 0.0.0.0 --port 8000; fi"]

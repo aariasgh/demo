@@ -68,12 +68,22 @@ export const useKanbanDragDrop = () => {
       const previousLeads = queryClient.getQueryData(['leads']);
 
       // Optimistic update: immediately update the UI
-      queryClient.setQueryData(['leads'], (old: any) => ({
-        ...old,
-        data: old.data.map((lead: any) =>
+      // NOTE: useLeads stores an array directly, not { data: [...] }
+      queryClient.setQueryData(['leads'], (old: any) => {
+        console.log('🔄 onMutate - old data:', old, 'type:', Array.isArray(old) ? 'array' : typeof old);
+        
+        // Defensive check: ensure old data is an array
+        if (!Array.isArray(old)) {
+          console.log('⚠️ Cannot perform optimistic update: expected array but got', typeof old);
+          return old;
+        }
+
+        const updated = old.map((lead: any) =>
           lead.id === id ? { ...lead, status: newStatus } : lead
-        ),
-      }));
+        );
+        console.log('✅ Optimistic update completed, updated', updated.length, 'leads');
+        return updated;
+      });
 
       return { previousLeads };
     },
@@ -96,9 +106,12 @@ export const useKanbanDragDrop = () => {
       }
     },
 
-    onSuccess: (_data, { newStatus }) => {
+    onSuccess: (data, { newStatus }) => {
+      console.log('✅ Mutation success:', data);
+      // Invalidate leads query to refetch with new status
+      // This ensures UI updates with server-confirmed data
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
       toast.success(`Lead movido a "${newStatus}"`);
-      // Data already updated optimistically
     },
 
     retry: (failureCount) => {
@@ -111,22 +124,26 @@ export const useKanbanDragDrop = () => {
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, draggableId } = result;
 
+    console.log('🎯 handleDragEnd called with:', { source, destination, draggableId });
+
     // H1.1: Validate draggable ID format before parsing
     const idMatch = draggableId.match(DRAGGABLE_ID_PATTERN);
     if (!idMatch || !idMatch[1]) {
-      console.error(`Invalid draggable ID format: ${draggableId}`);
+      console.error(`❌ Invalid draggable ID format: ${draggableId}`);
       toast.error('Error interno: ID inválido');
       return;
     }
     const leadId = parseInt(idMatch[1], 10);
     if (isNaN(leadId)) {
-      console.error(`Failed to parse lead ID from: ${draggableId}`);
+      console.error(`❌ Failed to parse lead ID from: ${draggableId}`);
       toast.error('Error interno: No se pudo procesar el lead');
       return;
     }
+    console.log(`✅ Parsed lead ID: ${leadId}`);
 
     // No destination: drag cancelled
     if (!destination) {
+      console.log('⚠️  No destination - drag cancelled');
       return;
     }
 
@@ -135,6 +152,7 @@ export const useKanbanDragDrop = () => {
       source.droppableId === destination.droppableId &&
       source.index === destination.index
     ) {
+      console.log('⚠️  Same position - no change needed');
       return;
     }
 
@@ -144,24 +162,40 @@ export const useKanbanDragDrop = () => {
     // Same column = just reorder (no status change, no API call)
     // TODO: Persist reordering in future epic
     if (oldStatus === newStatus) {
+      console.log(`⚠️  Same column (${oldStatus}) - no API call`);
       return;
     }
 
+    console.log(`📊 Status change: ${oldStatus} → ${newStatus}`);
+
     // H1.3: Validate status before mutation
     if (!LEAD_STATUSES.includes(newStatus as LeadStatus)) {
-      console.error(`Invalid status destination: ${newStatus}`);
+      console.error(`❌ Invalid status destination: ${newStatus}`);
+      console.log(`Available statuses: ${LEAD_STATUSES.join(', ')}`);
       toast.error('Destino inválido');
       return;
     }
 
+    console.log(`✅ Status "${newStatus}" is valid`);
+
     // Disable dragging during sync
     setIsDragging(true);
+    console.log('⏳ Starting mutation...');
 
     // Trigger mutation with validated status
     changeStatusMutation.mutate(
       { id: leadId, newStatus: newStatus as LeadStatus },
       {
-        onSettled: () => setIsDragging(false),
+        onSettled: () => {
+          console.log('✅ Mutation settled');
+          setIsDragging(false);
+        },
+        onError: (error) => {
+          console.error('❌ Mutation error:', error);
+        },
+        onSuccess: (data) => {
+          console.log('✅ Mutation success:', data);
+        }
       }
     );
   };
