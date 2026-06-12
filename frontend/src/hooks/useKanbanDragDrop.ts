@@ -34,7 +34,7 @@ export const useKanbanDragDrop = () => {
       return fetch(`/api/leads/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ new_status: newStatus }),
         signal: controller.signal,
       })
         .then((r) => {
