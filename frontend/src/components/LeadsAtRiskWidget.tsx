@@ -32,7 +32,6 @@ export default function LeadsAtRiskWidget({ onOpenPanel }: LeadsAtRiskWidgetProp
   const [retryCount, setRetryCount] = useState(0);
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMountedRef = useRef(true);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Fetch at-risk leads from backend with retry logic
   const fetchAtRiskLeads = useCallback(async () => {

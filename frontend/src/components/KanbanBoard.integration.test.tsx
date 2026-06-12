@@ -16,11 +16,11 @@ function FilteringTestComponent() {
   const { selectedStatus, searchQuery, selectedPriorities, getVisibleColumns, setSelectedStatus, setSearchQuery, setPriorities } = useKanbanFilterStore();
 
   const mockLeads = [
-    { id: 1, name: 'juan', status: 'Nuevo' as const, priority: 'Alta' },
-    { id: 2, name: 'maria', status: 'En contacto' as const, priority: 'Media' },
-    { id: 3, name: 'juan', status: 'Propuesta' as const, priority: 'Alta' },
-    { id: 4, name: 'carlos', status: 'Propuesta' as const, priority: 'Urgente' },
-    { id: 5, name: 'juan', status: 'Cerrado' as const, priority: 'Baja' },
+    { id: 1, name: 'juan', status: 'Nuevo' as const, priority: 'Alta' as const },
+    { id: 2, name: 'maria', status: 'En contacto' as const, priority: 'Media' as const },
+    { id: 3, name: 'juan', status: 'Propuesta' as const, priority: 'Alta' as const },
+    { id: 4, name: 'carlos', status: 'Propuesta' as const, priority: 'Urgente' as const },
+    { id: 5, name: 'juan', status: 'Cerrado' as const, priority: 'Baja' as const },
   ];
 
   // Filter leads by all 3 criteria (search AND priority AND status)

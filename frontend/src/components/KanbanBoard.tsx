@@ -18,7 +18,6 @@ import SearchFilterHeader from './SearchFilterHeader';
 import StatusFilterTabs from './StatusFilterTabs';
 import LeadsAtRiskWidget from './LeadsAtRiskWidget';
 import LeadsAtRiskPanel from './LeadsAtRiskPanel';
-import { LEAD_STATUSES } from '../utils/constants';
 import type { Lead } from '../types/lead';
 
 export default function KanbanBoard() {
