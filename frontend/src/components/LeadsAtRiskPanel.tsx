@@ -200,36 +200,6 @@ export default function LeadsAtRiskPanel({
                   )}
                 </div>
               ))}
-                  <p className="font-semibold text-gray-900 mb-1">{lead.name}</p>
-                  
-                  {/* Company */}
-                  <p className="text-sm text-gray-600 mb-2">
-                    <span className="font-medium">Empresa:</span> {lead.company}
-                  </p>
-                  
-                  {/* Status + Days without change */}
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <span className="inline-block px-2 py-1 bg-gray-100 rounded text-xs font-medium text-gray-700">
-                        {lead.status}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-red-600">
-                        {formatDuration(lead.days_without_change)}
-                      </p>
-                      <p className="text-xs text-gray-500">sin cambios</p>
-                    </div>
-                  </div>
-                  
-                  {/* Email if available */}
-                  {lead.email && (
-                    <p className="text-xs text-gray-500 mt-2 truncate">
-                      {lead.email}
-                    </p>
-                  )}
-                </div>
-              ))}
             </div>
           )}
         </div>
