@@ -530,12 +530,12 @@ describe('KanbanBoard Integration - E4-S3 Status Filter', () => {
         store.setSelectedStatus(status);
         const visible = store.getVisibleColumns();
         
-        expect(visible.length).toBeGreaterThan(0, `getVisibleColumns should not be empty for status=${status}`);
+        expect(visible.length, `getVisibleColumns should not be empty for status=${status}`).toBeGreaterThan(0);
         
         if (status === 'all') {
-          expect(visible.length).toBe(4, 'Should return all 4 statuses when "all" is selected');
+          expect(visible.length, 'Should return all 4 statuses when "all" is selected').toBe(4);
         } else {
-          expect(visible.length).toBe(1, `Should return 1 column for single status: ${status}`);
+          expect(visible.length, `Should return 1 column for single status: ${status}`).toBe(1);
           expect(visible[0]).toBe(status);
         }
       });

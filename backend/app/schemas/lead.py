@@ -4,7 +4,7 @@ import re
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime
 from typing import Optional
-from app.models.lead import LeadStatus
+from app.models.lead import LeadStatus, LeadPriority
 
 
 class LeadBase(BaseModel):
@@ -13,6 +13,7 @@ class LeadBase(BaseModel):
     company: str = Field(..., min_length=2, max_length=255, description="Company name")
     email: str = Field(..., description="Lead email (must be unique)")
     phone: Optional[str] = Field(None, max_length=20, description="Optional phone number")
+    priority: Optional[str] = Field(default="Media", description="Lead priority level")
     notes: Optional[str] = Field(None, max_length=1000, description="Optional notes")
 
     @field_validator('name', 'company', mode='before')
@@ -59,6 +60,7 @@ class LeadResponse(LeadBase):
     """Schema for API response - includes DB-generated fields and uses ORM conversion"""
     id: int = Field(..., description="Lead unique identifier")
     status: str = Field(default="Nuevo", description="Lead status")
+    priority: str = Field(default="Media", description="Lead priority level")
     created_at: datetime = Field(..., description="Lead creation timestamp")
     updated_at: datetime = Field(..., description="Lead last update timestamp")
     last_status_change_at: Optional[datetime] = Field(None, description="Timestamp of last status change")

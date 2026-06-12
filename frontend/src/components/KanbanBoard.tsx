@@ -58,6 +58,7 @@ export default function KanbanBoard() {
       }, 150); // 150ms fade effect
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [selectedStatus, searchQuery, selectedPriorities]);
 
   /**

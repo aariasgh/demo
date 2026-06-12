@@ -18,6 +18,14 @@ class LeadStatus(str, Enum):
     CERRADO = "Cerrado"
 
 
+class LeadPriority(str, Enum):
+    """Valid lead priority values"""
+    BAJA = "Baja"
+    MEDIA = "Media"
+    ALTA = "Alta"
+    URGENTE = "Urgente"
+
+
 class Lead(Base):
     """Lead model for customer prospect tracking in CRM"""
 
@@ -30,6 +38,9 @@ class Lead(Base):
     phone: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(
         String(50), default="Nuevo", nullable=False
+    )
+    priority: Mapped[str] = mapped_column(
+        String(50), default="Media", nullable=False
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
@@ -47,8 +58,13 @@ class Lead(Base):
             "status IN ('Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado')",
             name="check_status_valid",
         ),
+        CheckConstraint(
+            "priority IN ('Baja', 'Media', 'Alta', 'Urgente')",
+            name="check_priority_valid",
+        ),
         Index("idx_leads_email", "email"),
         Index("idx_leads_status", "status"),
+        Index("idx_leads_priority", "priority"),
         Index("idx_leads_updated_at", "updated_at"),
         Index("idx_leads_last_status_change", "last_status_change_at"),
     )
