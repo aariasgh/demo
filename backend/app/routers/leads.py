@@ -29,7 +29,7 @@ router = APIRouter(prefix="/api/leads", tags=["leads"])
 
 @router.get("", response_model=LeadListResponse, status_code=status.HTTP_200_OK)
 async def list_leads(
-    status_filter: LeadStatus | None = Query(default=None, description="Filter by lead status"),
+    status_filter: str | None = Query(default=None, alias="status", description="Filter by lead status"),
     limit: int = Query(default=100, ge=1, le=1000, description="Number of leads to return"),
     offset: int = Query(default=0, ge=0, description="Number of leads to skip"),
     db: AsyncSession = Depends(get_db),
@@ -45,9 +45,15 @@ async def list_leads(
         count_stmt = select(func.count()).select_from(Lead)
 
         if status_filter is not None:
-            status_value = status_filter.value if isinstance(status_filter, LeadStatus) else status_filter
-            base_stmt = base_stmt.where(Lead.status == status_value)
-            count_stmt = count_stmt.where(Lead.status == status_value)
+            # Validate status against allowed values
+            valid_statuses = [s.value for s in LeadStatus]
+            if status_filter not in valid_statuses:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Invalid status. Allowed values: {', '.join(valid_statuses)}",
+                )
+            base_stmt = base_stmt.where(Lead.status == status_filter)
+            count_stmt = count_stmt.where(Lead.status == status_filter)
 
         total_result = await db.execute(count_stmt)
         total = total_result.scalar_one()

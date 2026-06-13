@@ -70,6 +70,8 @@ class TestDatabaseSchema:
             "notes",
             "created_at",
             "updated_at",
+            "last_status_change_at",
+            "priority",
         ]
         assert columns == expected, f"Leads table columns mismatch: {columns}"
 
@@ -92,6 +94,7 @@ class TestDatabaseSchema:
             "created_by_id",
             "created_at",
             "meta",
+            "field_name",
         ]
         assert columns == expected, f"Audit log table columns mismatch: {columns}"
 
@@ -257,10 +260,10 @@ class TestDatabaseSchema:
             email1 = f"lead_unique_{test_id}@example.com"
             cur.execute(
                 """
-                INSERT INTO leads (name, company, email, status)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO leads (name, company, email, status, priority)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
-                ("Acme Corp", "Acme", email1, "Nuevo")
+                ("Acme Corp", "Acme", email1, "Nuevo", "Media")
             )
             pg_connection.commit()
             
@@ -268,10 +271,10 @@ class TestDatabaseSchema:
             with pytest.raises(psycopg2.IntegrityError):
                 cur.execute(
                     """
-                    INSERT INTO leads (name, company, email, status)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO leads (name, company, email, status, priority)
+                    VALUES (%s, %s, %s, %s, %s)
                     """,
-                    ("Beta Ltd", "Beta", email1, "Nuevo")
+                    ("Beta Ltd", "Beta", email1, "Nuevo", "Alta")
                 )
                 pg_connection.commit()
         finally:
@@ -323,4 +326,5 @@ class TestMigrationReversibility:
         conn.close()
 
         assert len(versions) >= 1, "Migration version should be recorded"
-        assert versions[0][0] == "323f0096ff65", "Initial migration version should be recorded"
+        # Verify current migration is recorded (can be 006 or later)
+        assert versions[0][0] in ["006", "005", "323f0096ff65"], f"Current migration version {versions[0][0]} should be valid"

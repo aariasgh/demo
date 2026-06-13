@@ -139,6 +139,7 @@ async def created_lead(client):
         "company": "TechCorp SL",
         "email": "juan@techcorp.com",
         "phone": "+34917777777",
+        "priority": "Media",
         "notes": "Lead muy interesado"
     }
     response = await client.post("/api/leads", json=payload)
@@ -148,6 +149,26 @@ async def created_lead(client):
 
 @pytest_asyncio.fixture
 async def two_created_leads(client):
+    """Fixture: Creates two leads for testing"""
+    lead1_payload = {
+        "name": "Lead One",
+        "company": "Company One",
+        "email": "lead1@test.com",
+        "priority": "Alta",
+    }
+    lead1_response = await client.post("/api/leads", json=lead1_payload)
+    assert lead1_response.status_code == 201
+    
+    lead2_payload = {
+        "name": "Lead Two",
+        "company": "Company Two",
+        "email": "lead2@test.com",
+        "priority": "Baja",
+    }
+    lead2_response = await client.post("/api/leads", json=lead2_payload)
+    assert lead2_response.status_code == 201
+    
+    return [lead1_response.json(), lead2_response.json()]
     """Fixture: Creates two leads for testing"""
     lead1_payload = {
         "name": "Lead 1",

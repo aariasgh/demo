@@ -6,7 +6,7 @@ Main entry point for the Mini CRM backend API.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import health, leads, timeline
+from app.routers import health, leads, timeline, audit
 from app.config import settings
 import logging
 
@@ -33,6 +33,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(leads.router)
 app.include_router(timeline.router)
+app.include_router(audit.router)
 
 
 @app.on_event("startup")

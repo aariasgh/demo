@@ -35,11 +35,11 @@ async def test_get_leads_filters_by_status(client: AsyncClient):
     """GET /api/leads?status=... should filter results by status."""
     first = await client.post(
         "/api/leads",
-        json={"name": "Lead Nuevo", "company": "Company A", "email": "nuevo@test.com"},
+        json={"name": "Lead Nuevo", "company": "Company A", "email": "nuevo@test.com", "priority": "Media"},
     )
     second = await client.post(
         "/api/leads",
-        json={"name": "Lead Contacto", "company": "Company B", "email": "contacto@test.com"},
+        json={"name": "Lead Contacto", "company": "Company B", "email": "contacto@test.com", "priority": "Alta"},
     )
 
     assert first.status_code == 201

@@ -21,6 +21,7 @@ class LeadAuditLog(Base):
     event_type: Mapped[str] = mapped_column(String(50), nullable=False)
     old_value: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
     new_value: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    field_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_by_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
