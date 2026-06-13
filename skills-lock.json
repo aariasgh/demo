@@ -91,6 +91,12 @@
       "skillPath": "plugins/database-design/skills/postgresql/SKILL.md",
       "computedHash": "d7d040ee506a300c08a64b9ef6de9aa677b6d7251e33c3c87e0608f821a9506d"
     },
+    "powershell-windows": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/powershell-windows/SKILL.md",
+      "computedHash": "f2c5e604bb18ca5709be47e040051ec0691744fb064dbb41502cdd5a11b796b4"
+    },
     "prisma-postgres": {
       "source": "prisma/skills",
       "sourceType": "github",
