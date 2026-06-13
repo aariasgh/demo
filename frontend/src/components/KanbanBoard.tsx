@@ -177,7 +177,7 @@ export default function KanbanBoard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" data-testid="kanban-board">
       {/* E4-S1: SearchFilterHeader — AC-1.1: Sticky header above Kanban */}
       <SearchFilterHeader />
 
@@ -186,7 +186,7 @@ export default function KanbanBoard() {
         <StatusFilterTabs />
       </div>
 
-      <div className="p-4 md:p-6">
+      <div className="p-4 md:p-6" data-testid="kanban-header">
         {/* AC-12: Accessibility - Live region for status updates */}
         <div
           role="status"
@@ -249,7 +249,7 @@ export default function KanbanBoard() {
             }`}>
               {/* Overlay during drag sync */}
               {isDragging && (
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none backdrop-blur-sm">
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none backdrop-blur-sm" data-testid="drag-sync-overlay">
                   <div className="flex flex-col items-center gap-2">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                     <p className="text-white text-sm font-medium">Sincronizando...</p>

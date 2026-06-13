@@ -53,6 +53,7 @@ export default function PriorityFilter() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
+        data-testid="priority-filter-button"
         aria-label="Abrir filtro de prioridad"
         aria-expanded={isOpen}
         aria-haspopup="true"
@@ -87,7 +88,7 @@ export default function PriorityFilter() {
           {/* Options */}
           <div className="p-4 space-y-3">
             {PRIORITY_OPTIONS.map((priority) => (
-              <label key={priority} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
+              <label key={priority} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors" data-testid={`priority-${priority.toLowerCase()}`}>
                 <input
                   type="checkbox"
                   checked={selectedPriorities.includes(priority)}

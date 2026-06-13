@@ -61,6 +61,7 @@ export default function StatusFilterTabs() {
   return (
     <div
       className="flex gap-2 pb-4 border-b border-gray-200 overflow-x-auto sticky top-16 bg-white z-10 md:gap-3"
+      data-testid="status-filter-tabs"
       role="tablist"
       aria-label="Filtrar leads por estado"
     >
@@ -77,6 +78,7 @@ export default function StatusFilterTabs() {
             aria-pressed={isActive}
             aria-label={`Filtrar por ${tab.label}`}
             aria-description={tab.description}
+            data-testid={`status-tab-${tab.value.toLowerCase()}`}
             className={`
               px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
               transition-colors duration-200 flex-shrink-0

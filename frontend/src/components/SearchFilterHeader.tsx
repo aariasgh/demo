@@ -64,6 +64,7 @@ export default function SearchFilterHeader() {
               placeholder="Buscar: nombre, empresa, email..."
               value={inputValue}
               onChange={handleInputChange}
+              data-testid="search-input"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               aria-label="Buscar leads por nombre, empresa o email"
             />

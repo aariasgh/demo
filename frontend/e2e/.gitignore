@@ -1,0 +1,23 @@
+# Playwright
+.auth/
+test-results/
+playwright-report/
+playwright/.cache/
+*.traceviewer/
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

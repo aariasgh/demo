@@ -25,7 +25,7 @@ export default function KanbanColumn({ status, leads, isDisabled = false }: Kanb
   const displayColor = color || '#EF4444';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full">
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full" data-testid={`kanban-column-${status.toLowerCase()}`}>
       {/* Column Header */}
       <div className="flex items-center justify-between p-4 pb-3 border-b border-gray-200">
         <div className="flex items-center gap-3 flex-1">

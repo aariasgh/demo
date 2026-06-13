@@ -46,6 +46,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
           ? 'border-blue-500 shadow-md bg-blue-50'
           : 'border-gray-200 shadow-sm bg-white'}
       `}
+      data-testid="lead-card"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onTouchStart={handleTouchStart}

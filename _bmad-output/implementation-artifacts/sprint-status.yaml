@@ -578,26 +578,95 @@ development_status:
   
   epic-4-planning-review: done
   epic-4-planning-review-date: "2026-06-10T22:00:00Z"
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
+  epic-4-retrospective-date: "2026-06-12T14:00:00Z"
+  epic-4-retrospective-file: "_bmad-output/implementation-artifacts/epic-4-retro-2026-06-12.md"
   
   # ============================================================
   # EPIC 5: TIMELINE Y AUDITORÍA
-  # Status: backlog | Goal: Historial de eventos completo
-  # Duration: 12h | Points: 13
+  # Status: planning-complete | Goal: Historial de eventos completo
+  # Duration: 13h | Points: 13 (8+5) | Planning: DONE ✅
   # ============================================================
-  epic-5: backlog
+  epic-5: in-progress
+  epic-5-planning-status: done
+  epic-5-planning-completed: "2026-06-12T15:30:00Z"
+  epic-5-planning-document: "_bmad-output/planning-artifacts/epic-5-sprint-plan.md"
+  epic-5-planning-summary:
+    sequence: "E5-S1 (Timeline Backend+Frontend 8pts) → E5-S2 (Auditoría Backend 5pts)"
+    total_duration_hours: 13
+    dev_hours: 8
+    testing_hours: 2
+    code_review_hours: 3
+    dependencies_external: "None (Epics 1-4 complete)"
+    blockers: "None - Ready to start"
+    main_risk: "Regresión en E3 Kanban during Timeline integration"
+    risk_mitigation: "Run full E3 test suite after each phase"
   
   E5-S1:
     title: "Timeline de Actividad por Lead - Backend + Frontend"
-    status: backlog
+    status: ready-for-dev
     points: 8
     priority: P2
+    story_created_date: "2026-06-12"
+    planning_review_date: "2026-06-12T15:30:00Z"
+    story_file: "frontend/e2e/timeline.spec.ts"
+    planning_document: "_bmad-output/planning-artifacts/epic-5-sprint-plan.md"
+    development_roadmap: "5 fases (Backend → Components → Modales → Filtering → Testing)"
+    estimated_duration_hours: "5-6 (2h+1.5h+1.5h+0.5h+1h)"
+    estimated_start_date: "2026-06-12"
+    estimated_completion_date: "2026-06-13"
+    
+    # Phase 0: E2E Test Specification - COMPLETE ✅
+    phase_0_status: "COMPLETE ✅"
+    phase_0_completion_date: "2026-06-12T14:50:00Z"
+    phase_0_artifacts:
+      - "frontend/e2e/timeline.spec.ts (15 test scenarios, 19 acceptance criteria)"
+      - "docs/E5-S1-TIMELINE-TESTID-REFERENCE.md (35 data-testid selectors, component architecture)"
+      - "_bmad-output/planning-artifacts/E5-S1-IMPLEMENTATION-ROADMAP.md (5-hour implementation guide)"
+    
+    e2e_test_coverage:
+      - "AC-1: Timeline loads with existing events"
+      - "AC-2: User can add note to timeline"
+      - "AC-3: User can add call event"
+      - "AC-4: User can add email event"
+      - "AC-5: User can delete timeline event"
+      - "AC-6: Filter by event type works"
+      - "AC-7: All events visible without scroll"
+      - "AC-8: Events persist after page reload"
+      - "AC-9: Timeline sorts by date (newest first)"
+      - "AC-10: Error on add event shows toast"
+      - "AC-11: Delete confirmation required"
+      - "AC-12: Empty timeline shows helpful message"
+      - "Plus 3 smoke tests (navigation, UI details)"
+    
+    test_scenarios_count: 15
+    acceptance_criteria_count: 12
+    total_e2e_variants: 75
+    notes: |
+      ✅ E2E test specification complete
+      ✅ 15 test scenarios covering all 12 acceptance criteria
+      ✅ 75 E2E test variants (15 scenarios × 5 browsers)
+      ✅ data-testid reference: 35 selectors across 9 components
+      ✅ Implementation roadmap: 5-hour timeline, 5 phases
+      ✅ Backend API specification documented
+      ✅ Frontend component architecture specified
+      ✅ React Query patterns ready
+      ✅ Ready for development team handoff
+      - Dependencies: None (E4 complete)
+      - Blocks: E5-S2 (Auditoría), E6-S3 (Accessibility), E8-S2 (E2E coverage)
   
   E5-S2:
     title: "Auditoría Completa - Registro de Cambios Backend"
     status: backlog
     points: 5
     priority: P2
+    planning_review_date: "2026-06-12T15:30:00Z"
+    blockers: "E5-S1 (Timeline debe completarse primero)"
+    blocked_by: ["E5-S1"]
+    estimated_duration_hours: "3-4 (1.5h+1.5h+1h)"
+    estimated_start_date: "2026-06-13 (después de E5-S1)"
+    estimated_completion_date: "2026-06-13"
+    development_phases: "Migration + Triggers → API Endpoint → Tests + Validation"
   
   epic-5-retrospective: optional
   
