@@ -38,6 +38,7 @@ async def get_lead_audit_history(
     
     **Raises:**
         HTTPException 404: Lead no encontrado
+        HTTPException 422: Tipo de evento inválido
         HTTPException 500: Error del servidor
     
     **Example:**
@@ -47,9 +48,22 @@ async def get_lead_audit_history(
     
     GET /api/leads/99999/audit
     → 404 Not Found: Lead no encontrado
+    
+    GET /api/leads/1/audit?event_type=INVALID
+    → 422 Unprocessable Entity: event_type must be one of: CREATED, FIELD_EDITED, STATUS_CHANGED, DELETED
     ```
     """
     try:
+        # Valid event types
+        valid_event_types = {"CREATED", "FIELD_EDITED", "STATUS_CHANGED", "DELETED"}
+        
+        # Validate event_type parameter if provided
+        if event_type and event_type not in valid_event_types:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Invalid event_type. Allowed values: {', '.join(sorted(valid_event_types))}",
+            )
+        
         # Verify lead exists
         lead_stmt = select(Lead).where(Lead.id == lead_id)
         lead_result = await db.execute(lead_stmt)
@@ -63,7 +77,7 @@ async def get_lead_audit_history(
         base_stmt = select(LeadAuditLog).where(LeadAuditLog.lead_id == lead_id)
         count_stmt = select(func.count()).select_from(LeadAuditLog).where(LeadAuditLog.lead_id == lead_id)
         
-        # Filter by event type if provided
+        # Filter by event type if provided (already validated above)
         if event_type:
             base_stmt = base_stmt.where(LeadAuditLog.event_type == event_type)
             count_stmt = count_stmt.where(LeadAuditLog.event_type == event_type)

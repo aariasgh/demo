@@ -477,3 +477,35 @@ async def test_audit_no_data_loss_on_concurrent_edits(client: AsyncClient):
     
     # Should have 6 events: 1 CREATED + 5 FIELD_EDITED
     assert data["meta"]["total"] >= 6, f"Expected at least 6 events, got {data['meta']['total']}"
+
+
+@pytest.mark.asyncio
+async def test_audit_rejects_invalid_event_type(client: AsyncClient):
+    """
+    Event type validation: Invalid event_type returns 422 Unprocessable Entity
+    - Attempts to filter by non-existent event type (e.g., "INVALID_TYPE")
+    - Should return 422, not 200 with empty results
+    """
+    # Create a lead first (need valid lead_id)
+    payload = {
+        "name": "Test Lead",
+        "company": "Test Company",
+        "email": "test@example.com",
+    }
+    create_response = await client.post("/api/leads", json=payload)
+    assert create_response.status_code == 201
+    lead_id = create_response.json()["id"]
+    
+    # Test invalid event_type
+    response = await client.get(f"/api/leads/{lead_id}/audit?event_type=INVALID_TYPE")
+    assert response.status_code == 422, f"Expected 422, got {response.status_code}"
+    error_data = response.json()
+    assert "Invalid event_type" in error_data["detail"]
+    
+    # Test another invalid value
+    response = await client.get(f"/api/leads/{lead_id}/audit?event_type=TYPO")
+    assert response.status_code == 422
+    
+    # Valid values should still work
+    response = await client.get(f"/api/leads/{lead_id}/audit?event_type=CREATED")
+    assert response.status_code == 200, "Valid event_type should return 200"
