@@ -21,8 +21,17 @@ def upgrade() -> None:
     op.add_column('lead_audit_log', 
         sa.Column('field_name', sa.String(255), nullable=True)
     )
+    
+    # Add composite index for pagination queries (lead_id, created_at DESC)
+    op.create_index(
+        'idx_audit_lead_created_composite',
+        'lead_audit_log',
+        ['lead_id', sa.desc('created_at')],
+        unique=False
+    )
 
 
 def downgrade() -> None:
-    """Remove field_name column"""
+    """Remove field_name column and composite index"""
+    op.drop_index('idx_audit_lead_created_composite')
     op.drop_column('lead_audit_log', 'field_name')

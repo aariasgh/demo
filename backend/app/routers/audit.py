@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/leads", tags=["audit"])
 async def get_lead_audit_history(
     lead_id: int,
     event_type: Optional[str] = Query(None, description="Filter by event type (CREATED, FIELD_EDITED, STATUS_CHANGED, DELETED)"),
-    limit: int = Query(default=100, ge=1, le=500, description="Number of audit entries to return"),
+    limit: int = Query(default=100, ge=1, le=200, description="Number of audit entries to return (max 200 for performance)"),
     offset: int = Query(default=0, ge=0, description="Number of audit entries to skip"),
     db: AsyncSession = Depends(get_db),
 ) -> AuditLogListResponse:
