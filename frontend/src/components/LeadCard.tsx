@@ -41,7 +41,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
   return (
     <div
       className={`
-        p-3 rounded-lg border-2 transition-all duration-150 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
+        p-3 md:p-4 rounded-lg border-2 transition-all duration-150 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
         ${(isHovering || isTouchActive)
           ? 'border-blue-500 shadow-md bg-blue-50'
           : 'border-gray-200 shadow-sm bg-white'}
@@ -55,24 +55,24 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
       aria-label={`Lead: ${lead.name} de ${lead.company}. Estado: ${lead.status}. Arrastra para cambiar estado.`}
       draggable={false}
     >
-      {/* Lead Name - Bold */}
-      <p className="font-semibold text-gray-900 text-sm truncate" title={lead.name}>
+      {/* Lead Name - Bold, Responsive Font */}
+      <p className="font-semibold text-gray-900 text-sm md:text-base truncate" title={lead.name}>
         {lead.name || 'Sin nombre'}
       </p>
 
-      {/* Company - Medium Gray */}
-      <p className="text-gray-600 text-xs mt-1 truncate" title={lead.company}>
+      {/* Company - Medium Gray, Responsive */}
+      <p className="text-gray-600 text-xs md:text-sm mt-1 md:mt-2 truncate" title={lead.company}>
         {lead.company || 'Sin empresa'}
       </p>
 
-      {/* Email - Light Gray */}
-      <p className="text-gray-400 text-xs mt-0.5 truncate" title={lead.email}>
+      {/* Email - Light Gray, Responsive */}
+      <p className="text-gray-400 text-xs mt-0.5 md:mt-1 truncate" title={lead.email}>
         {lead.email || 'Sin email'}
       </p>
 
       {/* Phone - If available */}
       {lead.phone && (
-        <p className="text-gray-400 text-xs mt-0.5 truncate" title={lead.phone}>
+        <p className="text-gray-400 text-xs mt-0.5 md:mt-1 truncate" title={lead.phone}>
           {lead.phone}
         </p>
       )}

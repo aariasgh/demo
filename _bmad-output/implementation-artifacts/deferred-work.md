@@ -1,5 +1,11 @@
 # Deferred Work Log
 
+## Deferred from: Code Review of E6-S1 (2026-06-13)
+
+- **Scroll Position Not Preserved on Tab Change (AC-23)** — State management for scroll position preservation not visible in this diff; appears to be handled in parent component. *Deferral reason: Pre-existing behavior, not caused by responsive changes; acceptable for MVP.*
+
+- **Unused Spacing Config Tokens (Design System Cleanup)** — Tailwind config defines `spacing.xs/sm/md/lg/xl` tokens but they are not uniformly used across components. *Deferral reason: Technical debt; non-urgent refactoring; can be addressed in a dedicated design-system cleanup story.*
+
 ## Deferred from: Code Review of E1-S2 (2026-06-07)
 
 - **CASCADE behavior not documented** — `lead_id` foreign key has `ondelete="CASCADE"` which destroys audit trail when lead is deleted. Ensure this is documented in model docstring or separate runbook. *Deferral reason: Design decision, should be intentional but needs documentation.*

@@ -109,3 +109,26 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ============================================================
+   E6-S1: RESPONSIVE DESIGN UTILITIES
+   ============================================================ */
+
+/* Smooth scrolling behavior for touch devices */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Smooth scrolling on mobile (iOS) */
+*[data-scrollable] {
+  -webkit-overflow-scrolling: touch;
+  overflow-scrolling: touch;
+}
+
+/* Prevent scrollbar from causing layout shift */
+html {
+  scrollbar-gutter: stable;
+  line-height: 1.5; /* AC-15: Explicit line-height for legibility (1.4-1.6 spec) */
+}
+
+/* Media query debugging utilities removed — production build does not include debug indicators */

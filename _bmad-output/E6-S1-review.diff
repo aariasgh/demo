@@ -1,0 +1,448 @@
+warning: in the working copy of 'frontend/src/index.css', LF will be replaced by CRLF the next time Git touches it
+diff --git a/_bmad-output/implementation-artifacts/sprint-status.yaml b/_bmad-output/implementation-artifacts/sprint-status.yaml
+index 67d74ac..391ca14 100644
+--- a/_bmad-output/implementation-artifacts/sprint-status.yaml
++++ b/_bmad-output/implementation-artifacts/sprint-status.yaml
+@@ -26,7 +26,7 @@
+ #   - done: Retrospective has been completed
+ 
+ generated: 2026-06-07
+-last_updated: 2026-06-12T19:35:00Z
++last_updated: 2026-06-13T10:00:00Z
+ project: Demo - Mini CRM de Seguimiento de Clientes
+ project_key: NOKEY
+ tracking_system: file-system
+@@ -700,16 +700,22 @@ development_status:
+   
+   # ============================================================
+   # EPIC 6: UX/UI, RESPONSIVO Y ACCESIBILIDAD
+-  # Status: backlog | Goal: UI pulida, responsive, accesible
++  # Status: in-progress | Goal: UI pulida, responsive, accesible
+   # Duration: 16h | Points: 21
+   # ============================================================
+-  epic-6: backlog
++  epic-6: in-progress
+   
+   E6-S1:
+     title: "Dise├▒o Responsivo - Mobile, Tablet, Desktop"
+-    status: backlog
++    status: review
+     points: 8
+     priority: P1
++    story_file: "_bmad-output/implementation-artifacts/E6-S1.md"
++    story_created_date: "2026-06-13"
++    story_started_date: "2026-06-13"
++    story_completed_date: "2026-06-13"
++    baseline_commit: "736eb19aa2348bb45ac5dae4be6becc7df58e1f3"
++    story_context: "Comprehensive story with responsive breakpoints (xs/sm/md/lg/xl), Tailwind config, touch targets (44-48px), typography scale, 28 acceptance criteria, 10 implementation tasks completed, manual testing checklist created"
+   
+   E6-S2:
+     title: "Animaciones, Transiciones y Feedback Visual"
+diff --git a/frontend/src/components/CreateLeadModal.tsx b/frontend/src/components/CreateLeadModal.tsx
+index 551e77c..c8a2a16 100644
+--- a/frontend/src/components/CreateLeadModal.tsx
++++ b/frontend/src/components/CreateLeadModal.tsx
+@@ -156,10 +156,10 @@ export default function CreateLeadModal() {
+       aria-modal="true"
+       aria-labelledby="modal-title"
+     >
+-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
++      <div className="bg-white rounded-lg shadow-lg xs:max-w-[90vw] sm:max-w-md max-h-[90vh] overflow-y-auto w-full mx-4">
+         {/* Header */}
+-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+-          <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
++        <div className="flex justify-between items-center p-4 md:p-6 border-b border-gray-200">
++          <h2 id="modal-title" className="text-lg md:text-xl font-semibold text-gray-900">
+             Crear Lead
+           </h2>
+           <button
+@@ -173,10 +173,10 @@ export default function CreateLeadModal() {
+         </div>
+ 
+         {/* Form */}
+-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4" data-testid="create-lead-form">
++        <form onSubmit={handleSubmit(onSubmit)} className="p-4 md:p-6 space-y-4 md:space-y-5" data-testid="create-lead-form">
+           {/* Name Field */}
+           <div>
+-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
++            <label htmlFor="name" className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+               Nombre <span className="text-red-500">*</span>
+             </label>
+             <input
+@@ -187,13 +187,13 @@ export default function CreateLeadModal() {
+               data-testid="lead-name-input"
+               aria-invalid={!!errors.name}
+               aria-describedby={errors.name ? 'name-error' : undefined}
+-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
++              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                 errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'
+               }`}
+               disabled={isPending}
+             />
+             {errors.name && (
+-              <p id="name-error" className="text-red-600 text-sm mt-1">
++              <p id="name-error" className="text-red-600 text-xs md:text-sm mt-1">
+                 {errors.name.message}
+               </p>
+             )}
+@@ -201,7 +201,7 @@ export default function CreateLeadModal() {
+ 
+           {/* Company Field */}
+           <div>
+-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
++            <label htmlFor="company" className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+               Empresa <span className="text-red-500">*</span>
+             </label>
+             <input
+@@ -211,13 +211,13 @@ export default function CreateLeadModal() {
+               {...register('company')}
+               aria-invalid={!!errors.company}
+               aria-describedby={errors.company ? 'company-error' : undefined}
+-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
++              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                 errors.company ? 'border-red-500 bg-red-50' : 'border-gray-300'
+               }`}
+               disabled={isPending}
+             />
+             {errors.company && (
+-              <p id="company-error" className="text-red-600 text-sm mt-1">
++              <p id="company-error" className="text-red-600 text-xs md:text-sm mt-1">
+                 {errors.company.message}
+               </p>
+             )}
+@@ -225,7 +225,7 @@ export default function CreateLeadModal() {
+ 
+           {/* Email Field */}
+           <div>
+-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
++            <label htmlFor="email" className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+               Email <span className="text-red-500">*</span>
+             </label>
+             <input
+@@ -237,15 +237,15 @@ export default function CreateLeadModal() {
+               aria-invalid={!!(errors.email || emailValidationError)}
+               aria-describedby={errors.email || emailValidationError ? 'email-error' : undefined}
+               disabled={isPending}
+-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
++              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                 errors.email || emailValidationError ? 'border-red-500 bg-red-50' : 'border-gray-300'
+               }`}
+             />
+             {emailValidating && (
+-              <p className="text-blue-600 text-sm mt-1">Verificando email...</p>
++              <p className="text-blue-600 text-xs md:text-sm mt-1">Verificando email...</p>
+             )}
+             {(errors.email || emailValidationError) && (
+-              <p id="email-error" className="text-red-600 text-sm mt-1">
++              <p id="email-error" className="text-red-600 text-xs md:text-sm mt-1">
+                 {emailValidationError || errors.email?.message}
+               </p>
+             )}
+@@ -253,7 +253,7 @@ export default function CreateLeadModal() {
+ 
+           {/* Phone Field */}
+           <div>
+-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
++            <label htmlFor="phone" className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+               Tel├®fono
+             </label>
+             <input
+@@ -263,13 +263,13 @@ export default function CreateLeadModal() {
+               {...register('phone')}
+               aria-invalid={!!errors.phone}
+               aria-describedby={errors.phone ? 'phone-error' : undefined}
+-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
++              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                 errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+               }`}
+               disabled={isPending}
+             />
+             {errors.phone && (
+-              <p id="phone-error" className="text-red-600 text-sm mt-1">
++              <p id="phone-error" className="text-red-600 text-xs md:text-sm mt-1">
+                 {errors.phone.message}
+               </p>
+             )}
+@@ -277,7 +277,7 @@ export default function CreateLeadModal() {
+ 
+           {/* Notes Field */}
+           <div>
+-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
++            <label htmlFor="notes" className="block text-xs md:text-sm font-medium text-gray-700 mb-1">
+               Notas
+             </label>
+             <textarea
+@@ -287,31 +287,33 @@ export default function CreateLeadModal() {
+               {...register('notes')}
+               aria-invalid={notesExceedsLimit}
+               aria-describedby={notesExceedsLimit ? 'notes-error' : 'notes-count'}
+-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-none h-24 ${
++              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-none h-24 min-h-[120px] ${
+                 notesExceedsLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'
+               }`}
+               disabled={isPending}
+             />
+             {notesExceedsLimit && (
+-              <p id="notes-error" className="text-red-600 font-semibold text-sm mt-1">
++              <p id="notes-error" className="text-red-600 font-semibold text-xs md:text-sm mt-1">
+                 L├¡mite de caracteres excedido
+               </p>
+             )}
+             <p
+               id="notes-count"
+-              className={notesExceedsLimit ? 'text-red-600 font-semibold' : 'text-gray-500'}
++              className={`text-xs md:text-sm ${
++                notesExceedsLimit ? 'text-red-600 font-semibold' : 'text-gray-500'
++              }`}
+             >
+               {notesCharCount} / 1000
+             </p>
+           </div>
+ 
+           {/* Submit Buttons (Cancel first for optimal tab order) */}
+-          <div className="flex gap-3 pt-4">
++          <div className="flex gap-3 md:gap-4 pt-4 md:pt-6">
+             <button
+               type="button"
+               onClick={closeCreateModal}
+               disabled={isPending}
+-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
++              className="flex-1 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base min-h-[48px] border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+               tabIndex={0}
+             >
+               Cancelar
+@@ -319,7 +321,7 @@ export default function CreateLeadModal() {
+             <button
+               type="submit"
+               disabled={!isValid || isPending || notesExceedsLimit || !!emailValidationError || emailValidating}
+-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
++              className="flex-1 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base min-h-[48px] bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+               tabIndex={0}
+             >
+               {isPending && (
+diff --git a/frontend/src/components/KanbanBoard.tsx b/frontend/src/components/KanbanBoard.tsx
+index 19b411e..a1e60c5 100644
+--- a/frontend/src/components/KanbanBoard.tsx
++++ b/frontend/src/components/KanbanBoard.tsx
+@@ -244,7 +244,7 @@ export default function KanbanBoard() {
+               
+               BAJO-11: Apply fade transition when filters change for visual feedback
+             */}
+-            <div className={`grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative transition-opacity duration-300 ${
++            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 relative transition-opacity duration-300 ${
+               isTransitioning ? 'opacity-60' : 'opacity-100'
+             }`}>
+               {/* Overlay during drag sync */}
+diff --git a/frontend/src/components/LeadCard.tsx b/frontend/src/components/LeadCard.tsx
+index ce2461f..393ea80 100644
+--- a/frontend/src/components/LeadCard.tsx
++++ b/frontend/src/components/LeadCard.tsx
+@@ -41,7 +41,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
+   return (
+     <div
+       className={`
+-        p-3 rounded-lg border-2 transition-all duration-150 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
++        p-3 md:p-4 rounded-lg border-2 transition-all duration-150 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
+         ${(isHovering || isTouchActive)
+           ? 'border-blue-500 shadow-md bg-blue-50'
+           : 'border-gray-200 shadow-sm bg-white'}
+@@ -55,24 +55,24 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
+       aria-label={`Lead: ${lead.name} de ${lead.company}. Estado: ${lead.status}. Arrastra para cambiar estado.`}
+       draggable={false}
+     >
+-      {/* Lead Name - Bold */}
+-      <p className="font-semibold text-gray-900 text-sm truncate" title={lead.name}>
++      {/* Lead Name - Bold, Responsive Font */}
++      <p className="font-semibold text-gray-900 text-sm md:text-base truncate" title={lead.name}>
+         {lead.name || 'Sin nombre'}
+       </p>
+ 
+-      {/* Company - Medium Gray */}
+-      <p className="text-gray-600 text-xs mt-1 truncate" title={lead.company}>
++      {/* Company - Medium Gray, Responsive */}
++      <p className="text-gray-600 text-xs md:text-sm mt-1 md:mt-2 truncate" title={lead.company}>
+         {lead.company || 'Sin empresa'}
+       </p>
+ 
+-      {/* Email - Light Gray */}
+-      <p className="text-gray-400 text-xs mt-0.5 truncate" title={lead.email}>
++      {/* Email - Light Gray, Responsive */}
++      <p className="text-gray-400 text-xs mt-0.5 md:mt-1 truncate" title={lead.email}>
+         {lead.email || 'Sin email'}
+       </p>
+ 
+       {/* Phone - If available */}
+       {lead.phone && (
+-        <p className="text-gray-400 text-xs mt-0.5 truncate" title={lead.phone}>
++        <p className="text-gray-400 text-xs mt-0.5 md:mt-1 truncate" title={lead.phone}>
+           {lead.phone}
+         </p>
+       )}
+diff --git a/frontend/src/index.css b/frontend/src/index.css
+index 5fb3313..1ec4e1e 100644
+--- a/frontend/src/index.css
++++ b/frontend/src/index.css
+@@ -109,3 +109,126 @@ code {
+   padding: 4px 8px;
+   background: var(--code-bg);
+ }
++
++/* ============================================================
++   E6-S1: RESPONSIVE DESIGN UTILITIES
++   ============================================================ */
++
++/* Smooth scrolling behavior for touch devices */
++html {
++  scroll-behavior: smooth;
++}
++
++/* Smooth scrolling on mobile (iOS) */
++*[data-scrollable] {
++  -webkit-overflow-scrolling: touch;
++  overflow-scrolling: touch;
++}
++
++/* Prevent scrollbar from causing layout shift */
++html {
++  scrollbar-gutter: stable;
++}
++
++/* Media query debugging utilities ÔÇö visible in bottom-right corner */
++@media (max-width: 320px) {
++  body::after {
++    content: 'xs: 320px';
++    position: fixed;
++    bottom: 10px;
++    right: 10px;
++    background: rgba(0, 0, 0, 0.8);
++    color: #0f0;
++    padding: 4px 8px;
++    font-size: 10px;
++    font-family: monospace;
++    border-radius: 2px;
++    z-index: 9999;
++    pointer-events: none;
++  }
++}
++
++@media (min-width: 321px) and (max-width: 639px) {
++  body::after {
++    content: 'sm: 640px';
++    position: fixed;
++    bottom: 10px;
++    right: 10px;
++    background: rgba(0, 0, 0, 0.8);
++    color: #0f0;
++    padding: 4px 8px;
++    font-size: 10px;
++    font-family: monospace;
++    border-radius: 2px;
++    z-index: 9999;
++    pointer-events: none;
++  }
++}
++
++@media (min-width: 640px) and (max-width: 767px) {
++  body::after {
++    content: 'md: 768px';
++    position: fixed;
++    bottom: 10px;
++    right: 10px;
++    background: rgba(0, 0, 0, 0.8);
++    color: #0f0;
++    padding: 4px 8px;
++    font-size: 10px;
++    font-family: monospace;
++    border-radius: 2px;
++    z-index: 9999;
++    pointer-events: none;
++  }
++}
++
++@media (min-width: 768px) and (max-width: 1023px) {
++  body::after {
++    content: 'md: 768px';
++    position: fixed;
++    bottom: 10px;
++    right: 10px;
++    background: rgba(0, 0, 0, 0.8);
++    color: #0f0;
++    padding: 4px 8px;
++    font-size: 10px;
++    font-family: monospace;
++    border-radius: 2px;
++    z-index: 9999;
++    pointer-events: none;
++  }
++}
++
++@media (min-width: 1024px) and (max-width: 1279px) {
++  body::after {
++    content: 'lg: 1024px';
++    position: fixed;
++    bottom: 10px;
++    right: 10px;
++    background: rgba(0, 0, 0, 0.8);
++    color: #0f0;
++    padding: 4px 8px;
++    font-size: 10px;
++    font-family: monospace;
++    border-radius: 2px;
++    z-index: 9999;
++    pointer-events: none;
++  }
++}
++
++@media (min-width: 1280px) {
++  body::after {
++    content: 'xl: 1280px+';
++    position: fixed;
++    bottom: 10px;
++    right: 10px;
++    background: rgba(0, 0, 0, 0.8);
++    color: #0f0;
++    padding: 4px 8px;
++    font-size: 10px;
++    font-family: monospace;
++    border-radius: 2px;
++    z-index: 9999;
++    pointer-events: none;
++  }
++}
+diff --git a/frontend/tailwind.config.js b/frontend/tailwind.config.js
+index 37a6480..3c387d9 100644
+--- a/frontend/tailwind.config.js
++++ b/frontend/tailwind.config.js
+@@ -6,12 +6,32 @@ export default {
+   ],
+   theme: {
+     extend: {
++      // Responsive Breakpoints (Mobile-first approach)
++      screens: {
++        'xs': '320px',   // Mobile small (iPhone SE)
++        'sm': '640px',   // Mobile large
++        'md': '768px',   // Tablet
++        'lg': '1024px',  // Desktop small
++        'xl': '1280px',  // Desktop large
++        '2xl': '1536px', // Desktop XL
++      },
++      // Responsive Typography Scale
++      fontSize: {
++        'xs': '0.75rem',    // 12px (secondary text)
++        'sm': '0.875rem',   // 14px (mobile default)
++        'base': '1rem',     // 16px (desktop default)
++        'lg': '1.125rem',   // 18px (headings/large text)
++        'xl': '1.25rem',    // 20px (modal headers)
++        '2xl': '1.5rem',    // 24px (page titles)
++      },
++      // Custom Colors (preserve existing)
+       colors: {
+         primary: '#3B82F6',
+         secondary: '#10B981',
+         danger: '#EF4444',
+         warning: '#F59E0B',
+       },
++      // Responsive Spacing
+       spacing: {
+         'xs': '0.25rem',
+         'sm': '0.5rem',

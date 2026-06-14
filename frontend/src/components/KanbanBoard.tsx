@@ -244,7 +244,7 @@ export default function KanbanBoard() {
               
               BAJO-11: Apply fade transition when filters change for visual feedback
             */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 md:gap-5 lg:grid-cols-4 gap-4 lg:gap-6 relative transition-opacity duration-300 ${
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 relative transition-opacity duration-300 ${
               isTransitioning ? 'opacity-60' : 'opacity-100'
             }`}>
               {/* Overlay during drag sync */}
