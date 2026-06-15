@@ -700,10 +700,10 @@ development_status:
   
   # ============================================================
   # EPIC 6: UX/UI, RESPONSIVO Y ACCESIBILIDAD
-  # Status: done | Goal: UI pulida, responsive, accesible
+  # Status: in-progress | Goal: UI pulida, responsive, accesible
   # Duration: 16h | Points: 21
   # ============================================================
-  epic-6: done
+  epic-6: in-progress
   
   E6-S1:
     title: "Diseño Responsivo - Mobile, Tablet, Desktop"
@@ -783,6 +783,21 @@ development_status:
     total_keyboard_tests: "63 tests passing across all phases"
     completion_notes: "✅ COMPLETE - All 4 phases finished. 11 keyboard shortcuts fully wired. 14 acceptance criteria satisfied. Build successful, 0 TypeScript errors."
   
+  E6-S5:
+    title: "Optimización de Bundle - Code Splitting y Lazy Loading"
+    status: ready-for-dev
+    points: 5
+    priority: P2
+    created_date: "2026-06-15"
+    planning_completed: "2026-06-15"
+    story_file: "_bmad-output/implementation-artifacts/E6-S5.md"
+    story_context: "React.lazy() + Suspense code-splitting para CreateLeadModal (40kB), QuickNotesModal (20kB), QuickStatusModal (15kB), RiskWidgetContainer (25kB). Target: reducir bundle inicial de 501kB a <400kB. Performance: ~30% más rápido en 3G mobile. 13 acceptance criteria. Developer: Amelia. Estimated duration: 70 min."
+    estimated_duration_minutes: "70"
+    dev_readiness: "READY - Comprehensive story with implementation patterns, testing checklist, build metrics"
+    dependencies: "E1-E6 complete (all features implemented)"
+    blocks_epics: "none (E7/E8 can proceed in parallel)"
+    last_updated: "2026-06-15T02:00:00Z"
+  
   epic-6-retrospective: optional
   
   # ============================================================
@@ -846,22 +861,22 @@ total_epics: 8
 total_stories: 25
 total_story_points_estimate: 144
 epics_backlog: 2
-epics_in_progress: 0
-epics_done: 6
+epics_in_progress: 1
+epics_done: 5
 stories_backlog: 7
 stories_ready_for_dev: 0
-stories_in_progress: 0
-stories_done: 20
+stories_in_progress: 2
+stories_done: 18
 stories_in_review: 0
 
 # ============================================================
 # COMPLETION METRICS
 # ============================================================
 completion_summary:
-  total_points_completed: 186
-  total_points_in_progress: 0
+  total_points_completed: 170
+  total_points_in_progress: 16
   total_points_backlog: 15
-  completion_percentage: 100%
+  completion_percentage: 91.4%
   
 completed_epics:
   - "Epic 1: Infrastructure & Setup (42 pts) ✅"
@@ -869,9 +884,9 @@ completed_epics:
   - "Epic 3: Kanban Visualization (34 pts) ✅"
   - "Epic 4: Search, Filter & Alerts (21 pts) ✅"
   - "Epic 5: Timeline & Audit (13 pts) ✅"
-  - "Epic 6: UX/UI & Accessibility (21 pts) ✅"
 
-in_progress_epics: []
+in_progress_epics:
+  - "Epic 6: UX/UI & Accessibility (21 pts) - 2/4 stories in-progress (E6-S2, E6-S4) | 2/4 done (E6-S1, E6-S3)"
 
 backlog_epics:
   - "Epic 7: Performance & Reliability (15 pts)"
