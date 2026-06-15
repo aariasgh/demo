@@ -64,6 +64,12 @@ export default function QuickStatusModal() {
       return;
     }
 
+    // L-2: Array boundary check - ensure selectedIndex is valid
+    if (selectedIndex < 0 || selectedIndex >= STATUS_OPTIONS.length) {
+      showToast('Error: Estado no válido', 'error');
+      return;
+    }
+
     const newStatus = STATUS_OPTIONS[selectedIndex].apiValue;
     
     // Avoid no-op updates

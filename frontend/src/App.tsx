@@ -109,7 +109,9 @@ function App() {
     const handleOpenStatusModal = () => {
       if (focusedLead) {
         const leadId = typeof focusedLead.id === 'string' ? parseInt(focusedLead.id, 10) : focusedLead.id;
-        openStatusModal(leadId, focusedLead.status);
+        // L-1: Defensive null-check - provide default status if undefined
+        const leadStatus = focusedLead.status || 'Nuevo';
+        openStatusModal(leadId, leadStatus);
       }
     };
 
