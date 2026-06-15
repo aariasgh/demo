@@ -3,6 +3,7 @@
  * Displays lead information: name, company, email
  * Shows action buttons on hover
  * Prepared for drag-and-drop in E3-S3
+ * AC-2.1: Keyboard alternative to drag-drop via Status dropdown
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -38,10 +39,23 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
     setIsTouchActive(false);
   };
 
+  /**
+   * E6-S4 AC-3: Enter/Space to Open Lead Details Modal
+   * Keyboard handler for accessible interaction
+   */
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    // Enter or Space should open the lead details
+    if ((event.key === 'Enter' || event.key === ' ') && onEdit) {
+      event.preventDefault();
+      onEdit(lead.id);
+    }
+  };
+
   return (
-    <div
+    <article
       className={`
         p-3 md:p-4 rounded-lg border-2 transition-all duration-200 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
+        focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2
         ${(isHovering || isTouchActive)
           ? 'border-blue-500 shadow-md bg-blue-50'
           : 'border-gray-200 shadow-sm bg-white'}
@@ -51,8 +65,10 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
       onMouseLeave={() => setIsHovering(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      role="article"
-      aria-label={`Lead: ${lead.name} de ${lead.company}. Estado: ${lead.status}. Arrastra para cambiar estado.`}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`${lead.name} de ${lead.company}, estado ${lead.status}. Presiona Enter para abrir detalles, S para cambiar estado`}
       draggable={false}
     >
       {/* Lead Name - Bold, Responsive Font */}
@@ -75,6 +91,18 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
         <p className="text-gray-400 text-xs mt-0.5 md:mt-1 truncate" title={lead.phone}>
           {lead.phone}
         </p>
+      )}
+
+      {/* Priority Badge */}
+      {lead.priority && (
+        <div className="mt-2 flex items-center gap-1">
+          <span 
+            className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700"
+            aria-label={`Prioridad: ${lead.priority}`}
+          >
+            {lead.priority}
+          </span>
+        </div>
       )}
 
       {/* Action Buttons - Visible on Hover or Touch Long-Press */}
@@ -105,6 +133,6 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
       <div className="text-xs text-gray-300 mt-1 hidden">
         ID: {lead.id} | Status: {lead.status}
       </div>
-    </div>
+    </article>
   );
 }

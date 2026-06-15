@@ -1,4 +1,5 @@
 export type LeadStatus = 'Nuevo' | 'En contacto' | 'Propuesta enviada' | 'Cerrado';
+export type LeadPriority = 'Baja' | 'Media' | 'Alta' | 'Urgente';
 
 export interface Lead {
   id: number;
@@ -7,6 +8,7 @@ export interface Lead {
   email: string;
   phone?: string | null;
   status: LeadStatus;
+  priority?: LeadPriority;
   notes?: string | null;
   created_at: string;
   updated_at: string;

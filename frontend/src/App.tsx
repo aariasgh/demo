@@ -1,9 +1,15 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState } from 'react';
 import React from 'react';
 import './styles/index.css';
 import CreateLeadModal from './components/CreateLeadModal';
 import KanbanBoard from './components/KanbanBoard';
+import useKeyboardNavigation, { registerKeyboardHandler, unregisterKeyboardHandler } from './hooks/useKeyboardNavigation';
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import QuickNotesModal from './components/QuickNotesModal';
+import QuickStatusModal from './components/QuickStatusModal';
+import RiskWidgetContainer from './components/RiskWidgetContainer';
+import { useUIStore } from './store/uiStore';
 
 const ReactQueryDevtools =
   import.meta.env.DEV
@@ -74,22 +80,98 @@ class ErrorBoundary extends React.Component<
 }
 
 function App() {
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const { openCreateModal, openNotesModal, openStatusModal, toggleRiskWidget } = useUIStore();
+  
+  // Initialize global keyboard navigation
+  useKeyboardNavigation();
+  
+  // Register keyboard handlers for all shortcuts
+  React.useEffect(() => {
+    
+    const handleOpenHelpModal = () => {
+      setShowHelpModal(true);
+    };
+    
+    const handleCloseModal = () => {
+      setShowHelpModal(false);
+    };
+    
+    // E6-S4 Phase 4: Action Shortcuts
+    const handleOpenCreateModal = () => {
+      openCreateModal();
+    };
+
+    const handleOpenNotesModal = () => {
+      openNotesModal();
+    };
+
+    const handleOpenStatusModal = () => {
+      openStatusModal();
+    };
+
+    const handleToggleRiskWidget = () => {
+      toggleRiskWidget();
+    };
+    
+    // Register help modal handlers
+    registerKeyboardHandler('onOpenHelpModal', handleOpenHelpModal);
+    registerKeyboardHandler('onCloseModal', handleCloseModal);
+    
+    // Register action shortcut handlers (Phase 4: C, N, S, R)
+    registerKeyboardHandler('onOpenCreateModal', handleOpenCreateModal);
+    registerKeyboardHandler('onOpenNotesList', handleOpenNotesModal);
+    registerKeyboardHandler('onChangeStatus', handleOpenStatusModal);
+    registerKeyboardHandler('onToggleRiskWidget', handleToggleRiskWidget);
+    
+    return () => {
+      unregisterKeyboardHandler('onOpenHelpModal');
+      unregisterKeyboardHandler('onCloseModal');
+      unregisterKeyboardHandler('onOpenCreateModal');
+      unregisterKeyboardHandler('onOpenNotesList');
+      unregisterKeyboardHandler('onChangeStatus');
+      unregisterKeyboardHandler('onToggleRiskWidget');
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen bg-gray-50">
-          <header className="bg-white shadow">
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <header 
+            className="bg-white shadow sticky top-0 z-30"
+            role="banner"
+            aria-label="Encabezado de la aplicación"
+          >
             <div className="max-w-7xl mx-auto px-4 py-6">
               <h1 className="text-3xl font-bold text-gray-900">
                 Mini CRM de Seguimiento de Leads
               </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Panel de Kanban accesible para seguimiento de clientes potenciales
+              </p>
             </div>
           </header>
-          <main>
+          <main 
+            className="flex-1 flex flex-col"
+            aria-label="Área principal del panel de Kanban"
+            role="main"
+          >
             <KanbanBoard />
           </main>
           {/* Create Lead Modal - appears when triggered */}
           <CreateLeadModal />
+          
+          {/* Phase 4: Action Shortcut Modals */}
+          <QuickNotesModal />
+          <QuickStatusModal />
+          <RiskWidgetContainer />
+          
+          {/* Keyboard Shortcuts Help Modal */}
+          <KeyboardShortcutsModal 
+            isOpen={showHelpModal} 
+            onClose={() => setShowHelpModal(false)} 
+          />
         </div>
         <Suspense fallback={null}>
           <ReactQueryDevtools initialIsOpen={false} />

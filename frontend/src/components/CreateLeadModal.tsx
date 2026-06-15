@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+// @ts-ignore - focus-trap-react CommonJS compatibility
+import FocusTrap from 'focus-trap-react';
 import { LeadCreateSchema, getCharacterCount, exceedsCharLimit } from '../utils/validations';
 import { useCreateLead } from '../hooks/useCreateLead';
 import { useToast } from '../hooks/useToast';
@@ -165,14 +167,15 @@ export default function CreateLeadModal() {
   const notesExceedsLimit = exceedsCharLimit(notesValue, 1000);
 
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      onClick={handleBackdropClick}
-      data-testid="create-lead-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
+    <FocusTrap>
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        onClick={handleBackdropClick}
+        data-testid="create-lead-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
       {/* Modal Container: flex layout with sticky footer to prevent button scroll-out */}
       <div className="bg-white rounded-lg shadow-lg xs:max-w-[90vw] sm:max-w-md max-h-[90vh] w-full mx-4 flex flex-col">
         {/* Header */}
@@ -182,7 +185,7 @@ export default function CreateLeadModal() {
           </h2>
           <button
             onClick={closeCreateModal}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
             aria-label="Cerrar modal"
             type="button"
           >
@@ -205,7 +208,7 @@ export default function CreateLeadModal() {
               data-testid="lead-name-input"
               aria-invalid={!!errors.name}
               aria-describedby={errors.name ? 'name-error' : undefined}
-              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 transition-colors ${
                 errors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
               disabled={isPending}
@@ -229,7 +232,7 @@ export default function CreateLeadModal() {
               {...register('company')}
               aria-invalid={!!errors.company}
               aria-describedby={errors.company ? 'company-error' : undefined}
-              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 transition-colors ${
                 errors.company ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
               disabled={isPending}
@@ -255,7 +258,7 @@ export default function CreateLeadModal() {
               aria-invalid={!!(errors.email || emailValidationError)}
               aria-describedby={errors.email || emailValidationError ? 'email-error' : undefined}
               disabled={isPending}
-              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 transition-colors ${
                 errors.email || emailValidationError ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
             />
@@ -281,7 +284,7 @@ export default function CreateLeadModal() {
               {...register('phone')}
               aria-invalid={!!errors.phone}
               aria-describedby={errors.phone ? 'phone-error' : undefined}
-              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base min-h-[44px] border rounded-md focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 transition-colors ${
                 errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
               disabled={isPending}
@@ -305,7 +308,7 @@ export default function CreateLeadModal() {
               {...register('notes')}
               aria-invalid={notesExceedsLimit}
               aria-describedby={notesExceedsLimit ? 'notes-error' : 'notes-count'}
-              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors resize-none h-24 min-h-[120px] ${
+              className={`w-full px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border rounded-md focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 transition-colors resize-none h-24 min-h-[120px] ${
                 notesExceedsLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'
               }`}
               disabled={isPending}
@@ -332,7 +335,7 @@ export default function CreateLeadModal() {
             type="button"
             onClick={closeCreateModal}
             disabled={isPending}
-            className="flex-1 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base min-h-[48px] border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base min-h-[48px] border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
             tabIndex={0}
           >
             Cancelar
@@ -341,7 +344,7 @@ export default function CreateLeadModal() {
             type="submit"
             form="create-lead-form"
             disabled={!isValid || isPending || notesExceedsLimit || !!emailValidationError || emailValidating}
-            className="flex-1 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base min-h-[48px] bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 md:px-6 py-2 md:py-3 text-sm md:text-base min-h-[48px] bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
             tabIndex={0}
           >
             {isPending && (
@@ -352,5 +355,6 @@ export default function CreateLeadModal() {
         </div>
       </div>
     </div>
+    </FocusTrap>
   );
 }

@@ -12,6 +12,7 @@ import { useMemo, useState, useRef, useEffect } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { useLeadsByStatus } from '../hooks/useLeadsByStatus';
 import { useKanbanDragDrop } from '../hooks/useKanbanDragDrop';
+import { useKanbanKeyboardNavigation } from '../hooks/useKanbanKeyboardNavigation';
 import { useKanbanFilterStore } from '../store/kanbanFilterStore';
 import KanbanColumn from './KanbanColumn';
 import SearchFilterHeader from './SearchFilterHeader';
@@ -30,6 +31,10 @@ export default function KanbanBoard() {
   
   // E4-S2: At-risk leads widget state
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // E6-S4 Phase 2: Keyboard navigation state
+  const columnRefsMap = useRef<Map<LeadStatus, HTMLElement>>(new Map());
+  const leadRefsMap = useRef<Map<string, HTMLElement>>(new Map());
 
   /**
    * BAJO-11: Loading/Transition State During Filter Changes
@@ -63,6 +68,15 @@ export default function KanbanBoard() {
     }
     return undefined;
   }, [selectedStatus, searchQuery, selectedPriorities]);
+
+  // E6-S4 Phase 2: Keyboard event handlers for Tab and Arrow navigation
+  const handleKanbanKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Tab') {
+      handleTabNavigation(event as any, !event.shiftKey);
+    } else if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      handleArrowNavigation(event as any);
+    }
+  };
 
   /**
    * MEDIUM-8: Triple Filter Pipeline with AND Logic
@@ -146,6 +160,27 @@ export default function KanbanBoard() {
   const visibleColumns = useMemo(() => {
     return getVisibleColumns();
   }, [getVisibleColumns]);
+
+  // E6-S4 Phase 2: Initialize keyboard navigation hook (after visibleColumns and filteredGroupedLeads are defined)
+  const leadsPerColumn = visibleColumns.map((status: LeadStatus) => filteredGroupedLeads[status]?.length ?? 0);
+  const { handleTabNavigation, handleArrowNavigation } = useKanbanKeyboardNavigation({
+    totalColumns: visibleColumns.length,
+    leadsPerColumn,
+    onColumnFocus: (columnIndex: number) => {
+      const status = visibleColumns[columnIndex];
+      const columnEl = columnRefsMap.current.get(status);
+      columnEl?.focus();
+    },
+    onLeadFocus: (columnIndex: number, leadIndex: number) => {
+      const status = visibleColumns[columnIndex];
+      const leads = filteredGroupedLeads[status] ?? [];
+      if (leadIndex >= 0 && leadIndex < leads.length) {
+        const leadId = leads[leadIndex].id;
+        const leadEl = leadRefsMap.current.get(String(leadId));
+        leadEl?.focus();
+      }
+    },
+  });
 
   if (isLoading) {
     return (
@@ -259,10 +294,17 @@ export default function KanbanBoard() {
               E4-S3: Only render visible columns based on selectedStatus filter
               
               BAJO-11: Apply fade transition when filters change for visual feedback
+              
+              E6-S4 Phase 2: Add keyboard navigation handlers
             */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 relative transition-opacity duration-300 ${
-              isTransitioning ? 'opacity-60' : 'opacity-100'
-            }`}>
+            <div 
+              className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 relative transition-opacity duration-300 ${
+                isTransitioning ? 'opacity-60' : 'opacity-100'
+              }`}
+              onKeyDown={handleKanbanKeyDown}
+              role="region"
+              aria-label="Kanban board with keyboard navigation"
+            >
               {/* Overlay during drag sync */}
               {isDragging && (
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg z-50 pointer-events-none backdrop-blur-sm" data-testid="drag-sync-overlay">
@@ -280,6 +322,14 @@ export default function KanbanBoard() {
                   status={status}
                   leads={filteredGroupedLeads[status] ?? []}
                   isDisabled={isPending}
+                  ref={(el) => {
+                    if (el) {
+                      columnRefsMap.current.set(status, el);
+                    } else {
+                      columnRefsMap.current.delete(status);
+                    }
+                  }}
+                  leadRefsMap={leadRefsMap}
                 />
               ))}
             </div>

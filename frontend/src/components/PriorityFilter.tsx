@@ -14,7 +14,8 @@
  * - AC-3.4: "Mostrar todo" resets filter
  */
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { registerKeyboardHandler, unregisterKeyboardHandler } from '../hooks/useKeyboardNavigation';
 import { useKanbanFilterStore, type LeadPriority } from '../store/kanbanFilterStore';
 
 const PRIORITY_OPTIONS: LeadPriority[] = ['Baja', 'Media', 'Alta', 'Urgente'];
@@ -30,6 +31,7 @@ export default function PriorityFilter() {
   const { selectedPriorities, togglePriority, clearPriorities } = useKanbanFilterStore();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handlePriorityToggle = (priority: LeadPriority) => {
     togglePriority(priority);
@@ -47,14 +49,26 @@ export default function PriorityFilter() {
     }
   };
 
+  // E6-S4 Phase 3: Register "F" keyboard shortcut for filter focus
+  useEffect(() => {
+    registerKeyboardHandler('onFocusFilter', () => {
+      buttonRef.current?.focus();
+    });
+
+    return () => {
+      unregisterKeyboardHandler('onFocusFilter');
+    };
+  }, []);
+
   return (
     <div className="relative" ref={dropdownRef} onClick={handleClickOutside}>
       {/* Filter Button — AC-3.1: Dropdown trigger */}
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
+        className="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
         data-testid="priority-filter-button"
-        aria-label="Abrir filtro de prioridad"
+        aria-label="Abrir filtro de prioridad (presiona F para enfocar)"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >

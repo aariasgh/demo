@@ -525,6 +525,98 @@ async def get_leads_at_risk(
         )
 
 
+@router.get("/validate-email", status_code=status.HTTP_200_OK)
+async def validate_email(
+    email: str = Query(..., description="Email to validate for uniqueness"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Validate that an email is available (not used by another lead).
+    
+    Used by frontend form during onBlur to check email uniqueness before submission.
+    
+    **Query Parameters:**
+    - email: Email address to validate (required)
+    
+    **Response (200 OK) - Email is available:**
+    ```json
+    {
+        "available": true,
+        "email": "juan@techcorp.com"
+    }
+    ```
+    
+    **Response (409 Conflict) - Email already exists:**
+    ```json
+    {
+        "available": false,
+        "email": "juan@techcorp.com",
+        "message": "Email ya existe en el sistema"
+    }
+    ```
+    
+    **Raises:**
+        HTTPException 409: Email already exists in database
+        HTTPException 500: Unexpected database error
+    
+    **Frontend Usage:**
+    ```typescript
+    const handleEmailBlur = async (email: string) => {
+        const response = await fetch(`/api/leads/validate-email?email=${encodeURIComponent(email)}`);
+        
+        if (!response.ok) {
+            // 409 = email duplicate
+            setEmailValidationError('Email ya existe en el sistema');
+        } else {
+            setEmailValidationError(null);
+        }
+    };
+    ```
+    """
+    
+    try:
+        # Check if email exists in database
+        stmt = select(Lead).where(Lead.email == email)
+        result = await db.execute(stmt)
+        existing_lead = result.scalars().first()
+        
+        if existing_lead:
+            logger.warning(
+                f"Email validation - email already exists",
+                extra={
+                    "email": email,
+                    "existing_lead_id": existing_lead.id,
+                }
+            )
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email ya existe en el sistema",
+                headers={"X-Error-Code": "EMAIL_DUPLICATE"},
+            )
+        
+        # Email is available
+        logger.debug(f"Email validation - email available", extra={"email": email})
+        
+        return {
+            "available": True,
+            "email": email,
+        }
+        
+    except HTTPException:
+        raise
+        
+    except Exception as e:
+        logger.error(
+            f"Unexpected error validating email",
+            extra={"email": email, "error": str(e)},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al validar email",
+        )
+
+
 @router.get("/{lead_id}", response_model=LeadResponse, status_code=status.HTTP_200_OK)
 async def get_lead(
     lead_id: int,
@@ -727,6 +819,5 @@ async def change_lead_status(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error al cambiar estado del lead",
         )
-
 
 

@@ -15,8 +15,9 @@
  * - AC-5.2: Smooth typing (no lag)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useKanbanFilterStore } from '../store/kanbanFilterStore';
+import { registerKeyboardHandler, unregisterKeyboardHandler } from '../hooks/useKeyboardNavigation';
 import PriorityFilter from './PriorityFilter';
 
 export default function SearchFilterHeader() {
@@ -27,6 +28,9 @@ export default function SearchFilterHeader() {
     selectedPriorities,
     hasActiveFilters,
   } = useKanbanFilterStore();
+
+  // E6-S4 Phase 3: Ref for keyboard focus (/ shortcut)
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Local input state for immediate UI feedback
   const [inputValue, setInputValue] = useState(searchQuery);
@@ -39,8 +43,17 @@ export default function SearchFilterHeader() {
 
     return () => clearTimeout(timer);
   }, [inputValue, setSearchQuery]);
-  // DECISION #2: Removed second useEffect for state sync simplification (unidirectional pattern)
-  // Store now only updates from this component's input, avoiding feedback loops
+
+  // E6-S4 Phase 3: Register "/" keyboard shortcut for search focus
+  useEffect(() => {
+    registerKeyboardHandler('onFocusSearch', () => {
+      searchInputRef.current?.focus();
+    });
+
+    return () => {
+      unregisterKeyboardHandler('onFocusSearch');
+    };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // E4-S1 FIX: Trim whitespace to avoid silent filtering when user types spaces
@@ -53,28 +66,38 @@ export default function SearchFilterHeader() {
   };
 
   return (
-    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm" role="region" aria-label="Barra de búsqueda y filtros">
       <div className="px-4 md:px-6 py-4">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row gap-4 md:gap-6 md:items-center">
           {/* Search Box — AC-1.1: Sticky header, AC-1.2: Placeholder */}
           <div className="flex-1 relative">
+            <label htmlFor="search-input" className="block text-sm font-medium text-gray-700 mb-1">
+              Buscar leads
+            </label>
             <input
+              ref={searchInputRef}
+              id="search-input"
               type="text"
-              placeholder="Buscar: nombre, empresa, email..."
+              placeholder="Nombre, empresa o email..."
               value={inputValue}
               onChange={handleInputChange}
               data-testid="search-input"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              aria-label="Buscar leads por nombre, empresa o email"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 focus:border-transparent transition-all"
+              aria-label="Buscar leads por nombre, empresa o email (presiona / para enfocar)"
+              aria-describedby="search-description"
             />
+            <p id="search-description" className="text-xs text-gray-500 mt-1">
+              Busca en nombre, empresa o email (en tiempo real)
+            </p>
             {/* Clear Button — AC-2.3: Clear button (X) */}
             {inputValue && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 focus:outline-2 focus:outline-blue-500 rounded"
                 aria-label="Limpiar búsqueda"
-                title="Limpiar"
+                title="Limpiar búsqueda"
+                type="button"
               >
                 ✕
               </button>

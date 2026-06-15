@@ -733,9 +733,50 @@ development_status:
   
   E6-S3:
     title: "Accesibilidad (WCAG AA) e Internacionalización Base"
-    status: backlog
+    status: done
     points: 5
     priority: P2
+    created_date: "2026-06-14"
+    planning_completed: "2026-06-14"
+    story_started_date: "2026-06-14"
+    story_completed_date: "2026-06-14"
+    baseline_commit: "3677b08d4c39901f18a0873e9c08c61168117f7c"
+    code_review_status: "completed"
+    code_review_date: "2026-06-14"
+    story_context: "Keyboard navigation (Tab, Escape), ARIA attributes (labels, roles, live regions), semantic HTML (section, article, main, headings), focus management (outline, trap), color contrast (4.5:1), prefers-reduced-motion support, i18n base (Spanish locale, dd/mm/yyyy dates). 14 Gherkin AC. Depends on E6-S1 responsive + E6-S2 animations. Developer: Amelia. Estimated duration: 2.5-3h."
+    last_updated: "2026-06-14"
+    completion_notes: "✅ COMPLETE - Focus trap, clear button positioning, role=\"region\" fixes. 232 tests passing. Build success."
+  
+  E6-S4:
+    title: "Keyboard Navigation & Shortcuts for Kanban"
+    status: in-progress
+    points: 8
+    priority: P2
+    created_date: "2026-06-14"
+    planning_completed: "2026-06-14"
+    story_started_date: "2026-06-14"
+    story_file: "_bmad-output/implementation-artifacts/E6-S4.md"
+    baseline_commit: "3677b08d4c39901f18a0873e9c08c61168117f7c"
+    story_context: "Tab/Arrow navigation between columns, Enter/Space for details, S for status change, N for notes, C for create, / for search, F for filter, R for risk widget, ? for help. 14 acceptance criteria. All keyboard shortcuts centralized. Depends on E6-S1 responsive + E6-S3 accessibility. Developer: Amelia. Estimated duration: 3-4h."
+    estimated_duration_hours: "3-4"
+    story_creation_completed: "2026-06-14T20:35:00Z"
+    dev_readiness: "READY - Ultimate context engine analysis completed - comprehensive developer guide created"
+    last_updated: "2026-06-14T20:55:00Z"
+    phase_1_status: "✅ COMPLETE"
+    phase_1_completion_date: "2026-06-14T20:50:00Z"
+    phase_1_notes: "Foundation Setup - keyboardConfig (14 tests ✅), useKeyboardNavigation hook (9 tests ✅), KeyboardShortcutsModal (12 tests ✅), App.tsx integration ✅. Total: 35 new tests, build successful."
+    phase_2_status: "✅ COMPLETE"
+    phase_2_progress: "Arrow key navigation implementation - useKanbanKeyboardNavigation hook (10 tests ✅), Tab cycling between columns, Arrow keys within column, KanbanBoard integration (6 tests ✅). KanbanColumn forwardRef with leadRefsMap tracking. Keyboard event handlers for Tab/Arrow. All Phase 2 tests passing."
+    phase_2_completion_date: "2026-06-14T21:00:00Z"
+    phase_2_tests_total: "16 tests passing (6 integration + 10 hook tests)"
+    phase_2_completion_estimate: "COMPLETE - 100% finished"
+    phase_3_status: "✅ COMPLETE"
+    phase_3_completion_date: "2026-06-14T21:05:00Z"
+    phase_3_tests_total: "12 tests passing (SearchFilterHeader keyboard + PriorityFilter keyboard)"
+    phase_3_notes: "SearchFilterHeader / shortcut (focus search-input), PriorityFilter F shortcut (focus filter button). Updated aria-labels with keyboard hints. All Phase 3 tests passing (12/12). Build successful."
+    phase_4_status: "🟡 IN PROGRESS"
+    phase_4_notes: "Action Shortcuts - C (create modal), N (notes list), S (status change), R (risk widget). Implementing callback wiring in App.tsx and registering handlers."
+    total_keyboard_tests: "63 tests passing across all phases"
   
   epic-6-retrospective: optional
   

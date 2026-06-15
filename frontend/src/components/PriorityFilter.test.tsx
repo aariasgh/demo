@@ -31,7 +31,7 @@ describe('PriorityFilter', () => {
   it('should display all 4 priority options when dropdown opened', () => {
     render(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
     fireEvent.click(filterButton);
 
     expect(screen.getByLabelText(/Filtrar por prioridad Baja/)).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe('PriorityFilter', () => {
 
     render(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
     fireEvent.click(filterButton);
 
     const altaCheckbox = screen.getByLabelText(/Filtrar por prioridad Alta/) as HTMLInputElement;
@@ -70,7 +70,7 @@ describe('PriorityFilter', () => {
 
     render(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
     fireEvent.click(filterButton);
 
     // Both should be checked
@@ -93,7 +93,7 @@ describe('PriorityFilter', () => {
 
     rerender(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
     fireEvent.click(filterButton);
 
     expect((screen.getByLabelText(/Filtrar por prioridad Alta/) as HTMLInputElement).checked).toBe(true);
@@ -110,7 +110,7 @@ describe('PriorityFilter', () => {
 
     render(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
     fireEvent.click(filterButton);
 
     const mostrarTodoButton = screen.getByLabelText('Mostrar todas las prioridades');
@@ -129,7 +129,7 @@ describe('PriorityFilter', () => {
 
     render(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
     expect(filterButton).toHaveTextContent('Prioridad (2)');
   });
 
@@ -137,7 +137,7 @@ describe('PriorityFilter', () => {
   it('should open and close dropdown on button click', () => {
     render(<PriorityFilter />);
 
-    const filterButton = screen.getByLabelText('Abrir filtro de prioridad');
+    const filterButton = screen.getByLabelText('Abrir filtro de prioridad (presiona F para enfocar)');
 
     // Initially closed
     expect(screen.queryByLabelText(/Filtrar por prioridad Baja/)).not.toBeInTheDocument();

@@ -33,18 +33,19 @@ describe('SearchFilterHeader', () => {
   });
 
   // AC-1.2: Placeholder text
-  it('should display placeholder text "Buscar: nombre, empresa, email..."', () => {
+  it('should display placeholder text "Nombre, empresa o email..."', () => {
     render(<SearchFilterHeader />);
-    const input = screen.getByPlaceholderText('Buscar: nombre, empresa, email...');
+    const input = screen.getByPlaceholderText('Nombre, empresa o email...');
     expect(input).toBeInTheDocument();
   });
 
   // AC-1.1: Sticky header
   it('should render with sticky positioning', () => {
     render(<SearchFilterHeader />);
-    const input = screen.getByPlaceholderText('Buscar: nombre, empresa, email...');
-    const header = input.closest('div')?.parentElement;
-    expect(header).toHaveClass('sticky');
+    const input = screen.getByPlaceholderText('Nombre, empresa o email...');
+    // Find the sticky container by traversing up from input
+    const stickyContainer = input.closest('[role="region"]');
+    expect(stickyContainer).toHaveClass('sticky');
   });
 
   // AC-1.5: Debounce 300ms
@@ -59,7 +60,7 @@ describe('SearchFilterHeader', () => {
     });
 
     render(<SearchFilterHeader />);
-    const input = screen.getByPlaceholderText('Buscar: nombre, empresa, email...');
+    const input = screen.getByPlaceholderText('Nombre, empresa o email...');
 
     // Type rapidly
     fireEvent.change(input, { target: { value: 'j' } });
@@ -130,7 +131,9 @@ describe('SearchFilterHeader', () => {
     
     // Should show filters indicator
     expect(screen.getByText(/Búsqueda: "juan"/)).toBeInTheDocument();
-    expect(screen.getByText(/prioridad/i)).toBeInTheDocument();
+    // Check for the filter count indicator
+    const filterIndicators = screen.getAllByText(/prioridad/i);
+    expect(filterIndicators.length).toBeGreaterThan(0);
   });
 
   // E4-S1 FIX: Whitespace trimming (AC-6.3)
@@ -145,7 +148,7 @@ describe('SearchFilterHeader', () => {
     });
 
     render(<SearchFilterHeader />);
-    const input = screen.getByPlaceholderText('Buscar: nombre, empresa, email...') as HTMLInputElement;
+    const input = screen.getByPlaceholderText('Nombre, empresa o email...') as HTMLInputElement;
 
     // Type spaces and whitespace
     fireEvent.change(input, { target: { value: '   juan   ' } });

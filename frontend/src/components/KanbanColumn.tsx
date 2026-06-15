@@ -6,6 +6,7 @@
 
 import { Droppable, Draggable } from 'react-beautiful-dnd';
 import type { DroppableProvided, DroppableStateSnapshot, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
+import { forwardRef } from 'react';
 import LeadCard from './LeadCard';
 import { STATUS_COLORS } from '../utils/constants';
 import type { Lead } from '../types';
@@ -14,9 +15,11 @@ interface KanbanColumnProps {
   status: string;
   leads: Lead[];
   isDisabled?: boolean;
+  leadRefsMap?: React.MutableRefObject<Map<string, HTMLElement>>;
 }
 
-export default function KanbanColumn({ status, leads, isDisabled = false }: KanbanColumnProps) {
+const KanbanColumn = forwardRef<HTMLElement, KanbanColumnProps>(
+  ({ status, leads, isDisabled = false, leadRefsMap }, ref) => {
   const count = leads.length;
   const color = STATUS_COLORS[status];
   if (!color) {
@@ -25,9 +28,22 @@ export default function KanbanColumn({ status, leads, isDisabled = false }: Kanb
   const displayColor = color || '#EF4444';
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full" data-testid={`kanban-column-${status.toLowerCase()}`}>
-      {/* Column Header */}
-      <div className="flex items-center justify-between p-4 pb-3 border-b border-gray-200">
+    <section 
+      ref={ref}
+      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full" 
+      data-testid={`kanban-column-${status.toLowerCase()}`}
+      role="region"
+      aria-label={`Columna ${status}, ${leads.length} leads`}
+      aria-live="polite"
+      aria-atomic="false"
+    >
+      {/* Column Header - Focusable for Keyboard Navigation (E6-S4 AC-1) */}
+      <div 
+        className="flex items-center justify-between p-4 pb-3 border-b border-gray-200 focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2 rounded cursor-pointer hover:bg-gray-50 transition-colors"
+        tabIndex={0}
+        role="button"
+        aria-label={`${status} column header, ${leads.length} leads. Tab to navigate between columns, Arrow keys to navigate leads`}
+      >
         <div className="flex items-center gap-3 flex-1">
           {/* Status Icon - Colored Circle */}
           <div
@@ -81,7 +97,12 @@ export default function KanbanColumn({ status, leads, isDisabled = false }: Kanb
                 >
                   {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
                     <div
-                      ref={provided.innerRef}
+                      ref={(el) => {
+                        provided.innerRef(el);
+                        if (el && leadRefsMap) {
+                          leadRefsMap.current.set(String(lead.id), el);
+                        }
+                      }}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
                       className={`transition-all duration-200 ${
@@ -110,6 +131,11 @@ export default function KanbanColumn({ status, leads, isDisabled = false }: Kanb
           </div>
         )}
       </Droppable>
-    </div>
+    </section>
   );
-}
+  }
+);
+
+KanbanColumn.displayName = 'KanbanColumn';
+
+export default KanbanColumn;
