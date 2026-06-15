@@ -8,7 +8,23 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import KanbanBoard from './KanbanBoard';
 import * as useLeadsByStatusHook from '../hooks/useLeadsByStatus';
+import * as kanbanFilterStoreHook from '../store/kanbanFilterStore';
+import * as uiStoreHook from '../store/uiStore';
+import * as useKanbanDragDropHook from '../hooks/useKanbanDragDrop';
 import type { Lead } from '../types';
+
+// Mock LeadsAtRiskWidget and LeadsAtRiskPanel to avoid fetch issues in tests
+vi.mock('./LeadsAtRiskWidget', () => ({
+  default: ({ onOpenPanel }: { onOpenPanel: () => void }) => (
+    <div data-testid="leads-at-risk-widget" onClick={onOpenPanel} />
+  ),
+}));
+
+vi.mock('./LeadsAtRiskPanel', () => ({
+  default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
+    isOpen ? <div data-testid="leads-at-risk-panel" onClick={onClose} /> : null
+  ),
+}));
 
 describe('KanbanBoard', () => {
   let queryClient: QueryClient;
@@ -19,6 +35,25 @@ describe('KanbanBoard', () => {
         queries: { retry: false },
       },
     });
+    
+    // Mock Zustand stores for each test
+    vi.spyOn(kanbanFilterStoreHook, 'useKanbanFilterStore').mockReturnValue({
+      searchQuery: '',
+      selectedPriorities: [],
+      selectedStatus: 'Todos',
+      getVisibleColumns: () => ['Nuevo', 'En contacto', 'Propuesta enviada', 'Cerrado'],
+    } as any);
+    
+    vi.spyOn(uiStoreHook, 'useUIStore').mockReturnValue({
+      isCreateModalOpen: false,
+      closeCreateModal: vi.fn(),
+    } as any);
+    
+    vi.spyOn(useKanbanDragDropHook, 'useKanbanDragDrop').mockReturnValue({
+      isDragging: false,
+      handleDragEnd: vi.fn(),
+      isPending: false,
+    } as any);
   });
 
   const mockLeads: Lead[] = [
@@ -88,7 +123,8 @@ describe('KanbanBoard', () => {
       isLoading: false,
       error: null,
       totalLeads: 0,
-    });
+      refetch: vi.fn(),
+    } as any);
 
     renderWithProviders(<KanbanBoard />);
 
@@ -109,7 +145,8 @@ describe('KanbanBoard', () => {
       isLoading: false,
       error: null,
       totalLeads: mockLeads.length,
-    });
+      refetch: vi.fn(),
+    } as any);
 
     renderWithProviders(<KanbanBoard />);
 
@@ -133,7 +170,8 @@ describe('KanbanBoard', () => {
       isLoading: false,
       error: null,
       totalLeads: 0,
-    });
+      refetch: vi.fn(),
+    } as any);
 
     renderWithProviders(<KanbanBoard />);
 
@@ -152,8 +190,7 @@ describe('KanbanBoard', () => {
       },
       isLoading: true,
       error: null,
-      totalLeads: 0,
-    });
+      totalLeads: 0,      refetch: vi.fn(),    });
 
     const { container } = renderWithProviders(<KanbanBoard />);
 
@@ -172,8 +209,7 @@ describe('KanbanBoard', () => {
       },
       isLoading: false,
       error: new Error('API Error'),
-      totalLeads: 0,
-    });
+      totalLeads: 0,      refetch: vi.fn(),    });
 
     renderWithProviders(<KanbanBoard />);
 
@@ -191,7 +227,8 @@ describe('KanbanBoard', () => {
       isLoading: false,
       error: null,
       totalLeads: mockLeads.length,
-    });
+      refetch: vi.fn(),
+    } as any);
 
     renderWithProviders(<KanbanBoard />);
 
@@ -209,7 +246,8 @@ describe('KanbanBoard', () => {
       isLoading: false,
       error: null,
       totalLeads: mockLeads.length,
-    });
+      refetch: vi.fn(),
+    } as any);
 
     renderWithProviders(<KanbanBoard />);
 
@@ -220,3 +258,4 @@ describe('KanbanBoard', () => {
     expect(screen.getByText('Lead 5')).toBeInTheDocument();
   });
 });
+

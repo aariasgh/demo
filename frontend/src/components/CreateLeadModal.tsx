@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LeadCreateSchema, getCharacterCount, exceedsCharLimit } from '../utils/validations';
 import { useCreateLead } from '../hooks/useCreateLead';
+import { useToast } from '../hooks/useToast';
 import { useUIStore } from '../store/uiStore';
 import type { LeadCreateFormData } from '../utils/validations';
 
@@ -21,6 +22,7 @@ import type { LeadCreateFormData } from '../utils/validations';
 export default function CreateLeadModal() {
   const { isCreateModalOpen, closeCreateModal } = useUIStore();
   const { mutate: createLead, isPending } = useCreateLead();
+  const { showSuccess, showError } = useToast();
   const [notesCharCount, setNotesCharCount] = useState(0);
   const [emailValidationError, setEmailValidationError] = useState<string | null>(null);
   const [emailValidating, setEmailValidating] = useState(false);
@@ -89,8 +91,23 @@ export default function CreateLeadModal() {
     };
     createLead(cleanedData, {
       onSuccess: () => {
+        showSuccess('Lead creado exitosamente');
         reset();
         closeCreateModal();
+      },
+      onError: (error) => {
+        // Extract error message from React Query error object
+        let errorMessage = 'Error al crear el lead';
+        if (error instanceof Error) {
+          // Check for axios response structure (from React Query)
+          if ('response' in error && error.response) {
+            const response = error.response as any;
+            errorMessage = response.data?.message || response.statusText || error.message;
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        showError(errorMessage);
       },
     });
   };

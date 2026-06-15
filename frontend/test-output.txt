@@ -1,0 +1,455 @@
+npm warn Unknown cli config "--run". This will stop working in the next major version of npm.
+
+> frontend@0.0.0 test
+> vitest KanbanBoard.test.tsx
+
+
+ RUN  v4.1.8 C:/SDD/Demo/frontend
+
+ ÔØ» src/components/KanbanBoard.test.tsx (7 tests | 2 failed) 452ms
+     ├ù should render 4 columns with correct status titles 99ms
+     ├ù should show empty state for columns without leads 17ms
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 2 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/components/KanbanBoard.test.tsx > KanbanBoard > should render 4 columns with correct status titles
+TestingLibraryElementError: Unable to find an element with the text: Propuesta enviada. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="min-h-screen bg-gray-50"
+      data-testid="kanban-board"
+    >
+      <div
+        class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm"
+      >
+        <div
+          class="px-4 md:px-6 py-4"
+        >
+          <div
+            class="flex flex-col md:flex-row gap-4 md:gap-6 md:items-center"
+          >
+            <div
+              class="flex-1 relative"
+            >
+              <input
+                aria-label="Buscar leads por nombre, empresa o email"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                data-testid="search-input"
+                placeholder="Buscar: nombre, empresa, email..."
+                type="text"
+                value=""
+              />
+            </div>
+            <div
+              class="relative"
+            >
+              <button
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Abrir filtro de prioridad"
+                class="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
+                data-testid="priority-filter-button"
+              >
+                <span
+                  class="text-sm font-medium"
+                >
+                  Prioridad
+                </span>
+                <svg
+                  class="w-4 h-4 transition-transform "
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="px-4 md:px-6"
+      >
+        <div
+          aria-label="Filtrar leads por estado"
+          class="flex gap-2 pb-4 border-b border-gray-200 overflow-x-auto sticky top-16 bg-white z-10 md:gap-3"
+          data-testid="status-filter-tabs"
+          role="tablist"
+        >
+          <button
+            aria-description="Mostrar todos los leads sin filtrar"
+            aria-label="Filtrar por Todos"
+            aria-pressed="true"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-blue-500 text-white border-b-2 border-blue-600
+            "
+            data-testid="status-tab-all"
+            role="tab"
+            tabindex="0"
+          >
+            Todos
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado Nuevo"
+            aria-label="Filtrar por Nuevo"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-nuevo"
+            role="tab"
+            tabindex="-1"
+          >
+            Nuevo
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado En contacto"
+            aria-label="Filtrar por En contacto"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-en contacto"
+            role="tab"
+            tabindex="-1"
+          >
+            En contacto
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado Propuesta enviada"
+            aria-label="Filtrar por Propuesta"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-propuesta enviada"
+            role="tab"
+            tabindex="-1"
+          >
+            Propuesta
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado Cerrado"
+            aria-label="Filtrar por Cerrado"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-cerrado"
+            role="tab"
+            tabindex="-1"
+          >
+            Cerrado
+          </button>
+        </div>
+      </div>
+      <div
+        class="p-4 md:p-6"
+        data-testid="kanban-header"
+      >
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          class="sr-only"
+          id="kanban-status-announcer"
+          role="status"
+        />
+        <div
+          class="mb-6"
+        >
+          <div
+            class="p-4 bg-gray-100 rounded-lg border border-gray-300 space-y-3"
+          >
+            <div
+              class="flex items-center gap-2"
+            >
+              <div
+                class="w-8 h-8 bg-gray-300 rounded-full animate-pulse"
+              />
+              <div
+                class="h-6 bg-gray-300 rounded w-48 animate-pulse"
+              />
+            </div>
+            <div
+              class="h-4 bg-gray-300 rounded w-full animate-pulse"
+            />
+          </div>
+        </div>
+        <div
+          class="mb-8"
+        >
+          <h1
+            class="text-3xl md:text-4xl font-bold text-gray-900"
+          >
+            Pipeline de Ventas
+          </h1>
+          <p
+            class="text-gray-600 mt-2"
+          >
+            Total de leads: 
+            0
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ÔØ» src/components/KanbanBoard.test.tsx:97:19
+     95|     expect(screen.getByText('Nuevo')).toBeInTheDocument();
+     96|     expect(screen.getByText('En contacto')).toBeInTheDocument();
+     97|     expect(screen.getByText('Propuesta enviada')).toBeInTheDocument();
+       |                   ^
+     98|     expect(screen.getByText('Cerrado')).toBeInTheDocument();
+     99|   });
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/2]ÔÄ»
+
+ FAIL  src/components/KanbanBoard.test.tsx > KanbanBoard > should show empty state for columns without leads
+TestingLibraryElementError: Unable to find an element with the text: No hay leads a├║n. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+<body>
+  <div
+    aria-atomic="true"
+    aria-live="assertive"
+    id="rbd-announcement-0"
+    style="position: absolute; width: 1px; height: 1px; margin: -1px; border: 0px; padding: 0px; overflow: hidden; clip: rect(0px); clip-path: inset(100%);"
+  />
+  <div>
+    <div
+      class="min-h-screen bg-gray-50"
+      data-testid="kanban-board"
+    >
+      <div
+        class="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm"
+      >
+        <div
+          class="px-4 md:px-6 py-4"
+        >
+          <div
+            class="flex flex-col md:flex-row gap-4 md:gap-6 md:items-center"
+          >
+            <div
+              class="flex-1 relative"
+            >
+              <input
+                aria-label="Buscar leads por nombre, empresa o email"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                data-testid="search-input"
+                placeholder="Buscar: nombre, empresa, email..."
+                type="text"
+                value=""
+              />
+            </div>
+            <div
+              class="relative"
+            >
+              <button
+                aria-expanded="false"
+                aria-haspopup="true"
+                aria-label="Abrir filtro de prioridad"
+                class="px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors flex items-center gap-2"
+                data-testid="priority-filter-button"
+              >
+                <span
+                  class="text-sm font-medium"
+                >
+                  Prioridad
+                </span>
+                <svg
+                  class="w-4 h-4 transition-transform "
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="px-4 md:px-6"
+      >
+        <div
+          aria-label="Filtrar leads por estado"
+          class="flex gap-2 pb-4 border-b border-gray-200 overflow-x-auto sticky top-16 bg-white z-10 md:gap-3"
+          data-testid="status-filter-tabs"
+          role="tablist"
+        >
+          <button
+            aria-description="Mostrar todos los leads sin filtrar"
+            aria-label="Filtrar por Todos"
+            aria-pressed="true"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-blue-500 text-white border-b-2 border-blue-600
+            "
+            data-testid="status-tab-all"
+            role="tab"
+            tabindex="0"
+          >
+            Todos
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado Nuevo"
+            aria-label="Filtrar por Nuevo"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-nuevo"
+            role="tab"
+            tabindex="-1"
+          >
+            Nuevo
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado En contacto"
+            aria-label="Filtrar por En contacto"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-en contacto"
+            role="tab"
+            tabindex="-1"
+          >
+            En contacto
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado Propuesta enviada"
+            aria-label="Filtrar por Propuesta"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-propuesta enviada"
+            role="tab"
+            tabindex="-1"
+          >
+            Propuesta
+          </button>
+          <button
+            aria-description="Mostrar solo leads en estado Cerrado"
+            aria-label="Filtrar por Cerrado"
+            aria-pressed="false"
+            class="
+              px-4 py-2 whitespace-nowrap font-medium rounded text-sm md:text-base
+              transition-colors duration-200 flex-shrink-0
+              bg-gray-100 text-gray-700 hover:bg-gray-200
+            "
+            data-testid="status-tab-cerrado"
+            role="tab"
+            tabindex="-1"
+          >
+            Cerrado
+          </button>
+        </div>
+      </div>
+      <div
+        class="p-4 md:p-6"
+        data-testid="kanban-header"
+      >
+        <div
+          aria-atomic="true"
+          aria-live="polite"
+          class="sr-only"
+          id="kanban-status-announcer"
+          role="status"
+        />
+        <div
+          class="mb-6"
+        >
+          <div
+            class="p-4 bg-gray-100 rounded-lg border border-gray-300 space-y-3"
+          >
+            <div
+              class="flex items-center gap-2"
+            >
+              <div
+                class="w-8 h-8 bg-gray-300 rounded-full animate-pulse"
+              />
+              <div
+                class="h-6 bg-gray-300 rounded w-48 animate-pulse"
+              />
+            </div>
+            <div
+              class="h-4 bg-gray-300 rounded w-full animate-pulse"
+            />
+          </div>
+        </div>
+        <div
+          class="mb-8"
+        >
+          <h1
+            class="text-3xl md:text-4xl font-bold text-gray-900"
+          >
+            Pipeline de Ventas
+          </h1>
+          <p
+            class="text-gray-600 mt-2"
+          >
+            Total de leads: 
+            0
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+ ÔØ» Object.getElementError node_modules/@testing-library/dom/dist/config.js:37:19
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ÔØ» node_modules/@testing-library/dom/dist/query-helpers.js:109:15
+ ÔØ» src/components/KanbanBoard.test.tsx:141:32
+    139|
+    140|     // Should show empty state 4 times (one per column)
+    141|     const emptyStates = screen.getAllByText('No hay leads a├║n');
+       |                                ^
+    142|     expect(emptyStates).toHaveLength(4);
+    143|   });
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[2/2]ÔÄ»
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  13:14:01
+   Duration  8.15s (transform 892ms, setup 1.31s, import 2.24s, tests 452ms, environment 3.59s)
+

@@ -15,7 +15,7 @@ interface LeadsByStatus {
 }
 
 export const useLeadsByStatus = () => {
-  const { data: leads = [], isLoading, error } = useLeads();
+  const { data: leads = [], isLoading, error, refetch } = useLeads();
 
   const groupedLeads = useMemo(() => {
     const grouped: LeadsByStatus = {
@@ -42,5 +42,6 @@ export const useLeadsByStatus = () => {
     isLoading,
     error,
     totalLeads: leads.length,
+    refetch,
   };
 };

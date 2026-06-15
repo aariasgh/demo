@@ -722,9 +722,14 @@ development_status:
   
   E6-S2:
     title: "Animaciones, Transiciones y Feedback Visual"
-    status: backlog
+    status: in-progress
     points: 8
     priority: P2
+    story_file: "_bmad-output/implementation-artifacts/E6-S2.md"
+    story_created_date: "2026-06-13"
+    story_started_date: "2026-06-13"
+    baseline_commit: "815eaeab76a60739cb104ebb269a74f4ac934340"
+    story_context: "Loading states (spinner), error states (banner + retry), empty states (placeholder), success feedback (toast). 10 AC. 5 new components: LoadingSpinner, ErrorBanner, EmptyState, SkeletonLoader, Toast. Depends on E6-S1 responsive design."
   
   E6-S3:
     title: "Accesibilidad (WCAG AA) e Internacionalización Base"

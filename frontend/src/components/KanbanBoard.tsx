@@ -18,10 +18,13 @@ import SearchFilterHeader from './SearchFilterHeader';
 import StatusFilterTabs from './StatusFilterTabs';
 import LeadsAtRiskWidget from './LeadsAtRiskWidget';
 import LeadsAtRiskPanel from './LeadsAtRiskPanel';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorBanner from './ErrorBanner';
+import EmptyState from './EmptyState';
 import type { Lead, LeadStatus } from '../types/lead';
 
 export default function KanbanBoard() {
-  const { groupedLeads, isLoading, error, totalLeads } = useLeadsByStatus();
+  const { groupedLeads, isLoading, error, totalLeads, refetch } = useLeadsByStatus();
   const { isDragging, handleDragEnd, isPending } = useKanbanDragDrop();
   const { searchQuery, selectedPriorities, selectedStatus, getVisibleColumns } = useKanbanFilterStore();
   
@@ -146,32 +149,43 @@ export default function KanbanBoard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div 
-          className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"
-          role="status"
-          aria-label="Cargando leads"
-        ></div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <LoadingSpinner 
+          size="lg" 
+          text="Cargando pipeline de ventas..." 
+          fullscreen={false}
+          ariaLabel="Cargando leads del pipeline"
+        />
       </div>
     );
   }
 
   if (error) {
     console.error('Error en KanbanBoard:', error);
-    const handleRetry = () => window.location.reload();
+    
+    // Extract error message from React Query error object
+    const extractErrorMessage = (): string => {
+      if (error instanceof Error) {
+        // Check for axios response structure (from React Query)
+        if ('response' in error && error.response) {
+          const response = error.response as any;
+          return response.data?.message || response.statusText || error.message;
+        }
+        return error.message;
+      }
+      return 'Error desconocido cargando el pipeline';
+    };
+    
+    const handleRetry = () => refetch();
+    
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-red-600 text-center">
-          <p className="text-lg font-semibold">Error cargando pipeline</p>
-          <p className="text-sm text-gray-500">Por favor, intenta recargar la página</p>
-          <button
-            onClick={handleRetry}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            aria-label="Reintentar cargar pipeline"
-          >
-            Reintentar
-          </button>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <ErrorBanner
+          message={`Error cargando pipeline: ${extractErrorMessage()}`}
+          onRetry={handleRetry}
+          autoClose={0}
+          ariaLive="assertive"
+        />
       </div>
     );
   }
@@ -220,15 +234,17 @@ export default function KanbanBoard() {
 
         {/* E4-S1: No Results Message — AC-2.2, AC-4.4: Clear message for empty results */}
         {filteredTotalLeads === 0 && (searchQuery || selectedPriorities.length > 0) && (
-          <div className="text-center py-12">
-            <p className="text-gray-600">
-              {searchQuery && selectedPriorities.length > 0
-                ? `No hay leads con esos criterios`
+          <EmptyState 
+            title="Sin resultados" 
+            description={
+              searchQuery && selectedPriorities.length > 0
+                ? `No hay leads que coincidan con los criterios de búsqueda y filtros`
                 : searchQuery
                   ? `No hay leads que coincidan con '${searchQuery}'`
-                  : `No hay leads con esa prioridad`}
-            </p>
-          </div>
+                  : `No hay leads con esa prioridad`
+            }
+            icon="search"
+          />
         )}
 
         {/* Kanban Grid with Drag-Drop Context */}

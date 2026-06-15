@@ -41,7 +41,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
   return (
     <div
       className={`
-        p-3 md:p-4 rounded-lg border-2 transition-all duration-150 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
+        p-3 md:p-4 rounded-lg border-2 transition-all duration-200 cursor-grab hover:cursor-grabbing active:cursor-grabbing min-h-[120px]
         ${(isHovering || isTouchActive)
           ? 'border-blue-500 shadow-md bg-blue-50'
           : 'border-gray-200 shadow-sm bg-white'}
@@ -79,11 +79,11 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
 
       {/* Action Buttons - Visible on Hover or Touch Long-Press */}
       {(isHovering || isTouchActive) && (
-        <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200">
+        <div className="flex gap-2 mt-3 pt-3 border-t border-gray-200 animate-in fade-in duration-200">
           {onEdit && (
             <button
               onClick={() => onEdit(lead.id)}
-              className="flex-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors duration-150"
+              className="flex-1 px-2 py-1 text-xs font-medium bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-all duration-200"
               aria-label={`Editar lead ${lead.name}`}
             >
               Editar
@@ -92,7 +92,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
           {onDelete && (
             <button
               onClick={() => onDelete(lead.id)}
-              className="flex-1 px-2 py-1 text-xs font-medium bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors duration-150"
+              className="flex-1 px-2 py-1 text-xs font-medium bg-red-50 text-red-600 rounded hover:bg-red-100 transition-all duration-200"
               aria-label={`Eliminar lead ${lead.name}`}
             >
               Opciones
