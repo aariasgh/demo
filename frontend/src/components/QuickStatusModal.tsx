@@ -32,6 +32,19 @@ export default function QuickStatusModal() {
   } = useUIStore();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [previousFocusElement, setPreviousFocusElement] = useState<HTMLElement | null>(null);
+
+  // L-4: Save and restore focus element when modal opens/closes
+  useEffect(() => {
+    if (isStatusModalOpen) {
+      // Save current focused element before opening modal
+      setPreviousFocusElement(document.activeElement as HTMLElement);
+    } else if (previousFocusElement && previousFocusElement !== document.body) {
+      // Restore focus when modal closes
+      previousFocusElement.focus();
+      setPreviousFocusElement(null);
+    }
+  }, [isStatusModalOpen, previousFocusElement]);
 
   // Initialize selectedIndex when modal opens (find current status in options)
   useEffect(() => {
@@ -91,6 +104,14 @@ export default function QuickStatusModal() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isUpdating) {
+      // Prevent keyboard navigation while updating
+      if (['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key)) {
+        e.preventDefault();
+      }
+      return;
+    }
+
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((prev) => (prev + 1) % STATUS_OPTIONS.length);
@@ -107,10 +128,10 @@ export default function QuickStatusModal() {
 
   return (
     <FocusTrap>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" role="presentation">
+        <div className="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4" role="dialog" aria-labelledby="status-modal-title" aria-modal="true">
           <div className="flex justify-between items-center mb-4 p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">Cambiar Estado</h2>
+            <h2 id="status-modal-title" className="text-xl font-semibold text-gray-900">Cambiar Estado</h2>
             <button
               onClick={closeStatusModal}
               disabled={isUpdating}
@@ -132,20 +153,30 @@ export default function QuickStatusModal() {
                     setTimeout(handleStatusChange, 0);
                   }}
                   disabled={isUpdating}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     index === selectedIndex
-                      ? 'bg-blue-500 text-white outline-2 outline-blue-700 outline-offset-2'
+                      ? `bg-blue-500 text-white outline-2 outline-blue-700 outline-offset-2 ${
+                          isUpdating ? 'ring-2 ring-blue-300 animate-pulse' : ''
+                        }`
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   } focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2`}
                   autoFocus={index === selectedIndex}
                 >
-                  {status.label}
+                  <div className="flex items-center justify-between">
+                    <span>{status.label}</span>
+                    {/* L-3: Loading indicator visual feedback */}
+                    {isUpdating && index === selectedIndex && (
+                      <span className="inline-block animate-spin">
+                        ⟳
+                      </span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>
             <p className="mt-4 text-sm text-gray-600">
               {isUpdating 
-                ? 'Actualizando...' 
+                ? '⟳ Actualizando estado en backend...' 
                 : 'Use ↑↓ to navigate, Enter to confirm, Escape to cancel'}
             </p>
           </div>
