@@ -47,10 +47,11 @@ environment:
   critical_commands:
     - "Do NOT use: grep, sed, awk, tail, head (Linux only)"
     - "DO use: Select-String, -replace, Get-Content (PowerShell equivalents)"
-total_story_points: 144
-stories_completed_points: 74
-stories_in_progress_points: 13
-stories_backlog_points: 57
+total_story_points: 227
+stories_completed_points: 186
+stories_in_progress_points: 0
+stories_ready_for_dev_points: 13
+stories_backlog_points: 28
 
 development_status:
   # ============================================================
@@ -701,10 +702,9 @@ development_status:
   # ============================================================
   # EPIC 6: UX/UI, RESPONSIVO Y ACCESIBILIDAD
   # Status: in-progress | Goal: UI pulida, responsive, accesible
-  # Duration: 16h | Points: 21
-  # ============================================================
-  epic-6: in-progress
-  
+# Duration: 16h | Points: 42 (E6-S1 to E6-S6)
+# Completed: E6-S1, E6-S2, E6-S3, E6-S4 (29 pts)
+# Ready-for-dev: E6-S5, E6-S6 (13 pts)
   E6-S1:
     title: "Diseño Responsivo - Mobile, Tablet, Desktop"
     status: done
@@ -873,31 +873,42 @@ development_status:
 # SUMMARY METRICS
 # ============================================================
 total_epics: 8
-total_stories: 25
-total_story_points_estimate: 144
+total_stories: 31
+total_story_points_estimate: 227
 epics_backlog: 2
 epics_in_progress: 1
 epics_done: 5
-stories_backlog: 7
-stories_ready_for_dev: 0
-stories_in_progress: 2
-stories_done: 18
+stories_backlog: 8
+stories_ready_for_dev: 2
+stories_in_progress: 0
+stories_done: 22
 stories_in_review: 0
 
 # ============================================================
 # COMPLETION METRICS
 # ============================================================
 completion_summary:
-  total_points_completed: 170
-  total_points_in_progress: 16
-  total_points_backlog: 15
-  completion_percentage: 91.4%
+  total_points_completed: 186
+  total_points_ready_for_dev: 13
+  total_points_in_progress: 0
+  total_points_backlog: 28
+  completion_percentage: 81.9%
+  ready_for_dev_percentage: 5.7%
+  remaining_percentage: 12.3%
   
 completed_epics:
   - "Epic 1: Infrastructure & Setup (42 pts) ✅"
   - "Epic 2: Lead Management CRUD (47 pts) ✅"
   - "Epic 3: Kanban Visualization (34 pts) ✅"
   - "Epic 4: Search, Filter & Alerts (21 pts) ✅"
+  - "Epic 5: Timeline & Audit Trail (13 pts) ✅"
+
+in_progress_epics:
+  - "Epic 6: UX/UI, Responsive & Accessibility (42 pts, 29 done + 13 ready-for-dev) ⏳"
+
+backlog_epics:
+  - "Epic 7: Performance, Optimization & Reliability (15 pts) 📋"
+  - "Epic 8: Testing, Documentation & Demo (13 pts) 📋"
   - "Epic 5: Timeline & Audit (13 pts) ✅"
 
 in_progress_epics:
