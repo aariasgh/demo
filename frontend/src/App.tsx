@@ -10,6 +10,7 @@ import QuickNotesModal from './components/QuickNotesModal';
 import QuickStatusModal from './components/QuickStatusModal';
 import RiskWidgetContainer from './components/RiskWidgetContainer';
 import { useUIStore } from './store/uiStore';
+import { logKeyboardValidation } from './utils/keyboardValidator';
 
 const ReactQueryDevtools =
   import.meta.env.DEV
@@ -85,6 +86,11 @@ function App() {
   
   // Initialize global keyboard navigation
   useKeyboardNavigation();
+  
+  // Validate keyboard shortcuts on app startup
+  React.useEffect(() => {
+    logKeyboardValidation();
+  }, []);
   
   // Register keyboard handlers for all shortcuts
   React.useEffect(() => {

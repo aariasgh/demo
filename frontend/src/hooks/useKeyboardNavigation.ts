@@ -1,4 +1,6 @@
 import { useEffect, useCallback, useRef } from 'react'
+import type { KeyboardContextState } from '../utils/keyboardStateMachine'
+import { keyboardContextStateMachine } from '../utils/keyboardStateMachine'
 import { KEYBOARD_SHORTCUTS, matchesShortcut } from '../utils/keyboardConfig'
 
 /**
@@ -30,6 +32,21 @@ export interface KeyboardNavigationHandlers {
 const keyboardHandlers: KeyboardNavigationHandlers = {}
 
 /**
+ * Export context state machine for use in components
+ */
+export function pushKeyboardContext(state: KeyboardContextState): void {
+  keyboardContextStateMachine.pushState(state)
+}
+
+export function popKeyboardContext(): KeyboardContextState {
+  return keyboardContextStateMachine.popState()
+}
+
+export function getKeyboardContext(): KeyboardContextState {
+  return keyboardContextStateMachine.getState()
+}
+
+/**
  * Register a keyboard handler
  * 
  * @param key Key of the handler (e.g., 'onOpenCreateModal')
@@ -46,6 +63,26 @@ export function registerKeyboardHandler(key: keyof KeyboardNavigationHandlers, h
  */
 export function unregisterKeyboardHandler(key: keyof KeyboardNavigationHandlers) {
   delete keyboardHandlers[key]
+}
+
+/**
+ * Context-aware handler execution
+ * Only executes handler if we're in the correct keyboard context
+ */
+function executeContextAwareHandler(
+  handler: (() => void) | undefined,
+  allowedContexts: KeyboardContextState[]
+): void {
+  if (!handler) return
+  
+  const currentContext = keyboardContextStateMachine.getState()
+  if (allowedContexts.includes(currentContext)) {
+    handler()
+  } else if (import.meta.env.DEV) {
+    console.debug(
+      `[Keyboard] Handler blocked: context "${currentContext}" not in allowed contexts [${allowedContexts.join(', ')}]`
+    )
+  }
 }
 
 /**
@@ -88,8 +125,10 @@ export function useKeyboardNavigation(): KeyboardNavigationHandlers {
     onOpenDetails: () => keyboardHandlers.onOpenDetails?.(),
   })
 
-  // Global keyboard event handler
+  // Global keyboard event handler with context awareness
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    const currentContext = keyboardContextStateMachine.getState()
+    
     // Don't intercept if user is typing in an input/textarea
     const target = event.target as HTMLElement
     const isTypingContext =
@@ -97,14 +136,16 @@ export function useKeyboardNavigation(): KeyboardNavigationHandlers {
       target?.tagName === 'TEXTAREA' ||
       target?.contentEditable === 'true'
 
-    // Always allow Escape (closes modals)
+    // Always allow Escape (closes modals) - works in MODAL context
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.escape)) {
       event.preventDefault()
-      keyboardHandlers.onCloseModal?.()
+      if (currentContext === 'MODAL' || currentContext === 'SEARCH') {
+        keyboardHandlers.onCloseModal?.()
+      }
       return
     }
 
-    // Always allow Enter and Space (open details)
+    // Always allow Enter and Space (open details) - works in KANBAN context
     if (
       matchesShortcut(event, KEYBOARD_SHORTCUTS.enter) ||
       matchesShortcut(event, KEYBOARD_SHORTCUTS.space)
@@ -112,7 +153,7 @@ export function useKeyboardNavigation(): KeyboardNavigationHandlers {
       // Only prevent default if not in text input (Enter in textarea should create newline)
       if (target?.tagName !== 'TEXTAREA') {
         event.preventDefault()
-        keyboardHandlers.onOpenDetails?.()
+        executeContextAwareHandler(keyboardHandlers.onOpenDetails, ['KANBAN', 'MODAL'])
       }
       return
     }
@@ -129,28 +170,28 @@ export function useKeyboardNavigation(): KeyboardNavigationHandlers {
       return
     }
 
-    // For arrow keys, dispatch navigation events
+    // For arrow keys - work in KANBAN and MODAL contexts
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.arrowUp)) {
       event.preventDefault()
-      keyboardHandlers.onNavigateUp?.()
+      executeContextAwareHandler(keyboardHandlers.onNavigateUp, ['KANBAN', 'MODAL'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.arrowDown)) {
       event.preventDefault()
-      keyboardHandlers.onNavigateDown?.()
+      executeContextAwareHandler(keyboardHandlers.onNavigateDown, ['KANBAN', 'MODAL'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.arrowLeft)) {
       event.preventDefault()
-      keyboardHandlers.onNavigateLeft?.()
+      executeContextAwareHandler(keyboardHandlers.onNavigateLeft, ['KANBAN', 'MODAL'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.arrowRight)) {
       event.preventDefault()
-      keyboardHandlers.onNavigateRight?.()
+      executeContextAwareHandler(keyboardHandlers.onNavigateRight, ['KANBAN', 'MODAL'])
       return
     }
 
@@ -168,45 +209,46 @@ export function useKeyboardNavigation(): KeyboardNavigationHandlers {
       }
     }
 
-    // Single-letter shortcuts (C, N, S, F, R, /, ?)
+    // Single-letter shortcuts (C, N, S, F, R, /, ?) - only work in KANBAN context
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.create)) {
       event.preventDefault()
-      keyboardHandlers.onOpenCreateModal?.()
+      executeContextAwareHandler(keyboardHandlers.onOpenCreateModal, ['KANBAN'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.notes)) {
       event.preventDefault()
-      keyboardHandlers.onOpenNotesList?.()
+      executeContextAwareHandler(keyboardHandlers.onOpenNotesList, ['KANBAN'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.status)) {
       event.preventDefault()
-      keyboardHandlers.onChangeStatus?.()
+      executeContextAwareHandler(keyboardHandlers.onChangeStatus, ['KANBAN'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.search)) {
       event.preventDefault()
-      keyboardHandlers.onFocusSearch?.()
+      executeContextAwareHandler(keyboardHandlers.onFocusSearch, ['KANBAN'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.filter)) {
       event.preventDefault()
-      keyboardHandlers.onFocusFilter?.()
+      executeContextAwareHandler(keyboardHandlers.onFocusFilter, ['KANBAN'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.riskWidget)) {
       event.preventDefault()
-      keyboardHandlers.onToggleRiskWidget?.()
+      executeContextAwareHandler(keyboardHandlers.onToggleRiskWidget, ['KANBAN'])
       return
     }
 
     if (matchesShortcut(event, KEYBOARD_SHORTCUTS.help)) {
       event.preventDefault()
+      // Help works in any context
       keyboardHandlers.onOpenHelpModal?.()
       return
     }
