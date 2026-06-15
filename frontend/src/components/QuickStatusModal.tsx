@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // @ts-ignore - focus-trap-react CommonJS compatibility
 import FocusTrap from 'focus-trap-react';
 import { useUIStore } from '../store/uiStore';
 
 const STATUS_OPTIONS = [
-  { value: 'new', label: 'Nuevo' },
-  { value: 'contacted', label: 'En contacto' },
-  { value: 'proposal_sent', label: 'Propuesta enviada' },
-  { value: 'closed', label: 'Cerrado' },
+  { value: 'new', label: 'Nuevo', apiValue: 'Nuevo' },
+  { value: 'contacted', label: 'En contacto', apiValue: 'En contacto' },
+  { value: 'proposal_sent', label: 'Propuesta enviada', apiValue: 'Propuesta enviada' },
+  { value: 'closed', label: 'Cerrado', apiValue: 'Cerrado' },
 ] as const;
 
 /**
@@ -17,14 +17,78 @@ const STATUS_OPTIONS = [
  * Features:
  * - Status selection with keyboard navigation
  * - Arrow keys to navigate options
- * - Enter to confirm
- * - Escape to close
+ * - Enter to confirm and call API
+ * - Escape to close without saving
+ * - Loading state and error handling
  */
 export default function QuickStatusModal() {
-  const { isStatusModalOpen, closeStatusModal } = useUIStore();
+  const { 
+    isStatusModalOpen, 
+    closeStatusModal, 
+    selectedLeadIdForStatus, 
+    selectedLeadCurrentStatus,
+    showToast,
+    setLoading
+  } = useUIStore();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Initialize selectedIndex when modal opens (find current status in options)
+  useEffect(() => {
+    if (isStatusModalOpen && selectedLeadCurrentStatus) {
+      const currentIndex = STATUS_OPTIONS.findIndex(
+        s => s.apiValue === selectedLeadCurrentStatus
+      );
+      setSelectedIndex(currentIndex !== -1 ? currentIndex : 0);
+    }
+  }, [isStatusModalOpen, selectedLeadCurrentStatus]);
 
   if (!isStatusModalOpen) return null;
+
+  const handleStatusChange = async () => {
+    if (!selectedLeadIdForStatus) {
+      showToast('Error: Lead no seleccionado', 'error');
+      return;
+    }
+
+    const newStatus = STATUS_OPTIONS[selectedIndex].apiValue;
+    
+    // Avoid no-op updates
+    if (newStatus === selectedLeadCurrentStatus) {
+      closeStatusModal();
+      return;
+    }
+
+    setIsUpdating(true);
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/leads/${selectedLeadIdForStatus}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Error al cambiar estado');
+      }
+
+      showToast(`Lead movido a "${newStatus}"`, 'success');
+      closeStatusModal();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      showToast(`Error: ${message}`, 'error');
+    } finally {
+      setIsUpdating(false);
+      setLoading(false);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
@@ -35,8 +99,7 @@ export default function QuickStatusModal() {
       setSelectedIndex((prev) => (prev - 1 + STATUS_OPTIONS.length) % STATUS_OPTIONS.length);
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      // TODO: Implement status change API call
-      closeStatusModal();
+      handleStatusChange();
     } else if (e.key === 'Escape') {
       closeStatusModal();
     }
@@ -50,7 +113,8 @@ export default function QuickStatusModal() {
             <h2 className="text-xl font-semibold text-gray-900">Cambiar Estado</h2>
             <button
               onClick={closeStatusModal}
-              className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+              disabled={isUpdating}
+              className="text-gray-500 hover:text-gray-700 text-2xl leading-none disabled:opacity-50"
               aria-label="Cerrar modal"
             >
               ×
@@ -62,8 +126,13 @@ export default function QuickStatusModal() {
               {STATUS_OPTIONS.map((status, index) => (
                 <button
                   key={status.value}
-                  onClick={() => closeStatusModal()}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                  onClick={() => {
+                    setSelectedIndex(index);
+                    // Auto-submit on click
+                    setTimeout(handleStatusChange, 0);
+                  }}
+                  disabled={isUpdating}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                     index === selectedIndex
                       ? 'bg-blue-500 text-white outline-2 outline-blue-700 outline-offset-2'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
@@ -75,7 +144,9 @@ export default function QuickStatusModal() {
               ))}
             </div>
             <p className="mt-4 text-sm text-gray-600">
-              Use ↑↓ to navigate, Enter to confirm, Escape to cancel
+              {isUpdating 
+                ? 'Actualizando...' 
+                : 'Use ↑↓ to navigate, Enter to confirm, Escape to cancel'}
             </p>
           </div>
         </div>

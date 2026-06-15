@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { Lead } from '../types/lead';
 
 interface UIState {
   isCreateModalOpen: boolean;
@@ -12,6 +13,12 @@ interface UIState {
   isNotesModalOpen: boolean;
   isStatusModalOpen: boolean;
   showRiskWidget: boolean;
+  selectedLeadIdForStatus: number | null;
+  selectedLeadCurrentStatus: string | null;
+  
+  // E6-S4 Phase 3: Keyboard Navigation - Track currently focused lead
+  focusedLead: Lead | null;
+  setFocusedLead: (lead: Lead | null) => void;
 
   openCreateModal: () => void;
   closeCreateModal: () => void;
@@ -19,7 +26,7 @@ interface UIState {
   closeEditModal: () => void;
   openNotesModal: () => void;
   closeNotesModal: () => void;
-  openStatusModal: () => void;
+  openStatusModal: (leadId: number, currentStatus: string) => void;
   closeStatusModal: () => void;
   toggleRiskWidget: () => void;
   showToast: (
@@ -41,6 +48,8 @@ export const useUIStore = create<UIState>((set) => ({
   isNotesModalOpen: false,
   isStatusModalOpen: false,
   showRiskWidget: false,
+  selectedLeadIdForStatus: null,
+  selectedLeadCurrentStatus: null,
 
   openCreateModal: () => set({ isCreateModalOpen: true }),
   closeCreateModal: () => set({ isCreateModalOpen: false }),
@@ -48,8 +57,8 @@ export const useUIStore = create<UIState>((set) => ({
   closeEditModal: () => set({ isEditModalOpen: false, selectedLeadIdForEdit: null }),
   openNotesModal: () => set({ isNotesModalOpen: true }),
   closeNotesModal: () => set({ isNotesModalOpen: false }),
-  openStatusModal: () => set({ isStatusModalOpen: true }),
-  closeStatusModal: () => set({ isStatusModalOpen: false }),
+  openStatusModal: (leadId, currentStatus) => set({ isStatusModalOpen: true, selectedLeadIdForStatus: leadId, selectedLeadCurrentStatus: currentStatus }),
+  closeStatusModal: () => set({ isStatusModalOpen: false, selectedLeadIdForStatus: null, selectedLeadCurrentStatus: null }),
   toggleRiskWidget: () => set((state) => ({ showRiskWidget: !state.showRiskWidget })),
   showToast: (message, type = 'info', duration = 3000) => {
     set({ toastMessage: message, toastType: type });
@@ -57,4 +66,6 @@ export const useUIStore = create<UIState>((set) => ({
   },
   closeToast: () => set({ toastMessage: null, toastType: null }),
   setLoading: (loading) => set({ isLoading: loading }),
+  focusedLead: null,
+  setFocusedLead: (lead) => set({ focusedLead: lead }),
 }));

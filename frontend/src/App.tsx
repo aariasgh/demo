@@ -81,7 +81,7 @@ class ErrorBoundary extends React.Component<
 
 function App() {
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const { openCreateModal, openNotesModal, openStatusModal, toggleRiskWidget } = useUIStore();
+  const { openCreateModal, openNotesModal, openStatusModal, toggleRiskWidget, focusedLead } = useUIStore();
   
   // Initialize global keyboard navigation
   useKeyboardNavigation();
@@ -107,7 +107,10 @@ function App() {
     };
 
     const handleOpenStatusModal = () => {
-      openStatusModal();
+      if (focusedLead) {
+        const leadId = typeof focusedLead.id === 'string' ? parseInt(focusedLead.id, 10) : focusedLead.id;
+        openStatusModal(leadId, focusedLead.status);
+      }
     };
 
     const handleToggleRiskWidget = () => {
@@ -132,7 +135,7 @@ function App() {
       unregisterKeyboardHandler('onChangeStatus');
       unregisterKeyboardHandler('onToggleRiskWidget');
     };
-  }, []);
+  }, [focusedLead]);
 
   return (
     <ErrorBoundary>
