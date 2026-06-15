@@ -60,6 +60,17 @@ export default function SearchFilterHeader() {
     setInputValue(e.currentTarget.value.trim());
   };
 
+  // L-5: Standardize Escape behavior in search input
+  const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      // Clear search term and blur input for consistent Escape behavior
+      setInputValue('');
+      clearSearch();
+      searchInputRef.current?.blur();
+    }
+  };
+
   const handleClearSearch = () => {
     setInputValue('');
     clearSearch();
@@ -82,6 +93,7 @@ export default function SearchFilterHeader() {
               placeholder="Nombre, empresa o email..."
               value={inputValue}
               onChange={handleInputChange}
+              onKeyDown={handleSearchInputKeyDown}
               data-testid="search-input"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-2 focus:outline-blue-500 focus:outline-offset-2 focus:border-transparent transition-all"
               aria-label="Buscar leads por nombre, empresa o email (presiona / para enfocar)"
