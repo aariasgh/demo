@@ -65,6 +65,7 @@ export const KEYBOARD_SHORTCUTS: Record<string, KeyboardShortcut> = {
     key: '?',
     ctrlKey: false,
     altKey: false,
+    shiftKey: true,  // Shift+? to open help (? = Shift+/)
     description: 'Ayuda de Atajos (Keyboard shortcuts help)',
   },
 

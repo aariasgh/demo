@@ -1,9 +1,7 @@
-import { useEffect } from 'react'
+import { useRef } from 'react'
 import { X } from 'lucide-react'
 import { getAllShortcuts, getShortcutDisplayString } from '../utils/keyboardConfig'
-
-// Dynamic import for FocusTrap to avoid type-only import issues
-const FocusTrap: React.ComponentType<{ children: React.ReactNode }> = ({ children }) => <>{children}</>
+import { useFocusTrap } from '../hooks/useFocusTrap'
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean
@@ -14,45 +12,35 @@ interface KeyboardShortcutsModalProps {
  * KeyboardShortcutsModal Component
  * 
  * Displays all keyboard shortcuts in an accessible modal.
- * Uses focus-trap-react to manage focus within modal (from E6-S3).
+ * Uses custom focus trap (useFocusTrap) to manage focus within modal (AC-1.2 requirement).
  * Closeable via Escape key or Close button.
  * 
  * Accepts the '?' key press trigger from useKeyboardNavigation hook.
  */
 export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsModalProps) {
-  // Close modal on Escape key
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        onClose()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  const modalRef = useRef<HTMLDivElement>(null)
+  
+  // Activate focus trap when modal is open
+  useFocusTrap(modalRef, isOpen, onClose)
 
   if (!isOpen) return null
 
   const allShortcuts = getAllShortcuts()
 
   return (
-    <FocusTrap>
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      role="presentation"
+      onClick={onClose}
+    >
       <div
-        className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-        role="presentation"
-        onClick={onClose}
+        ref={modalRef}
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard Shortcuts"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Keyboard Shortcuts"
-          onClick={(e) => e.stopPropagation()}
-        >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b">
             <div>
@@ -166,7 +154,7 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
           </div>
         </div>
       </div>
-    </FocusTrap>
+    
   )
 }
 
