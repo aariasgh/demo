@@ -3,16 +3,22 @@ import { Suspense, lazy, useState } from 'react';
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './styles/index.css';
-import CreateLeadModal from './components/CreateLeadModal';
+import LazyBoundary from './components/LazyBoundary';
 import KanbanBoard from './components/KanbanBoard';
 import TimelineView from './pages/TimelineView';
 import useKeyboardNavigation, { registerKeyboardHandler, unregisterKeyboardHandler } from './hooks/useKeyboardNavigation';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
-import QuickNotesModal from './components/QuickNotesModal';
-import QuickStatusModal from './components/QuickStatusModal';
-import RiskWidgetContainer from './components/RiskWidgetContainer';
 import { useUIStore } from './store/uiStore';
 import { logKeyboardValidation } from './utils/keyboardValidator';
+
+// E6-S5: Code-splitting for lazy modals
+// These components are deferred until first use to reduce initial bundle size
+// from 501 kB to <400 kB. Each modal is loaded on-demand when triggered.
+// webpackChunkName comments enable readable production chunk names
+const CreateLeadModal = lazy(() => import(/* webpackChunkName: "modal-create-lead" */ './components/CreateLeadModal'));
+const QuickNotesModal = lazy(() => import(/* webpackChunkName: "modal-quick-notes" */ './components/QuickNotesModal'));
+const QuickStatusModal = lazy(() => import(/* webpackChunkName: "modal-quick-status" */ './components/QuickStatusModal'));
+const RiskWidgetContainer = lazy(() => import(/* webpackChunkName: "widget-risk" */ './components/RiskWidgetContainer'));
 
 const ReactQueryDevtools =
   import.meta.env.DEV
@@ -179,13 +185,27 @@ function App() {
                 <Route path="/leads/:leadId/timeline" element={<TimelineView />} />
               </Routes>
             </main>
-            {/* Create Lead Modal - appears when triggered */}
-            <CreateLeadModal />
             
-            {/* Phase 4: Action Shortcut Modals */}
-            <QuickNotesModal />
-            <QuickStatusModal />
-            <RiskWidgetContainer />
+            {/* E6-S5: Code-split modals wrapped in LazyBoundary for error handling + loading */}
+            {/* Each modal has its own error boundary to isolate chunk load failures */}
+            
+            {/* Create Lead Modal - lazy-loaded on first "C" key or click */}
+            <LazyBoundary fallbackText="formulario de creación...">
+              <CreateLeadModal />
+            </LazyBoundary>
+            
+            {/* Phase 4: Action Shortcut Modals - all lazy-loaded on first use */}
+            <LazyBoundary fallbackText="notas rápidas...">
+              <QuickNotesModal />
+            </LazyBoundary>
+            
+            <LazyBoundary fallbackText="cambio de estado...">
+              <QuickStatusModal />
+            </LazyBoundary>
+            
+            <LazyBoundary fallbackText="leads en riesgo...">
+              <RiskWidgetContainer />
+            </LazyBoundary>
             
             {/* Keyboard Shortcuts Help Modal */}
             <KeyboardShortcutsModal 

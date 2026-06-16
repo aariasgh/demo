@@ -21,6 +21,30 @@ export default defineConfig({
     sourcemap: false,
     minify: 'terser',
     cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: (id: string): string | undefined => {
+          // E6-S5: Code-splitting optimization
+          // Separate heavy dependencies from main bundle using strict path matching
+          // to avoid false positives (e.g., 'react-hook-form-validator' matching 'react-hook-form')
+          if (id.includes('/node_modules/react-hook-form/')) {
+            return 'vendor-forms';
+          }
+          if (id.includes('/node_modules/@hookform/')) {
+            return 'vendor-forms';
+          }
+          if (id.includes('/node_modules/focus-trap-react/')) {
+            return 'vendor-focus-trap';
+          }
+          if (id.includes('/node_modules/react-beautiful-dnd/')) {
+            return 'vendor-dnd';
+          }
+          if (id.includes('/node_modules/@tanstack/react-query/')) {
+            return 'vendor-query';
+          }
+        },
+      },
+    },
   },
   resolve: {
     alias: {

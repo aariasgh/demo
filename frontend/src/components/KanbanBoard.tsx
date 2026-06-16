@@ -6,6 +6,13 @@
  * 
  * E4-S1 Integration: Includes SearchFilterHeader for real-time lead filtering
  * E4-S3 Integration: Includes StatusFilterTabs for status filtering
+ * 
+ * E6-S5 Bundle Optimization:
+ * - react-beautiful-dnd (243 kB) is bundled into vendor-dnd chunk
+ *   because it's a large, heavy dependency that doesn't need to load
+ *   until user interacts with the Kanban board
+ * - This allows the initial bundle to stay <400 kB
+ * - The DragDropContext wraps the entire board to enable drag-drop functionality
  */
 
 import { useMemo, useState, useRef, useEffect } from 'react';
