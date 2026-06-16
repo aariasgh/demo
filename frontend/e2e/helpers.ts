@@ -111,12 +111,16 @@ export async function verifyDragSuccess(
 }
 
 // ============================================================
-// Timeline Helpers (E5-S1 Preview)
+// Timeline Helpers (E5-S1)
 // ============================================================
 
 export async function navigateToTimeline(page: Page, leadId: number) {
   await page.goto(`/leads/${leadId}/timeline`);
   await page.waitForSelector('[data-testid="timeline-view"]', { timeout: 5000 });
+}
+
+export async function waitForTimelineToLoad(page: Page) {
+  await page.waitForSelector('[data-testid="timeline-event-list"]', { timeout: 5000 });
 }
 
 export async function getTimelineEventCount(page: Page): Promise<number> {

@@ -24,7 +24,7 @@ export const LeadCreateSchema = z.object({
 
   email: z
     .string()
-    .email('Email inválido')
+    .email('El formato de email no es válido. Verifica que no contenga caracteres especiales como &, *, !, etc.')
     .max(255, 'Máximo 255 caracteres')
     .describe('Email address (required, must be unique)'),
 
@@ -60,4 +60,25 @@ export const getCharacterCount = (text: string | null | undefined): number => {
  */
 export const exceedsCharLimit = (text: string | null | undefined, limit: number): boolean => {
   return (text?.length ?? 0) > limit;
+};
+
+/**
+ * Detect invalid characters in email
+ * Returns array of invalid characters found
+ */
+export const getInvalidEmailCharacters = (email: string): string[] => {
+  // RFC 5322 compliant email - only these special chars are allowed in local part
+  // Allowed: . ! # $ % & ' * + - / = ? ^ _ ` { | } ~
+  // But in practice, most email providers are stricter
+  // Invalid for most email providers: & * ! ^ ~ ` { } | and spaces
+  const invalidChars = new Set<string>();
+  const forbiddenChars = ['&', '*', '!', '^', '~', '`', '{', '}', '|', ' ', '<', '>', '(', ')', '[', ']', ',', ';', ':'];
+  
+  for (const char of email) {
+    if (forbiddenChars.includes(char)) {
+      invalidChars.add(char);
+    }
+  }
+  
+  return Array.from(invalidChars);
 };

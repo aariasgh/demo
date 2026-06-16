@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 // @ts-ignore - focus-trap-react CommonJS compatibility
 import FocusTrap from 'focus-trap-react';
-import { LeadCreateSchema, getCharacterCount, exceedsCharLimit } from '../utils/validations';
+import { LeadCreateSchema, getCharacterCount, exceedsCharLimit, getInvalidEmailCharacters } from '../utils/validations';
 import { useCreateLead } from '../hooks/useCreateLead';
 import { useToast } from '../hooks/useToast';
 import { useUIStore } from '../store/uiStore';
@@ -28,6 +28,7 @@ export default function CreateLeadModal() {
   const [notesCharCount, setNotesCharCount] = useState(0);
   const [emailValidationError, setEmailValidationError] = useState<string | null>(null);
   const [emailValidating, setEmailValidating] = useState(false);
+  const [invalidEmailChars, setInvalidEmailChars] = useState<string[]>([]);
 
   const {
     register,
@@ -75,6 +76,17 @@ export default function CreateLeadModal() {
   useEffect(() => {
     setNotesCharCount(getCharacterCount(notesValue));
   }, [notesValue]);
+
+  // Monitor email input for invalid characters in real-time
+  useEffect(() => {
+    const emailValue = watch('email');
+    if (emailValue) {
+      const invalidChars = getInvalidEmailCharacters(emailValue);
+      setInvalidEmailChars(invalidChars);
+    } else {
+      setInvalidEmailChars([]);
+    }
+  }, [watch('email')]);
 
   // Handle form submission
   const onSubmit = (data: LeadCreateFormData) => {
@@ -264,6 +276,11 @@ export default function CreateLeadModal() {
             />
             {emailValidating && (
               <p className="text-blue-600 text-xs md:text-sm mt-1">Verificando email...</p>
+            )}
+            {invalidEmailChars.length > 0 && (
+              <p className="text-amber-600 text-xs md:text-sm mt-1">
+                ⚠️ Caracteres no permitidos en email: <span className="font-mono bg-amber-50 px-1 py-0.5 rounded">{invalidEmailChars.map(c => c === ' ' ? '(espacio)' : c).join(', ')}</span>
+              </p>
             )}
             {(errors.email || emailValidationError) && (
               <p id="email-error" className="text-red-600 text-xs md:text-sm mt-1">

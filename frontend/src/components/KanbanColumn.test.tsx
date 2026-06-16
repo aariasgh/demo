@@ -80,7 +80,7 @@ describe('KanbanColumn', () => {
     );
 
     const region = container.querySelector('[role="region"]');
-    expect(region).toHaveAttribute('aria-label', 'Columna Nuevo con 2 leads');
+    expect(region).toHaveAttribute('aria-label', 'Columna Nuevo, 2 leads');
   });
 
   it('should render all 4 status colors correctly', () => {

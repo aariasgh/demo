@@ -50,23 +50,26 @@ export default function TimelineView() {
   if (error) return <div data-testid="timeline-error">Error al cargar timeline</div>;
   
   return (
-    <div data-testid="timeline-container" className="min-h-screen bg-gray-50 p-6">
+    <div data-testid="timeline-view" className="min-h-screen bg-gray-50 p-6">
       <TimelineHeader 
         leadName={lead?.name} 
-        onBack={() => navigate('/leads')}
+        onBack={() => navigate('/')}
       />
       
       <TimelineFilterBar 
         selectedType={filterType}
         onFilterChange={setFilterType}
+        data-testid="timeline-filter-bar"
       />
       
-      <TimelineEventList 
-        events={events}
-        onEventDeleted={() => refetch()}
-        isEmpty={events.length === 0}
-        isLoading={isRefetching}
-      />
+      <div data-testid="timeline-event-list">
+        <TimelineEventList 
+          events={events}
+          onEventDeleted={() => refetch()}
+          isEmpty={events.length === 0}
+          isLoading={isRefetching}
+        />
+      </div>
       
       <TimelineAddButton 
         leadId={leadIdNum}

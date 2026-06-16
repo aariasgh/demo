@@ -4,33 +4,27 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderWithProviders } from '../utils/test-utils';
 import CreateLeadModal from './CreateLeadModal';
 import { useUIStore } from '../store/uiStore';
 
-describe('CreateLeadModal', () => {
-  let queryClient: QueryClient;
+// Mock FocusTrap to avoid timing issues in tests
+vi.mock('focus-trap-react', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 
+describe('CreateLeadModal', () => {
   beforeEach(() => {
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-        mutations: { retry: false },
-      },
-    });
     // Reset store between tests
     useUIStore.setState({ isCreateModalOpen: false });
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-
   // Test 1: Should not render when isCreateModalOpen is false
   it('should not render when isCreateModalOpen is false', () => {
     useUIStore.setState({ isCreateModalOpen: false });
-    const { container } = render(<CreateLeadModal />, { wrapper });
+    const { container } = renderWithProviders(<CreateLeadModal />);
     const dialog = container.querySelector('[role="dialog"]');
     expect(dialog).toBeNull();
   });
@@ -38,7 +32,7 @@ describe('CreateLeadModal', () => {
   // Test 2: Should render when isCreateModalOpen is true
   it('should render when isCreateModalOpen is true', () => {
     useUIStore.setState({ isCreateModalOpen: true });
-    render(<CreateLeadModal />, { wrapper });
+    renderWithProviders(<CreateLeadModal />);
     
     // Check modal elements are present
     const dialog = screen.getByRole('dialog');
@@ -55,7 +49,7 @@ describe('CreateLeadModal', () => {
       openCreateModal: vi.fn(),
     } as any);
 
-    render(<CreateLeadModal />, { wrapper });
+    renderWithProviders(<CreateLeadModal />);
     const closeButton = screen.getByLabelText('Cerrar modal');
     
     expect(closeButton).toBeDefined();
@@ -66,7 +60,7 @@ describe('CreateLeadModal', () => {
   // Test 4: Should render all form fields
   it('should render all form fields', () => {
     useUIStore.setState({ isCreateModalOpen: true });
-    render(<CreateLeadModal />, { wrapper });
+    renderWithProviders(<CreateLeadModal />);
     
     expect(screen.getByLabelText(/Nombre/)).toBeDefined();
     expect(screen.getByLabelText(/Empresa/)).toBeDefined();
@@ -78,7 +72,7 @@ describe('CreateLeadModal', () => {
   // Test 5: Should display submit and cancel buttons
   it('should display submit and cancel buttons', () => {
     useUIStore.setState({ isCreateModalOpen: true });
-    render(<CreateLeadModal />, { wrapper });
+    renderWithProviders(<CreateLeadModal />);
     
     expect(screen.getByRole('button', { name: /Crear Lead/i })).toBeDefined();
     expect(screen.getByRole('button', { name: /Cancelar/i })).toBeDefined();
@@ -87,7 +81,7 @@ describe('CreateLeadModal', () => {
   // Test 6: Should have proper accessibility attributes
   it('should have proper accessibility attributes', () => {
     useUIStore.setState({ isCreateModalOpen: true });
-    render(<CreateLeadModal />, { wrapper });
+    renderWithProviders(<CreateLeadModal />);
     
     const dialog = screen.getByRole('dialog');
     expect(dialog.getAttribute('aria-modal')).toBe('true');

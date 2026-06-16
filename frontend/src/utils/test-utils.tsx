@@ -1,7 +1,7 @@
 /**
- * Test Utilities - Redux Provider Wrapper
- * Provides Redux store and React Query context for component tests
- * Fixes: react-beautiful-dnd requiring Redux store
+ * Test Utilities - Redux Provider Wrapper + DragDropContext
+ * Provides Redux store, React Query context, and Drag-Drop context for component tests
+ * Fixes: react-beautiful-dnd requiring both Redux store AND DragDropContext
  * 
  * Uses react-redux v7 for compatibility with react-beautiful-dnd v13
  */
@@ -11,6 +11,7 @@ import { render, type RenderOptions, screen, fireEvent } from '@testing-library/
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { DragDropContext } from 'react-beautiful-dnd';
 
 // Create a minimal Redux store compatible with react-beautiful-dnd
 export function createTestStore() {
@@ -21,7 +22,7 @@ export function createTestStore() {
   return createStore(reducer);
 }
 
-// Test wrapper component that provides both Redux and React Query
+// Test wrapper component that provides Redux, React Query, and DragDropContext
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'queries'> {
   store?: any;
 }
@@ -44,7 +45,9 @@ export function renderWithProviders(
     return (
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <DragDropContext onDragEnd={() => {}}>
+            {children}
+          </DragDropContext>
         </QueryClientProvider>
       </Provider>
     );

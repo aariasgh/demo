@@ -66,9 +66,9 @@ export default function LeadCard({ lead, onEdit, onDelete }: LeadCardProps) {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onKeyDown={handleKeyDown}
-      role="button"
+      role="article"
       tabIndex={0}
-      aria-label={`${lead.name} de ${lead.company}, estado ${lead.status}. Presiona Enter para abrir detalles, S para cambiar estado`}
+      aria-label={`Lead: ${lead.name} de ${lead.company}. Estado: ${lead.status}. Arrastra para cambiar estado.`}
       draggable={false}
     >
       {/* Lead Name - Bold, Responsive Font */}
